@@ -23,10 +23,7 @@ $blender_python -m ensurepip
 $blender_python -m pip install -r test-requirements.txt
 ```
 
-> You can also get the intepreter for a custom Blender installation location with `--blender-executable` option:
- ```
- pytest-blender --blender-executable ~/blender-2.91.2-linux64/blender
- ```
+> You can also get the intepreter for a custom Blender installation location with `--blender-executable` option: `pytest-blender --blender-executable ~/blender-2.91.2-linux64/blender`
 
 ### Execute tests
 
