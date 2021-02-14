@@ -29,11 +29,6 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: 3.8
-      - name: Cache Blender ${{ matrix.blender-version }}
-        uses: actions/cache@v2
-        with:
-          path: blender-*
-          key: ${{ runner.os }}-${{ matrix.blender-version }}
       - name: Download Blender ${{ matrix.blender-version }}
         id: download-blender
         run: |
