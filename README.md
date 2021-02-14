@@ -1,7 +1,12 @@
 # pytest-blender
 
+[![PyPI][pypi-version-badge-link]][pypi-link]
+[![Python versions][pypi-pyversions-badge-link]][pypi-link]
+[![License][license-image]][license-link]
+[![Tests][tests-image]][tests-link]
+
 Pytest plugin for Blender testing. Executes your pytest testsuite with
-Blender in headless mode using their builtin Python interpreter.
+Blender in headless mode using its builtin Python interpreter.
 
 ## Install
 
@@ -23,7 +28,12 @@ $blender_python -m ensurepip
 $blender_python -m pip install -r test-requirements.txt
 ```
 
-> You can also get the intepreter for a custom Blender installation location with `--blender-executable` option: `pytest-blender --blender-executable ~/blender-2.91.2-linux64/blender`
+You can also get the intepreter for a custom Blender installation location
+with `--blender-executable` option:
+
+```bash
+pytest-blender --blender-executable ~/blender-2.91.2-linux64/blender
+```
 
 ### Execute tests
 
@@ -39,16 +49,12 @@ Read prefs: ~/.config/blender/2.82/config/userpref.blend
 ========================= test session starts ==================================
 platform linux -- Python 3.8.5, pytest-6.1.2, py-1.9.0, pluggy-0.13.1 -- /usr/bin/blender
 cachedir: .pytest_cache
-metadata: {'Python': '3.8.5', 'Platform': 'Linux-5.4.0-65-generic-x86_64-with-glibc2.29',
-           'Packages': {'pytest': '6.1.2', 'py': '1.9.0', 'pluggy': '0.13.1'},
-           'Plugins': {'metadata': '1.11.0', 'cov': '2.10.1', 'html': '3.1.1'}}
 rootdir: /home/mondeja/files/code/pytest-blender
-plugins: metadata-1.11.0, cov-2.10.1, html-3.1.1
 collected 1 item
 
 tests/test_import_bpy.py::test_inside_blender <module 'bpy' from '/usr/share/blender/scripts/modules/bpy/__init__.py'>
 PASSED
-=========================== 1 passed in 0.01s =================================
+=========================== 1 passed in 0.01s ==================================
 ```
 
 Just can specify a custom blender executable path using `--blender-executable`
@@ -69,5 +75,13 @@ collected 1 item
 
 tests/test_import_bpy.py .                                                [100%]
 
-============================== 1 passed in 0.00s ==============================
+============================== 1 passed in 0.00s ===============================
 ```
+
+[pypi-link]: https://pypi.org/project/pytest-blender
+[pypi-version-badge-link]: https://img.shields.io/pypi/v/pytest-blender
+[pypi-pyversions-badge-link]: https://img.shields.io/pypi/pyversions/pytest-blender
+[license-image]: https://img.shields.io/pypi/l/pytest-blender?color=light-green
+[license-link]: https://github.com/mondeja/pytest-blender/blob/master/LICENSE
+[tests-image]: https://img.shields.io/github/workflow/status/mondeja/pytest-blender/CI
+[tests-link]: https://github.com/mondeja/pytest-blender/actions?query=workflow%3ACI
