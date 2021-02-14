@@ -38,7 +38,7 @@ jobs:
         id: download-blender
         run: |
           python -m pip install --upgrade pip blender-downloader
-          BLENDER_EXECUTABLE_PATH=$(blender-downloader ${{ matrix.blender-version }} --extract --print-blender-executable --remove-compressed)
+          BLENDER_EXECUTABLE_PATH=$(blender-downloader ${{ matrix.blender-version }} --extract --print-blender-executable --remove-compressed --quiet)
           echo "::set-output name=executable::$BLENDER_EXECUTABLE_PATH"
       - name: Install dependencies
         run: |
