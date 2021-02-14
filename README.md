@@ -1,6 +1,6 @@
 # pytest-blender
 
-Pytest plugin for Blender testing. Executes your pytest tests suite with
+Pytest plugin for Blender testing. Executes your pytest testsuite with
 Blender in headless mode using their builtin Python interpreter.
 
 ## Install
@@ -11,15 +11,24 @@ pip install pytest-blender
 
 ## Usage
 
-Before execute it, you need to install your testing dependencies using the
+### Install dependencies in Blender Python interpreter
+
+Before execute it, you need to install your testing dependencies inside the
 builtin Blender Python interpreter. To get the interpreter location you can
-use the CLI utility `pytest-blender`, so the commands would be something like:
+use the CLI utility `pytest-blender`, something like:
 
 ```bash
 blender_python="$(pytest-blender)"
 $blender_python -m ensurepip
 $blender_python -m pip install -r test-requirements.txt
 ```
+
+> You can also get the intepreter for a custom Blender installation location with `--blender-executable` option:
+ ```
+ pytest-blender --blender-executable ~/blender-2.91.2-linux64/blender
+ ```
+
+### Execute tests
 
 After installing dependencies, just call pytest as usually.
 
@@ -33,7 +42,9 @@ Read prefs: ~/.config/blender/2.82/config/userpref.blend
 ========================= test session starts ==================================
 platform linux -- Python 3.8.5, pytest-6.1.2, py-1.9.0, pluggy-0.13.1 -- /usr/bin/blender
 cachedir: .pytest_cache
-metadata: {'Python': '3.8.5', 'Platform': 'Linux-5.4.0-65-generic-x86_64-with-glibc2.29', 'Packages': {'pytest': '6.1.2', 'py': '1.9.0', 'pluggy': '0.13.1'}, 'Plugins': {'metadata': '1.11.0', 'cov': '2.10.1', 'html': '3.1.1'}}
+metadata: {'Python': '3.8.5', 'Platform': 'Linux-5.4.0-65-generic-x86_64-with-glibc2.29',
+           'Packages': {'pytest': '6.1.2', 'py': '1.9.0', 'pluggy': '0.13.1'},
+           'Plugins': {'metadata': '1.11.0', 'cov': '2.10.1', 'html': '3.1.1'}}
 rootdir: /home/mondeja/files/code/pytest-blender
 plugins: metadata-1.11.0, cov-2.10.1, html-3.1.1
 collected 1 item
