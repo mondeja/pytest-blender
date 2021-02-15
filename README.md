@@ -102,6 +102,46 @@ currently running session.
 Returns the version of the Python executable builtin in the Blender release of
 the currently running session.
 
+<a name="install_addons_from_dir" href="#install_addons_from_dir">#</a> <b>install_addons_from_dir</b>(<i>addons_dir</i>, <i>addon_module_names</i>, <i>save_userpref=True</i>, <i>default_set=True</i>, <i>persistent=True</i>, <i>\*\*kwargs</i>)
+
+Returns a function that installs and enables a set of addons whose modules are
+located in a directory. This function is designed to be executed before the
+pytest session to install the addons that you want to test, using the other
+fixture [`disable_addons`](https://github.com/mondeja/pytest-blender#disable_addons)
+to disable them after the execution of the suite:
+
+```python
+import os
+
+ADDON_MODULE_NAMES = ["my_awesome_addon_module_name"]
+
+@pytest.fixture(scope="session", autouse=True)
+def _register_addons(request, install_addons_from_dir, disable_addons):
+    install_addons_from_dir(os.path.abspath("src"), ADDON_MODULE_NAMES)
+    yield
+    disable_addons(ADDON_MODULE_NAMES)
+```
+- **addons_dir** (str) Directory in which are located the modules of the addons.
+- **addon_module_names** (list) Name of the addons modules (without the `.py` extension).
+- **save_userpref** (bool) Save user preferences after installation.
+- **default_set** (bool) Set the user-preference calling `addon_utils.enable`.
+- **persistent** (bool) Ensure the addon is enabled for the entire session
+ (after loading new files).
+- **\*\*kwargs** (dict) Subsecuent keyword arguments are passed to
+ [`bpy.ops.preferences.addon_install`](https://docs.blender.org/api/current/bpy.ops.preferences.html#bpy.ops.preferences.addon_install).
+
+<a name="disable_addons" href="#disable_addons">#</a> <b>disable_addons</b>(<i>addon_module_names</i>, <i>save_userpref=True</i>, <i>default_set=True</i>, <i>\*\*kwargs</i>)
+
+Returns a function that disables a set of addons by module name. Is designed to
+disables your addons after a pytest suite execution (check 
+[`install_addons_from_dir`](https://github.com/mondeja/pytest-blender#install_addons_from_dir)
+for an example).
+
+- **addon_module_names** (list) Name of the addons modules (without the `.py` extension).
+- **save_userpref** (bool) Save user preferences after installation.
+- **default_set** (bool) Set the user-preference calling `addon_utils.disable`.
+- **\*\*kwargs** (dict) Subsecuent keyword arguments are passed to `addon_utils.disable`.
+
 
 [pypi-link]: https://pypi.org/project/pytest-blender
 [pypi-version-badge-link]: https://img.shields.io/pypi/v/pytest-blender

@@ -129,6 +129,66 @@ def main():
                 )
             return blender_python_version
 
+        @pytest.fixture(scope="session")
+        def install_addons_from_dir(self, request):
+            def _install_addons_from_dir(
+                addons_dir,
+                addon_module_names,
+                save_userpref=True,
+                default_set=True,
+                persistent=True,
+                **kwargs,
+            ):
+                import addon_utils  # noqa F401
+                import bpy  # noqa F401
+
+                for addon_module_name in addon_module_names:
+                    addon_filepath = os.path.join(addons_dir, f"{addon_module_name}.py")
+                    bpy.ops.preferences.addon_install(filepath=addon_filepath, **kwargs)
+                    addon_utils.enable(
+                        addon_module_name,
+                        default_set=default_set,
+                        persistent=persistent,
+                    )
+                if save_userpref:
+                    bpy.ops.wm.save_userpref()
+
+            return _install_addons_from_dir
+
+        @pytest.fixture(scope="session")
+        def disable_addons(self, request):
+            def _disable_addons(
+                addon_module_names,
+                save_userpref=True,
+                default_set=True,
+                **kwargs,
+            ):
+                """Disables a set of addons by module name.
+
+                Parameters
+                ----------
+
+                addon_module_names : list
+                  Name of the addons modules (without the ``.py`` extension).
+
+                save_userpref : bool
+                  Save user preferences after disable.
+                """
+                import addon_utils  # noqa F401
+
+                for addon_module_name in addon_module_names:
+                    addon_utils.disable(
+                        addon_module_name,
+                        default_set=default_set,
+                        **kwargs,
+                    )
+                if save_userpref:
+                    import bpy  # noqa F401
+
+                    bpy.ops.wm.save_userpref()
+
+            return _disable_addons
+
     return pytest.main(argv, plugins=[PytestBlenderPlugin()])
 
 
