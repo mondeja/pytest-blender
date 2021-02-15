@@ -26,12 +26,6 @@ def _get_blender_executable(config):
     return blender_executable[0]
 
 
-@pytest.fixture
-def get_blender_version():
-    stdout = subprocess.check_output([_get_blender_executable(), "--version"])
-    return stdout.splitlines()[0].split(" ")[1]
-
-
 @pytest.hookimpl(tryfirst=True)
 def pytest_configure(config):
     # build propagated CLI args

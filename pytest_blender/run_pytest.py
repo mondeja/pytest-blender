@@ -37,7 +37,7 @@ def get_blender_binary_path_python(blender_executable):
 
     blender_python_path = None
     for line in stdout.decode("utf-8").splitlines():
-        if line.startswith(os.sep):
+        if line.startswith(os.sep) and os.path.exists(line):
             blender_python_path = line
             break
     return blender_python_path
