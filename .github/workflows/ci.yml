@@ -47,7 +47,7 @@ jobs:
         if: steps.cache-blender.outputs.cache-hit != 'true'
         id: download-blender
         run: |
-          python -m pip install --upgrade pip blender-downloader
+          python -m pip install --upgrade blender-downloader
           BLENDER_EXECUTABLE_PATH=$(blender-downloader ${{ matrix.blender-version }} --extract --print-blender-executable --remove-compressed --quiet)
           echo "$BLENDER_EXECUTABLE_PATH" > _blender-executable-path.txt
       - name: Install dependencies
