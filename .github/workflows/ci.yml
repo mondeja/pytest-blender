@@ -40,6 +40,7 @@ jobs:
             _blender-executable-path.txt
           key: ${{ runner.os }}-${{ matrix.blender-version }}
       - name: Download Blender ${{ matrix.blender-version }}
+        if: steps.cache-blender.outputs.cache-hit != 'true'
         id: download-blender
         run: |
           python -m pip install --upgrade pip blender-downloader
