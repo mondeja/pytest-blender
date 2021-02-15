@@ -23,6 +23,10 @@ jobs:
           - stable
           - '2.90.1'
           - '2.83.9'
+          - '2.82'
+          - '2.81'
+          - '2.80'
+          - '2.79'
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python v3.8
