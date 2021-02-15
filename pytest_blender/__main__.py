@@ -1,9 +1,8 @@
 import argparse
-import os
-import subprocess
 import sys
 
 from pytest_blender import __version__
+from pytest_blender.run_pytest import get_blender_binary_path_python
 from pytest_blender.utils import which_blender_by_os
 
 
@@ -46,22 +45,7 @@ def parse_args(args):
 
 def run(args):
     opts = parse_args(args)
-
-    stdout = subprocess.check_output(
-        [
-            opts.blender_executable,
-            "-b",
-            "--python-expr",
-            "import bpy;print(bpy.app.binary_path_python)",
-        ]
-    )
-
-    blender_python_path = None
-    for line in stdout.decode("utf-8").splitlines():
-        if line.startswith(os.sep):
-            blender_python_path = line
-            break
-    sys.stdout.write(f"{blender_python_path}\n")
+    sys.stdout.write(f"{get_blender_binary_path_python(opts.blender_executable)}\n")
 
     return 0
 

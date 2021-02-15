@@ -14,9 +14,11 @@ Blender in headless mode using its builtin Python interpreter.
 pip install pytest-blender
 ```
 
-## Usage
+## Documentation
 
-### Install dependencies in Blender Python interpreter
+### Usage
+
+#### Install dependencies in Blender Python interpreter
 
 Before execute it, you need to install your testing dependencies inside the
 builtin Blender Python interpreter. To get the interpreter location you can
@@ -35,7 +37,7 @@ with `--blender-executable` option:
 pytest-blender --blender-executable ~/blender-2.91.2-linux64/blender
 ```
 
-### Execute tests
+#### Execute tests
 
 After installing dependencies, just call pytest as usually.
 
@@ -52,7 +54,7 @@ cachedir: .pytest_cache
 rootdir: /home/mondeja/files/code/pytest-blender
 collected 1 item
 
-tests/test_import_bpy.py::test_inside_blender <module 'bpy' from '/usr/share/blender/scripts/modules/bpy/__init__.py'>
+tests/test_bpy_import.py::test_inside_blender <module 'bpy' from '/usr/share/blender/scripts/modules/bpy/__init__.py'>
 PASSED
 =========================== 1 passed in 0.01s ==================================
 ```
@@ -73,10 +75,33 @@ platform linux -- Python 3.7.7, pytest-6.2.2, py-1.10.0, pluggy-0.13.1
 rootdir: ~/pytest-blender
 collected 1 item
 
-tests/test_import_bpy.py .                                                [100%]
+tests/test_bpy_import.py .                                                [100%]
 
 ============================== 1 passed in 0.00s ===============================
 ```
+
+### Reference
+
+#### Fixtures
+
+<a name="blender_executable" href="#blender_executable">#</a> <b>blender_executable</b> ⇒ `str`
+
+Returns the path of the executable that has started the current Blender session.
+
+<a name="blender_version" href="#blender_version">#</a> <b>blender_version</b> ⇒ `str`
+
+Returns the version of Blender running in the current session.
+
+<a name="blender_python_executable" href="#blender_python_executable">#</a> <b>blender_python_executable</b> ⇒ `str`
+
+Returns the path of the Python executable builtin in the Blender release of the
+currently running session.
+
+<a name="blender_python_version" href="#blender_python_version">#</a> <b>blender_python_version</b> ⇒ `str`
+
+Returns the version of the Python executable builtin in the Blender release of
+the currently running session.
+
 
 [pypi-link]: https://pypi.org/project/pytest-blender
 [pypi-version-badge-link]: https://img.shields.io/pypi/v/pytest-blender

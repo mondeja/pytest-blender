@@ -19,15 +19,21 @@ def pytest_addoption(parser):
     )
 
 
-@pytest.hookimpl(tryfirst=True)
-def pytest_configure(config):
-    # parse blender executable location
+def _get_blender_executable(config):
     blender_executable = config.getoption("--blender-executable")
     if hasattr(blender_executable, "__call__"):
-        blender_executable = blender_executable()
-    else:
-        blender_executable = blender_executable[0]
+        return blender_executable()
+    return blender_executable[0]
 
+
+@pytest.fixture
+def get_blender_version():
+    stdout = subprocess.check_output([_get_blender_executable(), "--version"])
+    return stdout.splitlines()[0].split(" ")[1]
+
+
+@pytest.hookimpl(tryfirst=True)
+def pytest_configure(config):
     # build propagated CLI args
     propagated_cli_args = []
     _inside_root_invocation_arg = False
@@ -40,6 +46,8 @@ def pytest_configure(config):
             continue
         propagated_cli_args.append(arg)
 
+    blender_executable = _get_blender_executable(config)
+
     # run pytest using blender
     proc = subprocess.Popen(
         [
@@ -51,6 +59,8 @@ def pytest_configure(config):
                 "run_pytest.py",
             ),
             "--",
+            "--pytest-blender-executable",
+            blender_executable,
             *propagated_cli_args,  # propagate command line arguments
         ],
         stdout=sys.stdout,
