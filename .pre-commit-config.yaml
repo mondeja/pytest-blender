@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/asottile/pyupgrade
-    rev: v2.11.0
+    rev: v2.12.0
     hooks:
       - id: pyupgrade
         args:
@@ -35,7 +35,7 @@ repos:
           - --filter-files
         files: \.py$
   - repo: https://github.com/adrienverge/yamllint
-    rev: v1.26.0
+    rev: v1.26.1
     hooks:
       - id: yamllint
         files: .+\.(yml|yaml)
