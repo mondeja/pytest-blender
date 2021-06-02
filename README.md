@@ -4,6 +4,7 @@
 [![Python versions][pypi-pyversions-badge-link]][pypi-link]
 [![License][license-image]][license-link]
 [![Tests][tests-image]][tests-link]
+[![Downloads][pypi-downloads-image]][pypi-downloads-link]
 
 Pytest plugin for Blender testing. Executes your pytest testsuite with
 Blender in headless mode using its builtin Python interpreter.
@@ -210,4 +211,6 @@ jobs:
 [license-link]: https://github.com/mondeja/pytest-blender/blob/master/LICENSE
 [tests-image]: https://img.shields.io/github/workflow/status/mondeja/pytest-blender/CI
 [tests-link]: https://github.com/mondeja/pytest-blender/actions?query=workflow%3ACI
+[pypi-downloads-image]: https://img.shields.io/pypi/dm/pytest-blender
+[pypi-downloads-link]: https://pypistats.org/packages/pytest-blender
 [blender-downloader-link]: https://github.com/mondeja/blender-downloader

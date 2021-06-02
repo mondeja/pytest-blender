@@ -26,6 +26,22 @@ def _join(value):
 
 # this function can't be in 'utils'
 def get_blender_binary_path_python(blender_executable):
+    """Get Blender's Python executable location.
+
+    This function can't be in utils because the module is not loaded from
+    Blender (current script is executed inside Blender's Python executable).
+
+    Parameters
+    ----------
+
+    blender_executable : str
+      Blender's executable location.
+
+    Returns
+    -------
+
+    str: Blender's Python executable path.
+    """
     stdout = subprocess.check_output(
         [
             blender_executable,
@@ -62,6 +78,11 @@ def main():
         argv.append(arg)
 
     class PytestBlenderPlugin:
+        """Pytest plugin used by pytest-blender.
+
+        Injects all the fixtures in the Blender's PyTest session of the user.
+        """
+
         def _blender_python_executable(self, request):
             blender_python_executable = request.config.cache.get(
                 "pytest-blender/blender-python-executable",
@@ -79,14 +100,17 @@ def main():
 
         @pytest.fixture
         def blender_executable(self):
+            """Get the executable of the current Blender's session."""
             return blender_executable
 
         @pytest.fixture
         def blender_python_executable(self, request):
+            """Get the executable of the current Blender's Python session."""
             return self._blender_python_executable(request)
 
         @pytest.fixture
         def blender_version(self, request):
+            """Get the Blender version of the current session."""
             blender_version = request.config.cache.get(
                 "pytest-blender/blender-version",
                 None,
@@ -106,6 +130,7 @@ def main():
 
         @pytest.fixture
         def blender_python_version(self, request):
+            """Get the version of the Blender's Python executable."""
             blender_python_version = request.config.cache.get(
                 "pytest-blender/blender-python-version",
                 None,
@@ -131,6 +156,12 @@ def main():
 
         @pytest.fixture(scope="session")
         def install_addons_from_dir(self, request):
+            """Install Blender's addons from directory.
+
+            Installs a set of Blender's addons into the current Blender's
+            session specifying the names of the addons to be installed.
+            """
+
             def _install_addons_from_dir(
                 addons_dir,
                 addon_module_names,
@@ -157,6 +188,8 @@ def main():
 
         @pytest.fixture(scope="session")
         def disable_addons(self, request):
+            """Disable installed addons in the current Blender's session."""
+
             def _disable_addons(
                 addon_module_names,
                 save_userpref=True,
