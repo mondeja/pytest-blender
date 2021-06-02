@@ -142,6 +142,66 @@ for an example).
 - **default_set** (bool) Set the user-preference calling `addon_utils.disable`.
 - **\*\*kwargs** (dict) Subsecuent keyword arguments are passed to `addon_utils.disable`.
 
+### CI integration
+
+You can use [blender-downloader][blender-downloader-link] to download multiple
+versions of Blender in your CI and test against them. There is an example for
+Github Actions in the CI configuration of this repository:
+
+```yaml
+jobs:
+  test:
+    name: Test
+    runs-on: ${{ matrix.platform }}
+    strategy:
+      matrix:
+        platform:
+          - ubuntu-latest
+          - macos-latest
+        blender-version:
+          - '2.90.1'
+          - '2.83.9'
+          - '2.82'
+          - '2.81'
+          - '2.80'
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python v3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      - name: Upgrade PIP
+        run: python -m pip install --upgrade pip
+      - name: Cache Blender ${{ matrix.blender-version }}
+        uses: actions/cache@v2.1.5
+        id: cache-blender
+        with:
+          path: |
+            blender-*
+            _blender-executable-path.txt
+          key: ${{ runner.os }}-${{ matrix.blender-version }}
+      - name: Download Blender ${{ matrix.blender-version }}
+        if: steps.cache-blender.outputs.cache-hit != 'true'
+        id: download-blender
+        run: |
+          python -m pip install --upgrade blender-downloader
+          BLENDER_EXECUTABLE_PATH=$(blender-downloader \
+          ${{ matrix.blender-version }} --extract \
+          --print-blender-executable --remove-compressed --quiet)
+          echo "$BLENDER_EXECUTABLE_PATH" > _blender-executable-path.txt
+      - name: Install dependencies
+        id: install-dependencies
+        run: |
+          python -m pip install .[test]
+          BLENDER_EXECUTABLE_PATH="$(cat _blender-executable-path.txt | tr -d '\n')"
+          PYTHON_BLENDER_EXECUTABLE="$(pytest-blender --blender-executable $BLENDER_EXECUTABLE_PATH)"
+          $PYTHON_BLENDER_EXECUTABLE -m ensurepip
+          $PYTHON_BLENDER_EXECUTABLE -m pip install pytest
+          echo "::set-output name=blender-executable::$BLENDER_EXECUTABLE_PATH"
+      - name: Test with pytest
+        run: pytest -svv --blender-executable "${{ steps.install-dependencies.outputs.blender-executable }}" tests
+```
+
 
 [pypi-link]: https://pypi.org/project/pytest-blender
 [pypi-version-badge-link]: https://img.shields.io/pypi/v/pytest-blender
@@ -150,3 +210,4 @@ for an example).
 [license-link]: https://github.com/mondeja/pytest-blender/blob/master/LICENSE
 [tests-image]: https://img.shields.io/github/workflow/status/mondeja/pytest-blender/CI
 [tests-link]: https://github.com/mondeja/pytest-blender/actions?query=workflow%3ACI
+[blender-downloader-link]: https://github.com/mondeja/blender-downloader
