@@ -205,12 +205,12 @@ jobs:
 
 
 [pypi-link]: https://pypi.org/project/pytest-blender
-[pypi-version-badge-link]: https://img.shields.io/pypi/v/pytest-blender
-[pypi-pyversions-badge-link]: https://img.shields.io/pypi/pyversions/pytest-blender
-[license-image]: https://img.shields.io/pypi/l/pytest-blender?color=light-green
+[pypi-version-badge-link]: https://img.shields.io/pypi/v/pytest-blender?logo=pypi&logoColor=white
+[pypi-pyversions-badge-link]: https://img.shields.io/pypi/pyversions/pytest-blender?logo=python&logoColor=white
+[license-image]: https://img.shields.io/pypi/l/pytest-blender?color=light-green&logo=gnu&logoColor=white
 [license-link]: https://github.com/mondeja/pytest-blender/blob/master/LICENSE
-[tests-image]: https://img.shields.io/github/workflow/status/mondeja/pytest-blender/CI
+[tests-image]: https://img.shields.io/github/workflow/status/mondeja/pytest-blender/CI?logo=github&label=tests
 [tests-link]: https://github.com/mondeja/pytest-blender/actions?query=workflow%3ACI
-[pypi-downloads-image]: https://img.shields.io/pypi/dm/pytest-blender
+[pypi-downloads-image]: https://img.shields.io/pypi/dm/pytest-blender?logo=blender&logoColor=white
 [pypi-downloads-link]: https://pypistats.org/packages/pytest-blender
 [blender-downloader-link]: https://github.com/mondeja/blender-downloader
