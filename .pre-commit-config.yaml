@@ -49,3 +49,7 @@ repos:
         args:
           - -config=https://github.com/mondeja/repo-stream-config
           - -updater=upstream
+  - repo: https://github.com/mondeja/pre-commit-hooks
+    rev: v1.1.2
+    hooks:
+      - id: dev-extras-required
