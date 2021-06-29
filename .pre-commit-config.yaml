@@ -1,55 +1,63 @@
-repos:
-  - repo: https://github.com/asottile/pyupgrade
-    rev: v2.19.1
-    hooks:
-      - id: pyupgrade
-        args:
+repos: v1.2.1
+  - repo: v1.2.1
+    rev: v1.2.1
+    hooks: v1.2.1
+      - id: v1.2.1
+        args: v1.2.1
           - --py36-plus
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.0.1
-    hooks:
-      - id: end-of-file-fixer
-        name: end-of-file-fixer
-  - repo: https://github.com/asottile/setup-cfg-fmt
-    rev: v1.17.0
-    hooks:
-      - id: setup-cfg-fmt
-  - repo: https://github.com/psf/black
-    rev: 21.5b2
-    hooks:
-      - id: black
-        language_version: python3
-        files: \.py$
-  - repo: https://github.com/PyCQA/flake8
-    rev: 3.9.2
-    hooks:
-      - id: flake8
-        additional_dependencies:
+: v1.2.1
+  - repo: v1.2.1
+    rev: v1.2.1
+    hooks: v1.2.1
+      - id: v1.2.1
+        name: v1.2.1
+  - repo: v1.2.1
+    rev: v1.2.1
+    hooks: v1.2.1
+      - id: v1.2.1
+  - repo: v1.2.1
+    rev: v1.2.1
+    hooks: v1.2.1
+      - id: v1.2.1
+        language_version: v1.2.1
+        files: v1.2.1
+  - repo: v1.2.1
+    rev: v1.2.1
+    hooks: v1.2.1
+      - id: v1.2.1
+        additional_dependencies: v1.2.1
           - flake8-print
+: v1.2.1
           - flake8-implicit-str-concat
-  - repo: https://github.com/PyCQA/isort
-    rev: 5.8.0
-    hooks:
-      - id: isort
-        args:
+: v1.2.1
+  - repo: v1.2.1
+    rev: v1.2.1
+    hooks: v1.2.1
+      - id: v1.2.1
+        args: v1.2.1
           - --filter-files
-        files: \.py$
-  - repo: https://github.com/adrienverge/yamllint
-    rev: v1.26.1
-    hooks:
-      - id: yamllint
-        files: .+\.(yml|yaml)
-        args:
+: v1.2.1
+        files: v1.2.1
+  - repo: v1.2.1
+    rev: v1.2.1
+    hooks: v1.2.1
+      - id: v1.2.1
+        files: v1.2.1
+        args: v1.2.1
           - -c
+: v1.2.1
           - .yamllint
-  - repo: https://github.com/mondeja/repo-stream
-    rev: v1.0.2
-    hooks:
-      - id: repo-stream
-        args:
-          - -config=https://github.com/mondeja/repo-stream-config
+: v1.2.1
+  - repo: v1.2.1
+    rev: v1.2.1
+    hooks: v1.2.1
+      - id: v1.2.1
+        args: v1.2.1
+          - -config=https: v1.2.1
           - -updater=upstream
-  - repo: https://github.com/mondeja/pre-commit-hooks
-    rev: v1.1.2
-    hooks:
-      - id: dev-extras-required
+: v1.2.1
+  - repo: v1.2.1
+    rev: v1.2.1
+    hooks: v1.2.1
+      - id: v1.2.1
+      - id: root-editorconfig-required
