@@ -33,7 +33,7 @@ jobs:
       - name: Upgrade PIP
         run: python -m pip install --upgrade pip
       - name: Cache Blender ${{ matrix.blender-version }}
-        uses: actions/cache@v2.1.5
+        uses: actions/cache@v2.1.6
         id: cache-blender
         with:
           path: |
