@@ -50,6 +50,11 @@ repos:
           - -config=https://github.com/mondeja/repo-stream-config
           - -updater=upstream
   - repo: https://github.com/mondeja/pre-commit-hooks
-    rev: v1.1.2
+    rev: v1.3.0
     hooks:
       - id: dev-extras-required
+      - id: root-editorconfig-required
+  - repo: https://github.com/editorconfig-checker/editorconfig-checker.python
+    rev: 2.3.5
+    hooks:
+      - id: editorconfig-checker
