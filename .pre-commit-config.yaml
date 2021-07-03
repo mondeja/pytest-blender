@@ -53,3 +53,8 @@ repos:
     rev: v1.5.2
     hooks:
       - id: dev-extras-required
+      - id: root-editorconfig-required
+  - repo: https://github.com/editorconfig-checker/editorconfig-checker.python
+    rev: 2.3.5
+    hooks:
+      - id: editorconfig-checker
