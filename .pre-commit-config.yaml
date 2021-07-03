@@ -15,7 +15,7 @@ repos:
     hooks:
       - id: setup-cfg-fmt
   - repo: https://github.com/psf/black
-    rev: 21.5b2
+    rev: 21.6b0
     hooks:
       - id: black
         language_version: python3
@@ -28,7 +28,7 @@ repos:
           - flake8-print
           - flake8-implicit-str-concat
   - repo: https://github.com/PyCQA/isort
-    rev: 5.8.0
+    rev: 5.9.1
     hooks:
       - id: isort
         args:
@@ -43,14 +43,14 @@ repos:
           - -c
           - .yamllint
   - repo: https://github.com/mondeja/repo-stream
-    rev: v1.0.2
+    rev: v1.1.0
     hooks:
       - id: repo-stream
         args:
           - -config=https://github.com/mondeja/repo-stream-config
           - -updater=upstream
   - repo: https://github.com/mondeja/pre-commit-hooks
-    rev: v1.5.1
+    rev: v1.5.2
     hooks:
       - id: dev-extras-required
       - id: root-editorconfig-required
