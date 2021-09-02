@@ -59,7 +59,7 @@ jobs:
           $PYTHON_BLENDER_EXECUTABLE -m pip install pytest
           echo "::set-output name=blender-executable::$BLENDER_EXECUTABLE_PATH"
       - name: Test with pytest
-        run: pytest -svv --blender-executable "${{ steps.install-dependencies.outputs.blender-executable }}" tests
+        run: pytest -svv -p no:cacheprovider --blender-executable "${{ steps.install-dependencies.outputs.blender-executable }}" tests
 
   build-sdist:
     if: startsWith(github.ref, 'refs/tags/')

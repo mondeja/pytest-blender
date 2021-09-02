@@ -42,6 +42,9 @@ def pytest_configure(config):
 
     blender_executable = _get_blender_executable(config)
 
+    if not blender_executable:
+        pytest.exit("'blender' executable not found.", returncode=1)
+
     # run pytest using blender
     proc = subprocess.Popen(
         [
