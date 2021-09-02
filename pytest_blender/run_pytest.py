@@ -84,18 +84,25 @@ def main():
         """
 
         def _blender_python_executable(self, request):
-            blender_python_executable = request.config.cache.get(
-                "pytest-blender/blender-python-executable",
-                None,
-            )
+            blender_python_executable = None
+
+            # if pytest is executed without cache provider, the 'cache'
+            #   attribute will not be available (-p no:cacheprovider)
+            if hasattr(request.config, "cache"):
+                blender_python_executable = request.config.cache.get(
+                    "pytest-blender/blender-python-executable",
+                    None,
+                )
+
             if blender_python_executable is None:
                 blender_python_executable = get_blender_binary_path_python(
                     blender_executable,
                 )
-                request.config.cache.set(
-                    "pytest-blender/blender-python-executable",
-                    blender_python_executable,
-                )
+                if hasattr(request.config, "cache"):
+                    request.config.cache.set(
+                        "pytest-blender/blender-python-executable",
+                        blender_python_executable,
+                    )
             return blender_python_executable
 
         @pytest.fixture
@@ -111,10 +118,14 @@ def main():
         @pytest.fixture
         def blender_version(self, request):
             """Get the Blender version of the current session."""
-            blender_version = request.config.cache.get(
-                "pytest-blender/blender-version",
-                None,
-            )
+            blender_version = None
+
+            if hasattr(request.config, "cache"):
+                blender_version = request.config.cache.get(
+                    "pytest-blender/blender-version",
+                    None,
+                )
+
             if blender_version is None:
                 version_stdout = subprocess.check_output(
                     [blender_executable, "--version"]
@@ -122,19 +133,24 @@ def main():
                 blender_version = (
                     version_stdout.decode("utf-8").splitlines()[0].split(" ")[1]
                 )
-                request.config.cache.set(
-                    "pytest-blender/blender-version",
-                    blender_version,
-                )
+                if hasattr(request.config, "cache"):
+                    request.config.cache.set(
+                        "pytest-blender/blender-version",
+                        blender_version,
+                    )
             return blender_version
 
         @pytest.fixture
         def blender_python_version(self, request):
             """Get the version of the Blender's Python executable."""
-            blender_python_version = request.config.cache.get(
-                "pytest-blender/blender-python-version",
-                None,
-            )
+            blender_python_version = None
+
+            if hasattr(request.config, "cache"):
+                blender_python_version = request.config.cache.get(
+                    "pytest-blender/blender-python-version",
+                    None,
+                )
+
             if blender_python_version is None:
                 blender_python_executable = self._blender_python_executable(request)
                 blender_python_version_stdout = subprocess.check_output(
@@ -148,10 +164,11 @@ def main():
                     .splitlines()[0]
                     .split(" ")[1]
                 )
-                request.config.cache.set(
-                    "pytest-blender/blender-python-version",
-                    blender_python_version,
-                )
+                if hasattr(request.config, "cache"):
+                    request.config.cache.set(
+                        "pytest-blender/blender-python-version",
+                        blender_python_version,
+                    )
             return blender_python_version
 
         @pytest.fixture(scope="session")
