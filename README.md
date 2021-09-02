@@ -85,31 +85,39 @@ tests/test_bpy_import.py .                                                [100%]
 
 #### Fixtures
 
-<a name="blender_executable" href="#blender_executable">#</a> <b>blender_executable</b> ⇒ `str`
+<a name="blender_executable" href="#blender_executable">#</a>
+<b>blender_executable</b> ⇒ `str`
 
-Returns the path of the executable that has started the current Blender session.
+Returns the path of the executable that has started the current Blender
+session.
 
-<a name="blender_version" href="#blender_version">#</a> <b>blender_version</b> ⇒ `str`
+<a name="blender_version" href="#blender_version">#</a> <b>blender_version</b>
+⇒ `str`
 
 Returns the version of Blender running in the current session.
 
-<a name="blender_python_executable" href="#blender_python_executable">#</a> <b>blender_python_executable</b> ⇒ `str`
+<a name="blender_python_executable" href="#blender_python_executable">#</a>
+<b>blender_python_executable</b> ⇒ `str`
 
 Returns the path of the Python executable builtin in the Blender release of the
 currently running session.
 
-<a name="blender_python_version" href="#blender_python_version">#</a> <b>blender_python_version</b> ⇒ `str`
+<a name="blender_python_version" href="#blender_python_version">#</a>
+<b>blender_python_version</b> ⇒ `str`
 
 Returns the version of the Python executable builtin in the Blender release of
 the currently running session.
 
-<a name="install_addons_from_dir" href="#install_addons_from_dir">#</a> <b>install_addons_from_dir</b>(<i>addons_dir</i>, <i>addon_module_names</i>, <i>save_userpref=True</i>, <i>default_set=True</i>, <i>persistent=True</i>, <i>\*\*kwargs</i>)
+<a name="install_addons_from_dir" href="#install_addons_from_dir">#</a>
+<b>install_addons_from_dir</b>(<i>addons_dir</i>, <i>addon_module_names</i>,
+<i>save_userpref=True</i>, <i>default_set=True</i>, <i>persistent=True</i>,
+<i>\*\*kwargs</i>)
 
-Returns a function that installs and enables a set of addons whose modules are
-located in a directory. This function is designed to be executed before the
-pytest session to install the addons that you want to test, using the other
-fixture [`disable_addons`](https://github.com/mondeja/pytest-blender#disable_addons)
-to disable them after the execution of the suite:
+Function that installs and enables a set of addons whose modules are located in
+a directory. This function is designed to be executed before the pytest session
+to install the addons that you want to test, using the other fixture
+[`disable_addons`](https://github.com/mondeja/pytest-blender#disable_addons)
+to disable them after the execution of the test suite:
 
 ```python
 import os
@@ -122,8 +130,10 @@ def _register_addons(request, install_addons_from_dir, disable_addons):
     yield
     disable_addons(ADDON_MODULE_NAMES)
 ```
-- **addons_dir** (str) Directory in which are located the modules of the addons.
-- **addon_module_names** (list) Name of the addons modules (without the `.py` extension).
+- **addons_dir** (str) Directory in which are located the modules of the
+ addons.
+- **addon_module_names** (list) Name of the addons modules (without the
+ `.py` extension).
 - **save_userpref** (bool) Save user preferences after installation.
 - **default_set** (bool) Set the user-preference calling `addon_utils.enable`.
 - **persistent** (bool) Ensure the addon is enabled for the entire session
@@ -131,17 +141,21 @@ def _register_addons(request, install_addons_from_dir, disable_addons):
 - **\*\*kwargs** (dict) Subsecuent keyword arguments are passed to
  [`bpy.ops.preferences.addon_install`](https://docs.blender.org/api/current/bpy.ops.preferences.html#bpy.ops.preferences.addon_install).
 
-<a name="disable_addons" href="#disable_addons">#</a> <b>disable_addons</b>(<i>addon_module_names</i>, <i>save_userpref=True</i>, <i>default_set=True</i>, <i>\*\*kwargs</i>)
+<a name="disable_addons" href="#disable_addons">#</a>
+<b>disable_addons</b>(<i>addon_module_names</i>, <i>save_userpref=True</i>,
+<i>default_set=True</i>, <i>\*\*kwargs</i>)
 
-Returns a function that disables a set of addons by module name. Is designed to
-disables your addons after a pytest suite execution (check 
+Function that disables a set of addons by module name. Is designed to disable
+your addons after a pytest suite execution (check 
 [`install_addons_from_dir`](https://github.com/mondeja/pytest-blender#install_addons_from_dir)
 for an example).
 
-- **addon_module_names** (list) Name of the addons modules (without the `.py` extension).
+- **addon_module_names** (list) Name of the addons modules (without the `.py`
+ extension).
 - **save_userpref** (bool) Save user preferences after installation.
 - **default_set** (bool) Set the user-preference calling `addon_utils.disable`.
-- **\*\*kwargs** (dict) Subsecuent keyword arguments are passed to `addon_utils.disable`.
+- **\*\*kwargs** (dict) Subsecuent keyword arguments are passed to 
+ `addon_utils.disable`.
 
 ### CI integration
 
@@ -187,8 +201,8 @@ jobs:
         run: |
           python -m pip install --upgrade blender-downloader
           BLENDER_EXECUTABLE_PATH=$(blender-downloader \
-          ${{ matrix.blender-version }} --extract \
-          --print-blender-executable --remove-compressed --quiet)
+          ${{ matrix.blender-version }} --extract --remove-compressed \
+          --quiet --print-blender-executable)
           echo "$BLENDER_EXECUTABLE_PATH" > _blender-executable-path.txt
       - name: Install dependencies
         id: install-dependencies
