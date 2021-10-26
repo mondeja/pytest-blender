@@ -56,25 +56,18 @@ jobs:
         id: install-dependencies
         run: |
           python -m pip install .[test]
-          python -m pip install coveralls
           BLENDER_EXECUTABLE_PATH="$(cat _blender-executable-path.txt | tr -d '\n')"
           PYTHON_BLENDER_EXECUTABLE="$(pytest-blender --blender-executable $BLENDER_EXECUTABLE_PATH)"
           $PYTHON_BLENDER_EXECUTABLE -m ensurepip
           pytest_version="$(< setup.cfg grep pytest== | head -n 1 | cut -d'=' -f3)"
-          pytest_cov_version="$(< setup.cfg grep pytest-cov== | head -n 1 | cut -d'=' -f3)"
-          $PYTHON_BLENDER_EXECUTABLE -m pip install pytest==$pytest_version pytest-cov==$pytest_cov_version
+          $PYTHON_BLENDER_EXECUTABLE -m pip install pytest==$pytest_version
           echo "::set-output name=blender-executable::$BLENDER_EXECUTABLE_PATH"
       - name: Test with Blender Python executable (no cache)
         run: pytest -svv -p no:cacheprovider --blender-executable "${{ steps.install-dependencies.outputs.blender-executable }}" tests
       - name: Test with Blender Python executable
         run: pytest -svv --blender-executable "${{ steps.install-dependencies.outputs.blender-executable }}" tests
       - name: Test with local Python executable
-        run: BLENDER_EXECUTABLE="${{ steps.install-dependencies.outputs.blender-executable }}" pytest -svv -p no:pytest-blender --cov=pytest_blender --cov-config=setup.cfg tests
-      - name: Coveralls
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
-        run: coveralls --service=github
+        run: BLENDER_EXECUTABLE="${{ steps.install-dependencies.outputs.blender-executable }}" pytest -svv -p no:pytest-blender tests
 
   build-sdist:
     if: startsWith(github.ref, 'refs/tags/')
