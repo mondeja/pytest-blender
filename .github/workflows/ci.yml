@@ -55,7 +55,7 @@ jobs:
       - name: Install dependencies
         id: install-dependencies
         run: |
-          python -m pip install .[test]
+          python -m pip install .[test] coveralls
           BLENDER_EXECUTABLE_PATH="$(cat _blender-executable-path.txt | tr -d '\n')"
           PYTHON_BLENDER_EXECUTABLE="$(pytest-blender --blender-executable $BLENDER_EXECUTABLE_PATH)"
           $PYTHON_BLENDER_EXECUTABLE -m ensurepip
