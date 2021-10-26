@@ -207,7 +207,7 @@ def main():
 
             def _install_addons_from_dir(
                 addons_dir,
-                addon_module_names,
+                addon_module_names=None,
                 save_userpref=True,
                 default_set=True,
                 persistent=True,
@@ -216,8 +216,17 @@ def main():
                 import addon_utils  # noqa F401
                 import bpy  # noqa F401
 
+                if addon_module_names is None:
+                    addon_module_names = [
+                        fname.rstrip(".py")
+                        for fname in os.listdir(addons_dir)
+                        if not fname.startswith("__")
+                    ]
+
                 for addon_module_name in addon_module_names:
-                    addon_filepath = os.path.join(addons_dir, f"{addon_module_name}.py")
+                    addon_filepath = os.path.join(
+                        addons_dir, f"{addon_module_name.rstrip('.py')}.py"
+                    )
                     bpy.ops.preferences.addon_install(filepath=addon_filepath, **kwargs)
                     addon_utils.enable(
                         addon_module_name,
@@ -226,6 +235,8 @@ def main():
                     )
                 if save_userpref:
                     bpy.ops.wm.save_userpref()
+
+                return addon_module_names
 
             return _install_addons_from_dir
 
