@@ -162,8 +162,8 @@ def _register_addons(request, install_addons_from_dir, disable_addons):
 - **addons_dir** (str) Directory in which are located the modules of the
  addons.
 - **addon_module_names** (list) Name of the addons modules. If not defined
- (default) all the python modules located in `addons_dir` whose names do not
- start with `__` will be considered addons.
+ (default) all the python modules located in `addons_dir` directory whose names
+ do not start with `__` will be considered addons.
 - **save_userpref** (bool) Save user preferences after installation.
 - **default_set** (bool) Set the user-preference calling `addon_utils.enable`.
 - **persistent** (bool) Ensure the addon is enabled for the entire session
