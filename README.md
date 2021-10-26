@@ -104,10 +104,10 @@ pytest -svv -- -- -b
 
 #### Load startup template
 
-You can use the `--template` argument to pass a custom startup file:
+You can use the `--blender-template` argument to pass a custom startup file:
 
 ```sh
-pytest -svv --template ~/.config/blender/2.93/config/startup.blend
+pytest -svv --blender-template ~/.config/blender/2.93/config/startup.blend
 ```
 
 ### Reference

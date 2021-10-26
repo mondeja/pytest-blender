@@ -18,7 +18,7 @@ def pytest_addoption(parser):
         help="Blender executable location.",
     )
     parser.addoption(
-        "--template",
+        "--blender-template",
         nargs=1,
         default=None,
         help="Open Blender using an empty layout as start template.",
@@ -33,7 +33,7 @@ def _get_blender_executable(config):
 
 
 def _add_template_arg(config, args):
-    template = config.getoption("--template")
+    template = config.getoption("--blender-template")
     if template:
         args.append(template[0])
 
@@ -48,7 +48,7 @@ def pytest_configure(config):
     i = 0
     while i < len(argv):
         arg = argv[i]
-        if arg in ["--blender-executable", "--template"]:
+        if arg in ["--blender-executable", "--blender-template"]:
             i += 2
             continue
         elif arg in ["-h", "--help"]:
