@@ -16,11 +16,16 @@ except ImportError:
     reason="Requires testing without loading the pytest-blender plugin.",
 )
 def test_pytest_blender_cli():
-    output = subprocess.check_output(
+    proc = subprocess.run(
         [sys.executable, os.path.join("pytest_blender", "__main__.py")],
-    ).decode("utf-8")
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
 
-    assert output.count("\n") == 1
-    assert output.endswith("\n")
-    assert output.split(os.sep)[-1].startswith("python")
-    assert os.path.isfile(output.rstrip("\n"))
+    assert proc.stderr == b""
+
+    stdout = proc.stdout.decode("utf-8")
+    assert stdout.count("\n") == 1
+    assert stdout.endswith("\n")
+    assert stdout.split(os.sep)[-1].startswith("python")
+    assert os.path.isfile(stdout.rstrip("\n"))
