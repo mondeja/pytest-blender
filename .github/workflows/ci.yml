@@ -61,8 +61,10 @@ jobs:
           $PYTHON_BLENDER_EXECUTABLE -m ensurepip
           $PYTHON_BLENDER_EXECUTABLE -m pip install pytest
           echo "::set-output name=blender-executable::$BLENDER_EXECUTABLE_PATH"
-      - name: Test with Blender Python executable
+      - name: Test with Blender Python executable (no cache)
         run: pytest -svv -p no:cacheprovider --blender-executable "${{ steps.install-dependencies.outputs.blender-executable }}" tests
+      - name: Test with Blender Python executable
+        run: pytest -svv --blender-executable "${{ steps.install-dependencies.outputs.blender-executable }}" tests
       - name: Test with local Python executable
         run: pytest -svv -p no:pytest-blender tests
 
