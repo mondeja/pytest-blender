@@ -222,6 +222,12 @@ def main():
                         for fname in os.listdir(addons_dir)
                         if not fname.startswith("__")
                     ]
+                    if not addon_module_names:
+                        raise ValueError(
+                            f"Any addons found in '{addons_dir}' directory."
+                        )
+                elif not addon_module_names:
+                    raise ValueError("You need to pass at least one addon to install.")
 
                 for addon_module_name in addon_module_names:
                     addon_filepath = os.path.join(
