@@ -23,7 +23,7 @@ def build_parser():
         dest="blender_executable",
         nargs=1,
         default=which_blender_by_os,
-        help="Blender executable location.",
+        help="Custom Blender executable location for 'pytest-blender' plugin.",
     )
     return parser
 
