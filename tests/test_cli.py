@@ -15,9 +15,18 @@ except ImportError:
     pytest_blender_active,
     reason="Requires testing without loading the pytest-blender plugin.",
 )
+@pytest.mark.skipif(
+    not os.environ.get("BLENDER_EXECUTABLE"),
+    reason="Environment variable 'BLENDER_EXECUTABLE' must be set.",
+)
 def test_pytest_blender_cli():
     proc = subprocess.run(
-        [sys.executable, os.path.join("pytest_blender", "__main__.py")],
+        [
+            sys.executable,
+            os.path.join("pytest_blender", "__main__.py"),
+            "--blender-executable",
+            os.environ["BLENDER_EXECUTABLE"],
+        ],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
     )
