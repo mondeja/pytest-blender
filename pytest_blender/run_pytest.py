@@ -28,7 +28,7 @@ def _parse_version(version_string):
     return tuple(int(i) for i in version_string.split(".") if i.isdigit())
 
 
-def get_blender_binary_path_python(blender_executable, blender_version=None):
+def get_blender_binary_path_python(blender_executable, blend_version=None):
     """Get Blender's Python executable location.
 
     This function can't be in utils because the module is not loaded from
@@ -45,11 +45,11 @@ def get_blender_binary_path_python(blender_executable, blender_version=None):
 
     str: Blender's Python executable path.
     """
-    if blender_version is None:
-        blender_version = get_blender_version(blender_executable)
+    if blend_version is None:
+        blend_version = get_blender_version(blender_executable)
     python_expr = (
         "import sys;print(sys.executable);"
-        if _parse_version(blender_version) >= (2, 91)
+        if _parse_version(blend_version) >= (2, 91)
         else "import bpy;print(bpy.app.binary_path_python)"
     )
 
@@ -93,13 +93,13 @@ def main():
     argv = ["-p", "no:pytest-blender"]
 
     # parse Blender executable location, propagated from hook
-    blender_executable, _inside_bexec_arg = (None, None)
+    _blender_executable, _inside_bexec_arg = (None, None)
     for arg in raw_argv:
         if arg == "--pytest-blender-executable":
             _inside_bexec_arg = True
             continue
         elif _inside_bexec_arg:
-            blender_executable = arg
+            _blender_executable = arg
             _inside_bexec_arg = False
             continue
         argv.append(arg)
@@ -111,70 +111,73 @@ def main():
         """
 
         def _blender_python_executable(self, request):
-            blender_python_executable = None
+            response = None
 
             # if pytest is executed without cache provider, the 'cache'
             #   attribute will not be available (-p no:cacheprovider)
             if hasattr(request.config, "cache"):
-                blender_python_executable = request.config.cache.get(
+                response = request.config.cache.get(
                     "pytest-blender/blender-python-executable",
                     None,
                 )
 
-            if blender_python_executable is None:
-                blender_python_executable = get_blender_binary_path_python(
-                    blender_executable,
-                    blender_version=self.blender_version(request),
+            if response is None:
+                response = get_blender_binary_path_python(
+                    _blender_executable,
+                    blend_version=self._blender_version(request),
                 )
                 if hasattr(request.config, "cache"):
                     request.config.cache.set(
                         "pytest-blender/blender-python-executable",
-                        blender_python_executable,
+                        response,
                     )
-            return blender_python_executable
+            return response
 
         @pytest.fixture
         def blender_executable(self):
             """Get the executable of the current Blender's session."""
-            return blender_executable
+            return _blender_executable
 
         @pytest.fixture
         def blender_python_executable(self, request):
             """Get the executable of the current Blender's Python session."""
             return self._blender_python_executable(request)
 
-        @pytest.fixture
-        def blender_version(self, request):
-            """Get the Blender version of the current session."""
-            _blender_version = None
+        def _blender_version(self, request):
+            response = None
 
             if hasattr(request.config, "cache"):
-                _blender_version = request.config.cache.get(
+                response = request.config.cache.get(
                     "pytest-blender/blender-version",
                     None,
                 )
 
-            if _blender_version is None:
-                _blender_version = get_blender_version(blender_executable)
+            if response is None:
+                response = get_blender_version(_blender_executable)
                 if hasattr(request.config, "cache"):
                     request.config.cache.set(
                         "pytest-blender/blender-version",
-                        _blender_version,
+                        response,
                     )
-            return _blender_version
+            return response
+
+        @pytest.fixture
+        def blender_version(self, request):
+            """Get the Blender version of the current session."""
+            return self._blender_version(request)
 
         @pytest.fixture
         def blender_python_version(self, request):
             """Get the version of the Blender's Python executable."""
-            _blender_python_version = None
+            response = None
 
             if hasattr(request.config, "cache"):
-                _blender_python_version = request.config.cache.get(
+                response = request.config.cache.get(
                     "pytest-blender/blender-python-version",
                     None,
                 )
 
-            if _blender_python_version is None:
+            if response is None:
                 blender_python_executable = self._blender_python_executable(request)
                 blender_python_version_stdout = subprocess.check_output(
                     [
@@ -182,7 +185,7 @@ def main():
                         "--version",
                     ]
                 )
-                _blender_python_version = (
+                response = (
                     blender_python_version_stdout.decode("utf-8")
                     .splitlines()[0]
                     .split(" ")[1]
@@ -190,9 +193,9 @@ def main():
                 if hasattr(request.config, "cache"):
                     request.config.cache.set(
                         "pytest-blender/blender-python-version",
-                        _blender_python_version,
+                        response,
                     )
-            return _blender_python_version
+            return response
 
         @pytest.fixture(scope="session")
         def install_addons_from_dir(self, request):
