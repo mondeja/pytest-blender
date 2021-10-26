@@ -2,6 +2,7 @@
 
 import io
 import os
+import sys
 from contextlib import redirect_stdout
 
 import pytest
@@ -26,5 +27,6 @@ if pytest_blender_active:
         with redirect_stdout(f):
             addon_module_names = install_addons_from_dir(addons_dir)
         yield
+        sys.stdout.write("\n")
         with redirect_stdout(f):
             disable_addons(addon_module_names)

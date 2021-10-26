@@ -17,14 +17,9 @@ def test_basic_addon():
     import _bpy
     import addon_utils
 
-    _module_loaded = False
-    for addon_module in addon_utils.modules():
-        if addon_module.__name__ == "pytest_blender_basic":
-            _module_loaded = True
-    assert _module_loaded
+    installed_addons = [addon.__name__ for addon in addon_utils.modules()]
+    assert "pytest_blender_basic" in installed_addons
+    assert "__init__" not in installed_addons
 
-    _operator_class_loaded = False
-    for operator_cls in _bpy.types.Operator.__subclasses__():
-        if operator_cls.__name__ == "PytestBlenderObjectMoveX":
-            _operator_class_loaded = True
-    assert _operator_class_loaded
+    operator_classes = [cls.__name__ for cls in _bpy.types.Operator.__subclasses__()]
+    assert "PytestBlenderObjectMoveX" in operator_classes
