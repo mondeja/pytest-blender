@@ -28,6 +28,8 @@ def _get_blender_executable(config):
 
 @pytest.hookimpl(tryfirst=True)
 def pytest_configure(config):
+    pytest_help_opt = False
+
     # build propagated CLI args
     propagated_cli_args = []
     _inside_root_invocation_arg = False
@@ -38,7 +40,13 @@ def pytest_configure(config):
         elif arg == "--blender-executable":
             _inside_root_invocation_arg = True
             continue
+        elif arg in ["-h", "--help"]:
+            pytest_help_opt = True
+            break
         propagated_cli_args.append(arg)
+
+    if pytest_help_opt:
+        return
 
     blender_executable = _get_blender_executable(config)
 

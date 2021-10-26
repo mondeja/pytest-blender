@@ -1,10 +1,22 @@
 """Example addons testing."""
 
-import _bpy
-import addon_utils
+import pytest
 
 
+try:
+    from pytest_blender.test import pytest_blender_unactive
+except ImportError:
+    pytest_blender_unactive = False
+
+
+@pytest.mark.skipif(
+    pytest_blender_unactive,
+    reason="Requires testing loading the pytest-blender plugin.",
+)
 def test_basic_addon():
+    import _bpy
+    import addon_utils
+
     _module_loaded = False
     for addon_module in addon_utils.modules():
         if addon_module.__name__ == "pytest_blender_basic":

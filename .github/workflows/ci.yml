@@ -20,7 +20,7 @@ jobs:
           - ubuntu-latest
           - macos-latest
         blender-version:
-          - '2.93.4'
+          - '2.93.5'
           - '2.92.0'
           - '2.91.2'
           - '2.90.1'
@@ -61,8 +61,12 @@ jobs:
           $PYTHON_BLENDER_EXECUTABLE -m ensurepip
           $PYTHON_BLENDER_EXECUTABLE -m pip install pytest
           echo "::set-output name=blender-executable::$BLENDER_EXECUTABLE_PATH"
-      - name: Test with pytest
+      - name: Test with Blender Python executable (no cache)
         run: pytest -svv -p no:cacheprovider --blender-executable "${{ steps.install-dependencies.outputs.blender-executable }}" tests
+      - name: Test with Blender Python executable
+        run: pytest -svv --blender-executable "${{ steps.install-dependencies.outputs.blender-executable }}" tests
+      - name: Test with local Python executable
+        run: BLENDER_EXECUTABLE="${{ steps.install-dependencies.outputs.blender-executable }}" pytest -svv -p no:pytest-blender tests
 
   build-sdist:
     if: startsWith(github.ref, 'refs/tags/')
