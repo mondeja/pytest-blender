@@ -25,6 +25,6 @@ def test_basic_addon():
 
     _operator_class_loaded = False
     for operator_cls in _bpy.types.Operator.__subclasses__():
-        if operator_cls.__name__ == "ObjectMoveX":
+        if operator_cls.__name__ == "PytestBlenderObjectMoveX":
             _operator_class_loaded = True
     assert _operator_class_loaded

@@ -62,11 +62,16 @@ jobs:
           $PYTHON_BLENDER_EXECUTABLE -m pip install pytest
           echo "::set-output name=blender-executable::$BLENDER_EXECUTABLE_PATH"
       - name: Test with Blender Python executable (no cache)
-        run: pytest -svv -p no:cacheprovider --blender-executable "${{ steps.install-dependencies.outputs.blender-executable }}" tests
+        run: pytest -svv -p no:cacheprovider --blender-executable "${{ steps.install-dependencies.outputs.blender-executable }}" --cov=pytest_blender --cov-config=setup.cfg tests
       - name: Test with Blender Python executable
-        run: pytest -svv --blender-executable "${{ steps.install-dependencies.outputs.blender-executable }}" tests
+        run: pytest -svv --blender-executable "${{ steps.install-dependencies.outputs.blender-executable }}" --cov=pytest_blender --cov-config=setup.cfg tests
       - name: Test with local Python executable
-        run: BLENDER_EXECUTABLE="${{ steps.install-dependencies.outputs.blender-executable }}" pytest -svv -p no:pytest-blender tests
+        run: BLENDER_EXECUTABLE="${{ steps.install-dependencies.outputs.blender-executable }}" pytest -svv -p no:pytest-blender --cov=pytest_blender --cov-config=setup.cfg tests
+      - name: Coveralls
+        run: coveralls
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COVERALLS_SERVICE_NAME: github
 
   build-sdist:
     if: startsWith(github.ref, 'refs/tags/')
