@@ -59,7 +59,8 @@ jobs:
           BLENDER_EXECUTABLE_PATH="$(cat _blender-executable-path.txt | tr -d '\n')"
           PYTHON_BLENDER_EXECUTABLE="$(pytest-blender --blender-executable $BLENDER_EXECUTABLE_PATH)"
           $PYTHON_BLENDER_EXECUTABLE -m ensurepip
-          $PYTHON_BLENDER_EXECUTABLE -m pip install pytest
+          pytest_version="$(< setup.cfg grep pytest== | head -n 1 | cut -d'=' -f3)"
+          $PYTHON_BLENDER_EXECUTABLE -m pip install pytest==$pytest_version
           echo "::set-output name=blender-executable::$BLENDER_EXECUTABLE_PATH"
       - name: Test with Blender Python executable (no cache)
         run: pytest -svv -p no:cacheprovider --blender-executable "${{ steps.install-dependencies.outputs.blender-executable }}" tests
