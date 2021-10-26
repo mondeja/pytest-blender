@@ -24,8 +24,11 @@ def _join(value):
         return join(value)
 
 
-# this function can't be in 'utils'
-def get_blender_binary_path_python(blender_executable):
+def _parse_version(version_string):
+    return tuple(int(i) for i in version_string.split(".") if i.isdigit())
+
+
+def get_blender_binary_path_python(blender_executable, blender_version=None):
     """Get Blender's Python executable location.
 
     This function can't be in utils because the module is not loaded from
@@ -42,13 +45,22 @@ def get_blender_binary_path_python(blender_executable):
 
     str: Blender's Python executable path.
     """
+    if blender_version is None:
+        blender_version = get_blender_version(blender_executable)
+    python_expr = (
+        "import sys;print(sys.executable);"
+        if _parse_version(blender_version) >= (2, 91)
+        else "import bpy;print(bpy.app.binary_path_python)"
+    )
+
     stdout = subprocess.check_output(
         [
             blender_executable,
             "-b",
             "--python-expr",
-            "import bpy;print(bpy.app.binary_path_python)",
-        ]
+            python_expr,
+        ],
+        stderr=subprocess.STDOUT,
     )
 
     blender_python_path = None
@@ -57,6 +69,21 @@ def get_blender_binary_path_python(blender_executable):
             blender_python_path = line
             break
     return blender_python_path
+
+
+def get_blender_version(blender_executable):
+    """Get Blender's version goving its executable location.
+
+    blender_executable : str
+      Blender's executable location.
+
+    Returns
+    -------
+
+    str: Blender's version.
+    """
+    version_stdout = subprocess.check_output([blender_executable, "--version"])
+    return version_stdout.decode("utf-8").splitlines()[0].split(" ")[1]
 
 
 def main():
@@ -97,6 +124,7 @@ def main():
             if blender_python_executable is None:
                 blender_python_executable = get_blender_binary_path_python(
                     blender_executable,
+                    blender_version=self.blender_version(request),
                 )
                 if hasattr(request.config, "cache"):
                     request.config.cache.set(
@@ -127,12 +155,7 @@ def main():
                 )
 
             if blender_version is None:
-                version_stdout = subprocess.check_output(
-                    [blender_executable, "--version"]
-                )
-                blender_version = (
-                    version_stdout.decode("utf-8").splitlines()[0].split(" ")[1]
-                )
+                blender_version = get_blender_version(blender_executable)
                 if hasattr(request.config, "cache"):
                     request.config.cache.set(
                         "pytest-blender/blender-version",

@@ -45,7 +45,8 @@ def parse_args(args):
 
 def run(args):
     opts = parse_args(args)
-    sys.stdout.write(f"{get_blender_binary_path_python(opts.blender_executable)}\n")
+    blender_python = get_blender_binary_path_python(opts.blender_executable)
+    sys.stdout.write(f"{blender_python}\n")
 
     return 0
 
