@@ -81,6 +81,35 @@ tests/test_bpy_import.py .                                                [100%]
 ============================== 1 passed in 0.00s ===============================
 ```
 
+#### Arguments propagation
+
+When you call `pytest`, all options like `--blender-executable` are passed
+to the `pytest` suite running `pytest-blender`. If you want to pass arguments
+to `blender` in its headless execution, add a `--` between `pytest` and
+`blender` arguments. If you want to pass arguments to the `python` Blender's
+interpreter, you need to add another `--` between arguments in a third group.
+
+For example:
+
+```sh
+pytest -svv --blender-executable ~/blender -- --enable-event-simulate -- -b
+```
+
+In case that you don't want to pass arguments to `blender` but yes to `python`,
+use double arguments group separation (`-- --`):
+
+```sh
+pytest -svv -- -- -b
+```
+
+#### Load startup template
+
+You can use the `--template` argument to pass a custom startup file:
+
+```sh
+pytest -svv --template ~/.config/blender/2.93/config/startup.blend
+```
+
 ### Reference
 
 #### Fixtures
