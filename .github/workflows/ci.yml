@@ -62,9 +62,9 @@ jobs:
           $PYTHON_BLENDER_EXECUTABLE -m pip install pytest
           echo "::set-output name=blender-executable::$BLENDER_EXECUTABLE_PATH"
       - name: Test with Blender Python executable (no cache)
-        run: pytest -svv -p no:cacheprovider --blender-executable "${{ steps.install-dependencies.outputs.blender-executable }}" --cov=pytest_blender --cov-config=setup.cfg tests
+        run: pytest -svv -p no:cacheprovider --cov=pytest_blender --cov-config=setup.cfg --blender-executable "${{ steps.install-dependencies.outputs.blender-executable }}" tests
       - name: Test with Blender Python executable
-        run: pytest -svv --blender-executable "${{ steps.install-dependencies.outputs.blender-executable }}" --cov=pytest_blender --cov-config=setup.cfg tests
+        run: pytest -svv --cov=pytest_blender --cov-config=setup.cfg --blender-executable "${{ steps.install-dependencies.outputs.blender-executable }}" tests
       - name: Test with local Python executable
         run: BLENDER_EXECUTABLE="${{ steps.install-dependencies.outputs.blender-executable }}" pytest -svv -p no:pytest-blender --cov=pytest_blender --cov-config=setup.cfg tests
       - name: Coveralls
