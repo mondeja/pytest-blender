@@ -1,5 +1,6 @@
 import os
 import subprocess
+import sys
 
 import pytest
 
@@ -16,11 +17,10 @@ except ImportError:
 )
 def test_pytest_blender_cli():
     output = subprocess.check_output(
-        ["pytest-blender"],
-        stderr=subprocess.STDOUT,
-        shell=True,
+        [sys.executable, os.path.join("pytest_blender", "__main__.py")],
     ).decode("utf-8")
 
     assert output.count("\n") == 1
+    assert output.endswith("\n")
     assert output.split(os.sep)[-1].startswith("python")
     assert os.path.isfile(output.rstrip("\n"))
