@@ -146,35 +146,35 @@ def main():
         @pytest.fixture
         def blender_version(self, request):
             """Get the Blender version of the current session."""
-            blender_version = None
+            _blender_version = None
 
             if hasattr(request.config, "cache"):
-                blender_version = request.config.cache.get(
+                _blender_version = request.config.cache.get(
                     "pytest-blender/blender-version",
                     None,
                 )
 
-            if blender_version is None:
-                blender_version = get_blender_version(blender_executable)
+            if _blender_version is None:
+                _blender_version = get_blender_version(blender_executable)
                 if hasattr(request.config, "cache"):
                     request.config.cache.set(
                         "pytest-blender/blender-version",
-                        blender_version,
+                        _blender_version,
                     )
-            return blender_version
+            return _blender_version
 
         @pytest.fixture
         def blender_python_version(self, request):
             """Get the version of the Blender's Python executable."""
-            blender_python_version = None
+            _blender_python_version = None
 
             if hasattr(request.config, "cache"):
-                blender_python_version = request.config.cache.get(
+                _blender_python_version = request.config.cache.get(
                     "pytest-blender/blender-python-version",
                     None,
                 )
 
-            if blender_python_version is None:
+            if _blender_python_version is None:
                 blender_python_executable = self._blender_python_executable(request)
                 blender_python_version_stdout = subprocess.check_output(
                     [
@@ -182,7 +182,7 @@ def main():
                         "--version",
                     ]
                 )
-                blender_python_version = (
+                _blender_python_version = (
                     blender_python_version_stdout.decode("utf-8")
                     .splitlines()[0]
                     .split(" ")[1]
@@ -190,9 +190,9 @@ def main():
                 if hasattr(request.config, "cache"):
                     request.config.cache.set(
                         "pytest-blender/blender-python-version",
-                        blender_python_version,
+                        _blender_python_version,
                     )
-            return blender_python_version
+            return _blender_python_version
 
         @pytest.fixture(scope="session")
         def install_addons_from_dir(self, request):
