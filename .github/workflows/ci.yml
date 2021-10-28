@@ -29,7 +29,7 @@ jobs:
           - '3.10'
     steps:
       - uses: actions/checkout@v2
-      - name: Set up Python v3.8
+      - name: Set up Python v${{ matrix.python-version }}
         uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
@@ -48,20 +48,19 @@ jobs:
         id: download-blender
         run: |
           python -m pip install --upgrade blender-downloader
-          BLENDER_EXECUTABLE_PATH=$(blender-downloader \
+          echo "$(blender-downloader \
           ${{ matrix.blender-version }} --extract --remove-compressed \
-          --print-blender-executable --quiet)
-          echo "$BLENDER_EXECUTABLE_PATH" > _blender-executable-path.txt
+          --print-blender-executable --quiet)" > _blender-executable-path.txt
       - name: Install dependencies
         id: install-dependencies
         run: |
           python -m pip install .[test]
-          BLENDER_EXECUTABLE_PATH="$(cat _blender-executable-path.txt | tr -d '\n')"
-          PYTHON_BLENDER_EXECUTABLE="$(pytest-blender --blender-executable $BLENDER_EXECUTABLE_PATH)"
-          $PYTHON_BLENDER_EXECUTABLE -m ensurepip
+          blender_executable="$(< _blender-executable-path.txt tr -d '\n')"
+          python_blender_executable="$(pytest-blender --blender-executable $blender_executable)"
+          $python_blender_executable -m ensurepip
           pytest_version="$(< setup.cfg grep pytest== | head -n 1 | cut -d'=' -f3)"
-          $PYTHON_BLENDER_EXECUTABLE -m pip install pytest==$pytest_version
-          echo "::set-output name=blender-executable::$BLENDER_EXECUTABLE_PATH"
+          $python_blender_executable -m pip install pytest==$pytest_version
+          echo "::set-output name=blender-executable::$blender_executable"
       - name: Test with Blender Python executable (no cache)
         run: pytest -svv -p no:cacheprovider --blender-executable "${{ steps.install-dependencies.outputs.blender-executable }}" tests
       - name: Test with Blender Python executable

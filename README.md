@@ -234,19 +234,18 @@ jobs:
         id: download-blender
         run: |
           python -m pip install --upgrade blender-downloader
-          BLENDER_EXECUTABLE_PATH=$(blender-downloader \
+          echo "$(blender-downloader \
           ${{ matrix.blender-version }} --extract --remove-compressed \
-          --quiet --print-blender-executable)
-          echo "$BLENDER_EXECUTABLE_PATH" > _blender-executable-path.txt
+          --quiet --print-blender-executable)" > _blender-executable-path.txt
       - name: Install dependencies
         id: install-dependencies
         run: |
           python -m pip install .[test]
-          BLENDER_EXECUTABLE_PATH="$(cat _blender-executable-path.txt | tr -d '\n')"
-          PYTHON_BLENDER_EXECUTABLE="$(pytest-blender --blender-executable $BLENDER_EXECUTABLE_PATH)"
-          $PYTHON_BLENDER_EXECUTABLE -m ensurepip
-          $PYTHON_BLENDER_EXECUTABLE -m pip install pytest
-          echo "::set-output name=blender-executable::$BLENDER_EXECUTABLE_PATH"
+          blender_executable="$(< _blender-executable-path.txt tr -d '\n')"
+          python_blender_executable="$(pytest-blender --blender-executable $blender_executable)"
+          $python_blender_executable -m ensurepip
+          $python_blender_executable -m pip install pytest
+          echo "::set-output name=blender-executable::$blender_executable"
       - name: Test with pytest
         run: pytest -svv --blender-executable "${{ steps.install-dependencies.outputs.blender-executable }}" tests
 ```
