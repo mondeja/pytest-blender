@@ -3,7 +3,11 @@
 STDERR=/tmp/pytest-blender-integration-stderr.log
 
 testSigIntPropagation() {
-  python3 -m pytest -svv tests/integration/sigint.py &2> $STDERR &
+  _blender_executable_arg=""
+  if [ -n "$BLENDER_EXECUTABLE" ]; then
+    _blender_executable_arg="--blender-executable $BLENDER_EXECUTABLE"
+  fi;
+  python3 -m pytest -svv $_blender_executable_arg tests/integration/sigint.py &2> $STDERR &
 
   # wait some time to start the test suite execution
   sleep 3

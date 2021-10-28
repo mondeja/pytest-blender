@@ -30,7 +30,3 @@ if pytest_blender_active:
         sys.stdout.write("\n")
         with redirect_stdout(f):
             disable_addons(addon_module_names)
-
-
-else:
-    pytest_plugins = "pytester"
