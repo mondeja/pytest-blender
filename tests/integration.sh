@@ -1,13 +1,13 @@
 #!/usr/bin/env sh
 
-STDERR=/tmp/pytest-blender-integration-stderr.log
+STDOUT=/tmp/pytest-blender-integration-stdout.log
 
 testSigIntPropagation() {
   _blender_executable_arg=""
   if [ -n "$BLENDER_EXECUTABLE" ]; then
     _blender_executable_arg="--blender-executable $BLENDER_EXECUTABLE"
   fi;
-  python3 -m pytest -svv $_blender_executable_arg tests/integration/sigint.py &2> $STDERR &
+  python3 -m pytest -svv $_blender_executable_arg tests/integration/sigint.py > $STDOUT &
 
   # wait some time to start the test suite execution
   sleep 3
@@ -17,7 +17,7 @@ testSigIntPropagation() {
   kill -s 2 $pid
   sleep 1
 
-  printf "HOLA " && cat "$STDERR"
+  printf "HOLA " && cat "$STDOUT"
 }
 
 prepare() {
