@@ -139,8 +139,9 @@ the currently running session.
 
 <a name="install_addons_from_dir" href="#install_addons_from_dir">#</a>
 <b>install_addons_from_dir</b>(<i>addons_dir</i>,
-<i>addon_module_names=None</i>, <i>save_userpref=True</i>,
-<i>default_set=True</i>, <i>persistent=True</i>, <i>\*\*kwargs</i>) ⇒ `list`
+<i>addon_module_names=None</i>, <i>recursive=False</i>,
+<i>save_userpref=True</i>, <i>default_set=True</i>, <i>persistent=True</i>,
+<i>\*\*kwargs</i>) ⇒ `list`
 
 Function that installs and enables a set of addons whose modules are located in
 a directory. This function is designed to be executed before the pytest session
@@ -162,8 +163,11 @@ def _register_addons(request, install_addons_from_dir, disable_addons):
 - **addons_dir** (str) Directory in which are located the modules of the
  addons.
 - **addon_module_names** (list) Name of the addons modules. If not defined
- (default) all the python modules located in `addons_dir` directory whose names
- do not start with `__` will be considered addons.
+ (default) these will be discovered searching for addons in `addons_dir`
+ directory. By default the discovering is not recursive through subdirectories,
+ but you can enable it using the `recursive` argument.
+- **recursive** (bool) If `addon_module_names` is not defined, the discovering
+ of adddons inside `addons_dir` is done recursively through subdirectories.
 - **save_userpref** (bool) Save user preferences after installation.
 - **default_set** (bool) Set the user-preference calling `addon_utils.enable`.
 - **persistent** (bool) Ensure the addon is enabled for the entire session
