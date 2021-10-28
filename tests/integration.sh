@@ -14,8 +14,7 @@ _testSigIntPropagation() {
     kill -s $1 $pid
     sleep 1
 
-    # due to the current Bash process has not the same STDIN of sys.stdin in plugin,
-    # we must send here two SIGINTs to make this test work
+    # SIGINT needs two signals
     if [ "$1" -eq 2 ]; then
       kill -s 2 $pid
       sleep 1
