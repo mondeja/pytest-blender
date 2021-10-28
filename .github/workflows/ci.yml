@@ -67,6 +67,8 @@ jobs:
         run: pytest -svv --blender-executable "${{ steps.install-dependencies.outputs.blender-executable }}" tests
       - name: Test with local Python executable
         run: BLENDER_EXECUTABLE="${{ steps.install-dependencies.outputs.blender-executable }}" pytest -svv -p no:pytest-blender tests
+      - name: Integration tests
+        run: sh tests/integration.sh
 
   build-sdist:
     if: startsWith(github.ref, 'refs/tags/')

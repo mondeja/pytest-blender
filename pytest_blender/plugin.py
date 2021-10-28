@@ -2,6 +2,7 @@
 
 import io
 import os
+import signal
 import subprocess
 import sys
 
@@ -69,6 +70,7 @@ def pytest_configure(config):
     if not blender_executable:
         pytest.exit("'blender' executable not found.", returncode=1)
 
+    # process subprocess arguments
     pytest_opts, blender_opts, python_opts = args_groups
 
     # run pytest using blender
@@ -96,6 +98,12 @@ def pytest_configure(config):
         ]
     )
     proc = subprocess.Popen(args, stdout=sys.stdout, stderr=sys.stderr)
+
+    def on_sigint(signum, frame):
+        proc.send_signal(signal.SIGINT)
+
+    signal.signal(signal.SIGINT, on_sigint)
+
     proc.communicate()
 
     # hide "Exit:" message shown by pytest on exit
