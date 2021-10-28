@@ -208,6 +208,7 @@ def main():
             def _install_addons_from_dir(
                 addons_dir,
                 addon_module_names=None,
+                recursive=False,
                 save_userpref=True,
                 default_set=True,
                 persistent=True,
@@ -217,23 +218,27 @@ def main():
                 import bpy  # noqa F401
 
                 if addon_module_names is None:
-                    addon_module_names = [
-                        fname.rstrip(".py")
-                        for fname in os.listdir(addons_dir)
-                        if not fname.startswith("__")
-                    ]
+                    addon_module_names = bpy.path.module_names(
+                        addons_dir, recursive=recursive
+                    )
                     if not addon_module_names:
                         raise ValueError(
                             f"Any addons found in '{addons_dir}' directory."
                         )
                 elif not addon_module_names:
                     raise ValueError("You need to pass at least one addon to install.")
+                else:
+                    _addon_module_names = []
+                    for addon_module_name in addon_module_names:
+                        modname = addon_module_name.rstrip(".py")
+                        addon_filepath = os.path.join(addons_dir, f"{modname}.py")
+                        _addon_module_names.append((modname, addon_filepath))
+                    addon_module_names = _addon_module_names
 
-                for addon_module_name in addon_module_names:
-                    addon_filepath = os.path.join(
-                        addons_dir, f"{addon_module_name.rstrip('.py')}.py"
+                for addon_module_name, addon_module_path in addon_module_names:
+                    bpy.ops.preferences.addon_install(
+                        filepath=addon_module_path, **kwargs
                     )
-                    bpy.ops.preferences.addon_install(filepath=addon_filepath, **kwargs)
                     addon_utils.enable(
                         addon_module_name,
                         default_set=default_set,
@@ -242,7 +247,7 @@ def main():
                 if save_userpref:
                     bpy.ops.wm.save_userpref()
 
-                return addon_module_names
+                return [modname for modname, _ in addon_module_names]
 
             return _install_addons_from_dir
 

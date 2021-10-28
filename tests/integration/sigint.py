@@ -1,14 +1,10 @@
 import os
 import sys
-import tempfile
 import time
 
 
 def test_sleep():
-    pidfile = os.path.join(
-        tempfile.gettempdir(), "pytest-blender-integration-sigint.pid"
-    )
-    with open(pidfile, "w") as f:
+    with open(os.environ["SIGINT_PIDFILE"], "w") as f:
         f.write(str(os.getpid()))
 
     sys.stdout.write("DEBUG: BEFORE SLEEP\n")
