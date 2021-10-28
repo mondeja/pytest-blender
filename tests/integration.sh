@@ -14,7 +14,7 @@ _testSigIntPropagation() {
       $_blender_executable_arg \
       tests/integration/sigint.py &
     # wait some time to start the test suite execution
-    sleep 5
+    sleep 3
 
     # send sighup
     pid="$(cat /tmp/pytest-blender-integration-sigint.pid)"
