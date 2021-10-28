@@ -97,15 +97,20 @@ def pytest_configure(config):
             *pytest_opts,  # propagate Pytest command line arguments
         ]
     )
-    proc = subprocess.Popen(args, stdout=sys.stdout, stderr=sys.stderr)
+    proc = subprocess.Popen(args, stdout=sys.stdout, stderr=sys.stderr, stdin=sys.stdin)
+
+    def handled_exit():
+        # hide "Exit:" message shown by pytest on exit
+        sys.stderr = io.StringIO()
+        pytest.exit("", returncode=proc.returncode)
 
     def on_sigint(signum, frame):
-        proc.send_signal(signal.SIGINT)
+        proc.send_signal(signum)
+        handled_exit()
 
     signal.signal(signal.SIGINT, on_sigint)
-
+    signal.signal(signal.SIGHUP, on_sigint)
+    signal.signal(signal.SIGTERM, on_sigint)
     proc.communicate()
 
-    # hide "Exit:" message shown by pytest on exit
-    sys.stderr = io.StringIO()
-    pytest.exit("", returncode=proc.returncode)
+    handled_exit()
