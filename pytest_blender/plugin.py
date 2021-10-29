@@ -97,7 +97,7 @@ def pytest_configure(config):
             *pytest_opts,  # propagate Pytest command line arguments
         ]
     )
-    proc = subprocess.Popen(args, stdout=sys.stdout, stderr=sys.stderr, stdin=sys.stdin)
+    proc = subprocess.Popen(args, stdout=sys.stdout, stderr=sys.stderr)
 
     def handled_exit():
         # hide "Exit:" message shown by pytest on exit
