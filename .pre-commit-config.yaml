@@ -1,41 +1,41 @@
 repos:
   - repo: https://github.com/asottile/pyupgrade
-    rev: v2.19.4
+    rev: v2.31.0
     hooks:
       - id: pyupgrade
         args:
           - --py36-plus
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.0.1
+    rev: v4.1.0
     hooks:
       - id: end-of-file-fixer
         name: end-of-file-fixer
   - repo: https://github.com/asottile/setup-cfg-fmt
-    rev: v1.18.0
+    rev: v1.20.0
     hooks:
       - id: setup-cfg-fmt
   - repo: https://github.com/psf/black
-    rev: 21.6b0
+    rev: 21.12b0
     hooks:
       - id: black
         language_version: python3
         files: \.py$
   - repo: https://github.com/PyCQA/flake8
-    rev: 3.9.2
+    rev: 4.0.1
     hooks:
       - id: flake8
         additional_dependencies:
           - flake8-print
           - flake8-implicit-str-concat
   - repo: https://github.com/PyCQA/isort
-    rev: 5.9.1
+    rev: 5.10.1
     hooks:
       - id: isort
         args:
           - --filter-files
         files: \.py$
   - repo: https://github.com/adrienverge/yamllint
-    rev: v1.26.1
+    rev: v1.26.3
     hooks:
       - id: yamllint
         files: .+\.(yml|yaml)
@@ -43,7 +43,7 @@ repos:
           - -c
           - .yamllint
   - repo: https://github.com/mondeja/repo-stream
-    rev: v1.1.0
+    rev: v1.3.1
     hooks:
       - id: repo-stream
         args:
@@ -55,6 +55,6 @@ repos:
       - id: dev-extras-required
       - id: root-editorconfig-required
   - repo: https://github.com/editorconfig-checker/editorconfig-checker.python
-    rev: 2.3.5
+    rev: 2.4.0
     hooks:
       - id: editorconfig-checker
