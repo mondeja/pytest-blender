@@ -60,7 +60,7 @@ PASSED
 =========================== 1 passed in 0.01s ==================================
 ```
 
-Just can specify a custom blender executable path using `--blender-executable`
+You can specify a custom blender executable path using `--blender-executable`
 option:
 
 ```bash
@@ -167,7 +167,7 @@ def _register_addons(request, install_addons_from_dir, disable_addons):
  directory. By default the discovering is not recursive through subdirectories,
  but you can enable it using the `recursive` argument.
 - **recursive** (bool) If `addon_module_names` is not defined, the discovering
- of adddons inside `addons_dir` is done recursively through subdirectories.
+ of addons inside `addons_dir` is done recursively through subdirectories.
 - **save_userpref** (bool) Save user preferences after installation.
 - **default_set** (bool) Set the user-preference calling `addon_utils.enable`.
 - **persistent** (bool) Ensure the addon is enabled for the entire session
