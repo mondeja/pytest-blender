@@ -1,6 +1,7 @@
 """pytest-blender plugin"""
 
 import io
+import logging
 import os
 import signal
 import subprocess
@@ -9,6 +10,9 @@ import sys
 import pytest
 
 from pytest_blender.utils import which_blender_by_os
+
+
+logger = logging.getLogger("pytest_blender")
 
 
 def pytest_addoption(parser):
@@ -74,10 +78,7 @@ def pytest_configure(config):
     pytest_opts, blender_opts, python_opts = args_groups
 
     # run pytest using blender
-    args = [
-        blender_executable,
-        "-b",
-    ]
+    args = [blender_executable, "-b"]
 
     # template to open
     _add_template_arg(config, args)
@@ -97,12 +98,13 @@ def pytest_configure(config):
             *pytest_opts,  # propagate Pytest command line arguments
         ]
     )
+    logger.debug(f"Running blender from pytest-blender. CMD: {args}")
     proc = subprocess.Popen(args, stdout=sys.stdout, stderr=sys.stderr)
 
     def handled_exit():
         # hide "Exit:" message shown by pytest on exit
         sys.stderr = io.StringIO()
-        pytest.exit("", returncode=proc.returncode)
+        pytest.exit(" ", returncode=proc.returncode)
 
     def on_sigint(signum, frame):
         proc.send_signal(signum)

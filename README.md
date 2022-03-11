@@ -110,6 +110,19 @@ You can use the `--blender-template` argument to pass a custom startup file:
 pytest -svv --blender-template ~/.config/blender/2.93/config/startup.blend
 ```
 
+#### Enable logging
+
+Sometimes is useful to print debugging messages from `pytest_blender`.
+You can enable logging in your `conftest.py` file by the next way:
+
+```python
+import logging
+
+pytest_blender_logger = logging.getLogger("pytest_blender")
+pytest_blender_logger.setLevel(logging.DEBUG)
+pytest_blender_logger.addHandler(logging.StreamHandler())
+```
+
 ### Reference
 
 #### Fixtures
@@ -254,6 +267,10 @@ jobs:
         run: pytest -svv --blender-executable "${{ steps.install-dependencies.outputs.blender-executable }}" tests
 ```
 
+### Versions compatibility
+
+- Latest version that officially supports Python3.6 is [v1.2.1]
+
 
 [pypi-link]: https://pypi.org/project/pytest-blender
 [pypi-version-badge-link]: https://img.shields.io/pypi/v/pytest-blender?logo=pypi&logoColor=white
@@ -265,3 +282,4 @@ jobs:
 [pypi-downloads-image]: https://img.shields.io/pypi/dm/pytest-blender?logo=blender&logoColor=white
 [pypi-downloads-link]: https://pypistats.org/packages/pytest-blender
 [blender-downloader-link]: https://github.com/mondeja/blender-downloader
+[v1.2.1]: https://github.com/mondeja/pytest-blender/releases/tag/v1.2.1
