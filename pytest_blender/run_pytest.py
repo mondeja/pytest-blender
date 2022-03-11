@@ -7,16 +7,12 @@ builtin Python intepreter shouldn't be mandatory, so avoid
 ``from pytest_blender...`` imports in this module.
 """
 
-import logging
 import os
 import shlex
 import subprocess
 import sys
 
 import pytest
-
-
-logger = logging.getLogger("pytest_blender")
 
 
 def _join(value):
@@ -295,9 +291,4 @@ def main():
 
 
 if __name__ == "__main__":
-    # TODO: this must be catched by the process that runs
-    #       pytest inside blender and reported to the other
-    #       process
-    logger.debug(f"Executing pytest from pytest_blender. CMD: {sys.argv}")
-
     sys.exit(main())
