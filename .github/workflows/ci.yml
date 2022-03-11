@@ -19,14 +19,20 @@ jobs:
         platform:
           - ubuntu-latest
           - macos-latest
-        blender-version:
-          - '2.93.5'
-          - '2.92.0'
-          - '2.91.2'
-          - '2.90.1'
-        python-version:
-          - 3.7
-          - '3.10'
+        pytest-version:
+          - '7.0.1'
+          - '6.2.5'
+        include:
+          - python-version: '3.7'
+            blender-version: '2.90.1'
+          - python-version: '3.7'
+            blender-version: '2.90.1'
+          - python-version: '3.8'
+            blender-version: '2.91.2'
+          - python-version: '3.9'
+            blender-version: '2.92.0'
+          - python-version: '3.10'
+            blender-version: '2.93.5'
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python v${{ matrix.python-version }}
@@ -54,12 +60,11 @@ jobs:
       - name: Install dependencies
         id: install-dependencies
         run: |
-          python -m pip install .[test]
+          python -m pip install .[test] pytest==${{ matrix.pytest-version }}
           blender_executable="$(< _blender-executable-path.txt tr -d '\n')"
           python_blender_executable="$(pytest-blender --blender-executable $blender_executable)"
           $python_blender_executable -m ensurepip
-          pytest_version="$(< setup.cfg grep pytest== | head -n 1 | cut -d'=' -f3)"
-          $python_blender_executable -m pip install pytest==$pytest_version
+          $python_blender_executable -m pip install pytest==${{ matrix.pytest-version }}
           echo "::set-output name=blender-executable::$blender_executable"
       - name: Test with Blender Python executable (no cache)
         run: pytest -svv -p no:cacheprovider --blender-executable "${{ steps.install-dependencies.outputs.blender-executable }}" tests

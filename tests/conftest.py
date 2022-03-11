@@ -1,12 +1,17 @@
 """pytest-blender tests configuration."""
 
 import io
+import logging
 import os
 import sys
 from contextlib import redirect_stdout
 
 import pytest
 
+
+pytest_blender_logger = logging.getLogger("pytest_blender")
+pytest_blender_logger.setLevel(logging.DEBUG)
+pytest_blender_logger.addHandler(logging.StreamHandler())
 
 try:
     from pytest_blender.test import pytest_blender_active
