@@ -25,7 +25,7 @@ jobs:
           - '2.91.2'
           - '2.90.1'
         python-version:
-          - 3.6
+          - 3.7
           - '3.10'
     steps:
       - uses: actions/checkout@v2
