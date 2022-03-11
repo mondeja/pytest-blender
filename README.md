@@ -267,6 +267,10 @@ jobs:
         run: pytest -svv --blender-executable "${{ steps.install-dependencies.outputs.blender-executable }}" tests
 ```
 
+### Versions compatibility
+
+- Latest version that officially supports Python3.6 is [v1.2.1]
+
 
 [pypi-link]: https://pypi.org/project/pytest-blender
 [pypi-version-badge-link]: https://img.shields.io/pypi/v/pytest-blender?logo=pypi&logoColor=white
@@ -278,3 +282,4 @@ jobs:
 [pypi-downloads-image]: https://img.shields.io/pypi/dm/pytest-blender?logo=blender&logoColor=white
 [pypi-downloads-link]: https://pypistats.org/packages/pytest-blender
 [blender-downloader-link]: https://github.com/mondeja/blender-downloader
+[v1.2.1]: https://github.com/mondeja/pytest-blender/releases/tag/v1.2.1
