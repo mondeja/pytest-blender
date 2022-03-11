@@ -102,7 +102,10 @@ def pytest_configure(config):
     def handled_exit():
         # hide "Exit:" message shown by pytest on exit
         sys.stderr = io.StringIO()
-        pytest.exit("", returncode=proc.returncode)
+        if pytest.__version__.startswith('7'):
+            pytest.exit("Finish", returncode=proc.returncode)
+        else:
+            pytest.exit("", returncode=proc.returncode)
 
     def on_sigint(signum, frame):
         proc.send_signal(signum)
