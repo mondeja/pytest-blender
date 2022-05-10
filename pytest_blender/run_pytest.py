@@ -230,9 +230,14 @@ def main():
                 else:
                     _addon_module_names = []
                     for addon_module_name in addon_module_names:
-                        modname = addon_module_name.rstrip(".py").rstrip(".zip")
-                        addon_filepath = os.path.join(addons_dir, addon_module_name)
-                        _addon_module_names.append((modname, addon_filepath))
+                        if isinstance(addon_module_name, tuple):
+                            addon_name = addon_module_name[0]
+                            addon_filepath = addon_module_name[1]
+                            _addon_module_names.append((addon_name, addon_filepath))
+                        else:
+                            modname = addon_module_name.rstrip(".py").rstrip(".zip")
+                            addon_filepath = os.path.join(addons_dir, addon_module_name)
+                            _addon_module_names.append((modname, addon_filepath))
                     addon_module_names = _addon_module_names
 
                 for addon_module_name, addon_module_path in addon_module_names:
