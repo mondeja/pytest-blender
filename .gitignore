@@ -7,3 +7,4 @@ __pycache__
 blender-*
 *.blend
 shunit2
+.DS_Store
