@@ -172,7 +172,7 @@ end with `.py` or `.zip` files for packages with multiple modules.
 
 This function is designed to be executed before the pytest session
 to install the addons that you want to test, using the others fixtures
-[`disable_addons`](#disable_addons) o [`uninstall_addons`](#uninstall_addons)
+[`disable_addons`](#disable_addons) or [`uninstall_addons`](#uninstall_addons)
 to disable or remove them after the execution of the test suite:
 
 ```python
@@ -215,7 +215,7 @@ files there, allowing you to enable it manually from the preferences.
  [`bpy.ops.preferences.addon_install`].
 
 Returns the addon module names as a list, ready to be passed to
-[`disable_addons`](#disable_addons) function.
+[`disable_addons`](#disable_addons) or [`uninstall_addons`](#uninstall_addons).
 
 <a name="disable_addons" href="#disable_addons">#</a>
 <b>disable_addons</b>(<i>addon_module_names</i>, <i>save_userpref=True</i>,
