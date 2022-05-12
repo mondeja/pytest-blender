@@ -150,17 +150,30 @@ currently running session.
 Returns the version of the Python executable builtin in the Blender release of
 the currently running session.
 
+<a name="blender_addons_dir" href="#blender_addons_dir">#</a>
+<b>blender_addons_dir</b> ⇒ `str`
+
+Returns the `scripts/addons` directory of Blender (see
+[Blender Directory Layout), the directory in which by default are located
+the addons installed using the
+[`install_addons_from_dir`](#install_addons_from_dir) fixture.
+
+It tries to get it using the `BLENDER_USER_SCRIPTS` environment variable, but
+if is not defined attempts to discover it from the `PATH`.
+
 <a name="install_addons_from_dir" href="#install_addons_from_dir">#</a>
 <b>install_addons_from_dir</b>(<i>addons_dir</i>,
-<i>addon_module_names=None</i>, <i>recursive=False</i>,
-<i>save_userpref=True</i>, <i>default_set=True</i>, <i>persistent=True</i>,
-<i>\*\*kwargs</i>) ⇒ `list`
+<i>addon_module_names=None</i>, <i>save_userpref=True</i>,
+<i>default_set=True</i>, <i>persistent=True</i>, <i>\*\*kwargs</i>) ⇒ `list`
 
-Function that installs and enables a set of addons whose modules are located in
-a directory. This function is designed to be executed before the pytest session
-to install the addons that you want to test, using the other fixture
-[`disable_addons`](https://github.com/mondeja/pytest-blender#disable_addons)
-to disable them after the execution of the test suite:
+Function that installs and enables a set of addons which are located in
+a directory. By "addons" Blender understands Python scripts whose file names
+end with `.py` or `.zip` files for packages with multiple modules.
+
+This function is designed to be executed before the pytest session
+to install the addons that you want to test, using the others fixtures
+[`disable_addons`](#disable_addons) o [`uninstall_addons`](#uninstall_addons)
+to disable or remove them after the execution of the test suite:
 
 ```python
 import os
@@ -168,29 +181,41 @@ import os
 import pytest
 
 @pytest.fixture(scope="session", autouse=True)
-def _register_addons(request, install_addons_from_dir, disable_addons):
+def register_addons(install_addons_from_dir, disable_addons):
     addon_module_names = install_addons_from_dir(os.path.abspath("src"))
     yield
     disable_addons(addon_module_names)
 ```
-- **addons_dir** (str) Directory in which are located the modules of the
- addons.
+
+```python
+import os
+
+import pytest
+
+@pytest.fixture(scope="session", autouse=True)
+def register_addons(install_addons_from_dir, uninstall_addons):
+    addon_module_names = install_addons_from_dir(os.path.abspath("src"))
+    yield
+    uninstall_addons(addon_module_names)
+```
+
+The difference between disabling addons and uninstalling them is that disabling
+removes the files from the Blender's addons directory but disabling keep the
+files there, allowing you to enable it manually from the preferences.
+
+- **addons_dir** (str) Directory in which are located the files of the addons.
 - **addon_module_names** (list) Name of the addons modules. If not defined
  (default) these will be discovered searching for addons in `addons_dir`
- directory. By default the discovering is not recursive through subdirectories,
- but you can enable it using the `recursive` argument.
-- **recursive** (bool) If `addon_module_names` is not defined, the discovering
- of addons inside `addons_dir` is done recursively through subdirectories.
+ directory.
 - **save_userpref** (bool) Save user preferences after installation.
 - **default_set** (bool) Set the user-preference calling `addon_utils.enable`.
 - **persistent** (bool) Ensure the addon is enabled for the entire session
  (after loading new files).
 - **\*\*kwargs** (dict) Subsecuent keyword arguments are passed to
- [`bpy.ops.preferences.addon_install`](https://docs.blender.org/api/current/bpy.ops.preferences.html#bpy.ops.preferences.addon_install).
+ [`bpy.ops.preferences.addon_install`].
 
 Returns the addon module names as a list, ready to be passed to
-[`disable_addons`](https://github.com/mondeja/pytest-blender#disable_addons)
-function.
+[`disable_addons`](#disable_addons) function.
 
 <a name="disable_addons" href="#disable_addons">#</a>
 <b>disable_addons</b>(<i>addon_module_names</i>, <i>save_userpref=True</i>,
@@ -198,21 +223,31 @@ function.
 
 Function that disables a set of addons by module name. Is designed to disable
 your addons after a pytest suite execution (check 
-[`install_addons_from_dir`](https://github.com/mondeja/pytest-blender#install_addons_from_dir)
-for an example).
+[`install_addons_from_dir`](#install_addons_from_dir) for an example).
 
-- **addon_module_names** (list) Name of the addons modules (without the `.py`
- extension).
+- **addon_module_names** (list) Name of the addons modules as is returned by
+ [`install_addons_from_dir`](#install_addons_from_dir).
 - **save_userpref** (bool) Save user preferences after installation.
 - **default_set** (bool) Set the user-preference calling `addon_utils.disable`.
 - **\*\*kwargs** (dict) Subsecuent keyword arguments are passed to 
  `addon_utils.disable`.
 
+<a name="uninstall_addons" href="#uninstall_addons">#</a>
+<b>uninstall_addons</b>(<i>addon_module_names</i>)
+
+Function that uninstall a set of addons by module name. Is designed to
+remove your addons from the Blender's addons directory after a pytest suite
+execution (check [`install_addons_from_dir`](#install_addons_from_dir)
+for an example).
+
+- **addon_module_names** (list) Name of the addons modules as is returned by
+ [`install_addons_from_dir`](#install_addons_from_dir).
+
 ### CI integration
 
-You can use [blender-downloader][blender-downloader-link] to download multiple
-versions of Blender in your CI and test against them. There is an example for
-Github Actions in the CI configuration of this repository:
+You can use [blender-downloader] to download multiple
+versions of Blender in your CI and test against them. There is an example
+for Github Actions in the CI configuration of this repository:
 
 ```yaml
 jobs:
@@ -225,21 +260,19 @@ jobs:
           - ubuntu-latest
           - macos-latest
         blender-version:
-          - '2.90.1'
+          - '3.1.2'
+          - '2.93.9'
           - '2.83.9'
-          - '2.82'
-          - '2.81'
-          - '2.80'
     steps:
-      - uses: actions/checkout@v2
-      - name: Set up Python v3.8
-        uses: actions/setup-python@v2
+      - uses: actions/checkout@v3
+      - name: Set up Python v3.9
+        uses: actions/setup-python@v3
         with:
-          python-version: 3.8
+          python-version: 3.9
       - name: Upgrade PIP
         run: python -m pip install --upgrade pip
       - name: Cache Blender ${{ matrix.blender-version }}
-        uses: actions/cache@v2.1.5
+        uses: actions/cache@v3
         id: cache-blender
         with:
           path: |
@@ -269,7 +302,7 @@ jobs:
 
 ### Versions compatibility
 
-- Latest version that officially supports Python3.6 is [v1.2.1]
+- Latest version that officially supports Python3.6 is [v1.2.1].
 
 
 [pypi-link]: https://pypi.org/project/pytest-blender
@@ -281,5 +314,7 @@ jobs:
 [tests-link]: https://github.com/mondeja/pytest-blender/actions?query=workflow%3ACI
 [pypi-downloads-image]: https://img.shields.io/pypi/dm/pytest-blender?logo=blender&logoColor=white
 [pypi-downloads-link]: https://pypistats.org/packages/pytest-blender
-[blender-downloader-link]: https://github.com/mondeja/blender-downloader
+[blender-downloader]: https://github.com/mondeja/blender-downloader
 [v1.2.1]: https://github.com/mondeja/pytest-blender/releases/tag/v1.2.1
+[Blender Directory Layout]: https://docs.blender.org/manual/en/latest/advanced/blender_directory_layout.html
+[`bpy.ops.preferences.addon_install`]: https://docs.blender.org/api/current/bpy.ops.preferences.html#bpy.ops.preferences.addon_install

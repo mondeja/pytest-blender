@@ -17,7 +17,7 @@ except ImportError:
 )
 @pytest.mark.skipif(
     not os.environ.get("BLENDER_EXECUTABLE"),
-    reason="Environment variable 'BLENDER_EXECUTABLE' must be set.",
+    reason="The environment variable BLENDER_EXECUTABLE must be set to run this test",
 )
 def test_pytest_blender_cli():
     proc = subprocess.run(

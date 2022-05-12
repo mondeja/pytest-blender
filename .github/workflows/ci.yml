@@ -16,28 +16,46 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform:
-          - ubuntu-latest
-          - macos-latest
-        pytest-version:
-          - '7.0.1'
-          - '6.2.5'
-        blender-version:
-          - '2.92.0'
-          - '2.93.5'
-        python-version:
-          - '3.9'
-          - '3.10'
+        include:
+          # Test against Pytest v7
+          - platform: ubuntu-latest
+            pytest-version: '7.0.1'
+            blender-version: '3.1.2'
+            python-version: '3.10'
+          # Test against Pytest v6
+          - platform: ubuntu-latest
+            pytest-version: '6.2.5'
+            blender-version: '2.93.9'
+            python-version: '3.9'
+          # Test in MacOS (Py310)
+          - platform: macos-latest
+            pytest-version: '7.0.1'
+            blender-version: '3.1.2'
+            python-version: '3.10'
+          # Test in MacOS (Py39)
+          - platform: macos-latest
+            pytest-version: '6.2.5'
+            blender-version: '2.93.9'
+            python-version: '3.9'
+          # Test previous Blender versions
+          - platform: ubuntu-latest
+            pytest-version: '7.0.1'
+            blender-version: '2.83.9'
+            python-version: '3.8'
+          - platform: ubuntu-latest
+            pytest-version: '7.0.1'
+            blender-version: '2.82'
+            python-version: '3.7'
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Set up Python v${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v3
         with:
           python-version: ${{ matrix.python-version }}
       - name: Upgrade PIP
         run: python -m pip install --upgrade pip
       - name: Cache Blender ${{ matrix.blender-version }}
-        uses: actions/cache@v2.1.6
+        uses: actions/cache@v3
         id: cache-blender
         with:
           path: |
@@ -80,7 +98,7 @@ jobs:
       - uses: actions/setup-python@v2
         name: Install Python v3.8
         with:
-          python-version: 3.8
+          python-version: 3.9
       - name: Build sdist
         run: python setup.py sdist
       - uses: actions/upload-artifact@v2
@@ -97,7 +115,7 @@ jobs:
       - uses: actions/setup-python@v2
         name: Install Python v3.8
         with:
-          python-version: 3.8
+          python-version: 3.9
       - name: Install wheel
         run: python -m pip install --upgrade wheel
       - name: Build wheel

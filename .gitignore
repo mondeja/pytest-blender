@@ -7,3 +7,6 @@ __pycache__
 blender-*
 *.blend
 shunit2
+*.zip
+.DS_Store
+.vscode

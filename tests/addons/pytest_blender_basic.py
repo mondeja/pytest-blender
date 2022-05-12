@@ -7,7 +7,7 @@ bl_info = {
 }
 
 
-class PytestBlenderObjectMoveX(bpy.types.Operator):
+class PytestBlenderBasicObjectMoveX(bpy.types.Operator):
     """My Object Moving Script"""
 
     bl_idname = "object.move_x"
@@ -23,11 +23,11 @@ class PytestBlenderObjectMoveX(bpy.types.Operator):
 
 
 def register():
-    bpy.utils.register_class(PytestBlenderObjectMoveX)
+    bpy.utils.register_class(PytestBlenderBasicObjectMoveX)
 
 
 def unregister():
-    bpy.utils.unregister_class(PytestBlenderObjectMoveX)
+    bpy.utils.unregister_class(PytestBlenderBasicObjectMoveX)
 
 
 if __name__ == "__main__":
