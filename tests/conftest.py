@@ -1,11 +1,9 @@
 """pytest-blender tests configuration."""
 
-import io
 import logging
 import os
 import sys
 import zipfile
-from contextlib import redirect_stdout
 
 import pytest
 
@@ -56,10 +54,7 @@ if pytest_blender_active:
         zipify_addon_dir(addon_to_zip_dirpath, ADDONS_DIR)
 
         # register addons
-        stdout = io.StringIO()
-        with redirect_stdout(stdout):
-            addon_module_names = install_addons_from_dir(ADDONS_DIR)
+        addon_module_names = install_addons_from_dir(ADDONS_DIR, quiet=True)
         yield
         sys.stdout.write("\n")
-        with redirect_stdout(stdout):
-            uninstall_addons(addon_module_names)
+        uninstall_addons(addon_module_names, quiet=True)
