@@ -225,7 +225,8 @@ Function that disables a set of addons by module name. Is designed to disable
 your addons after a pytest suite execution (check 
 [`install_addons_from_dir`](#install_addons_from_dir) for an example).
 
-- **addon_module_names** (list) Name of the addons modules as is returned by [`install_addons_from_dir`](#install_addons_from_dir).
+- **addon_module_names** (list) Name of the addons modules as is returned by
+ [`install_addons_from_dir`](#install_addons_from_dir).
 - **save_userpref** (bool) Save user preferences after installation.
 - **default_set** (bool) Set the user-preference calling `addon_utils.disable`.
 - **\*\*kwargs** (dict) Subsecuent keyword arguments are passed to 
@@ -234,18 +235,19 @@ your addons after a pytest suite execution (check
 <a name="uninstall_addons" href="#uninstall_addons">#</a>
 <b>uninstall_addons</b>(<i>addon_module_names</i>)
 
-Function that uninstall a set of addons by module name. Is designed to remove
-your addons from the Blender's addons directory after a pytest suite
-execution (check 
-[`install_addons_from_dir`](#install_addons_from_dir) for an example).
+Function that uninstall a set of addons by module name. Is designed to
+remove your addons from the Blender's addons directory after a pytest suite
+execution (check [`install_addons_from_dir`](#install_addons_from_dir)
+for an example).
 
-- **addon_module_names** (list) Name of the addons modules as is returned by [`install_addons_from_dir`](#install_addons_from_dir).
+- **addon_module_names** (list) Name of the addons modules as is returned by
+ [`install_addons_from_dir`](#install_addons_from_dir).
 
 ### CI integration
 
 You can use [blender-downloader] to download multiple
-versions of Blender in your CI and test against them. There is an example for
-Github Actions in the CI configuration of this repository:
+versions of Blender in your CI and test against them. There is an example
+for Github Actions in the CI configuration of this repository:
 
 ```yaml
 jobs:
@@ -258,21 +260,19 @@ jobs:
           - ubuntu-latest
           - macos-latest
         blender-version:
-          - '2.90.1'
+          - '3.1.2'
+          - '2.93.9'
           - '2.83.9'
-          - '2.82'
-          - '2.81'
-          - '2.80'
     steps:
-      - uses: actions/checkout@v2
-      - name: Set up Python v3.8
-        uses: actions/setup-python@v2
+      - uses: actions/checkout@v3
+      - name: Set up Python v3.9
+        uses: actions/setup-python@v3
         with:
-          python-version: 3.8
+          python-version: 3.9
       - name: Upgrade PIP
         run: python -m pip install --upgrade pip
       - name: Cache Blender ${{ matrix.blender-version }}
-        uses: actions/cache@v2.1.5
+        uses: actions/cache@v3
         id: cache-blender
         with:
           path: |
