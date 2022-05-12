@@ -38,11 +38,11 @@ jobs:
             blender-version: '2.93.9'
             python-version: '3.9'
           # Test previous Blender versions
-          - platform: macos-latest
+          - platform: ubuntu-latest
             pytest-version: '7.0.1'
             blender-version: '2.83.9'
             python-version: '3.8'
-          - platform: macos-latest
+          - platform: ubuntu-latest
             pytest-version: '7.0.1'
             blender-version: '2.82'
             python-version: '3.7'
