@@ -7,6 +7,8 @@ builtin Python intepreter shouldn't be mandatory, so avoid
 ``from pytest_blender...`` imports in this module.
 """
 
+import contextlib
+import io
 import os
 import pprint
 import shlex
@@ -66,7 +68,7 @@ def get_blender_binary_path_python(blender_executable, blend_version=None):
             "--python-expr",
             python_expr,
         ],
-        stderr=subprocess.STDOUT,
+        stderr=subprocess.STDERR,
     )
 
     blender_python_path = None
@@ -123,21 +125,31 @@ def _disable_addons(
     addon_module_names,
     save_userpref=True,
     default_set=True,
+    quiet=False,
     **kwargs,
 ):
     """Disables a set of addons by module names."""
-    import addon_utils  # noqa F401
 
-    for addon_module_name in addon_module_names:
-        addon_utils.disable(
-            addon_module_name,
-            default_set=default_set,
-            **kwargs,
-        )
-    if save_userpref:
-        import bpy  # noqa F401
+    def _wrapper():
+        import addon_utils  # noqa F401
 
-        bpy.ops.wm.save_userpref()
+        for addon_module_name in addon_module_names:
+            addon_utils.disable(
+                addon_module_name,
+                default_set=default_set,
+                **kwargs,
+            )
+        if save_userpref:
+            import bpy  # noqa F401
+
+            bpy.ops.wm.save_userpref()
+
+    if quiet:
+        stdout = io.StringIO()
+        with contextlib.redirect_stdout(stdout):
+            _wrapper()
+    else:
+        _wrapper()
 
 
 def main():
@@ -279,55 +291,66 @@ def main():
                 save_userpref=True,
                 default_set=True,
                 persistent=True,
+                quiet=False,
                 **kwargs,
             ):
-                import addon_utils  # noqa F401
-                import bpy  # noqa F401
+                def _wrapper():
+                    import addon_utils  # noqa F401
+                    import bpy  # noqa F401
 
-                addons = []
-                for filename in os.listdir(addons_dir):
-                    if filename == "__init__.py":
-                        continue  # exclude '__init__.py' from root
+                    addons = []
+                    for filename in os.listdir(addons_dir):
+                        if filename == "__init__.py":
+                            continue  # exclude '__init__.py' from root
 
-                    if filename.endswith(".py"):
-                        addons.append(
-                            [
-                                removesuffix(filename, ".py"),
-                                os.path.join(addons_dir, filename),
-                            ]
+                        if filename.endswith(".py"):
+                            addons.append(
+                                [
+                                    removesuffix(filename, ".py"),
+                                    os.path.join(addons_dir, filename),
+                                ]
+                            )
+                        elif filename.endswith(".zip"):
+                            addons.append(
+                                [
+                                    removesuffix(filename, ".zip"),
+                                    os.path.join(addons_dir, filename),
+                                ]
+                            )
+                        # installation of packages is not supported by Blender if
+                        # they aren't zipped
+
+                    if addon_module_names:
+                        addons = list(
+                            filter(lambda a: a[0] in addon_module_names),
+                            addons,
                         )
-                    elif filename.endswith(".zip"):
-                        addons.append(
-                            [
-                                removesuffix(filename, ".zip"),
-                                os.path.join(addons_dir, filename),
-                            ]
+
+                    if not addons:
+                        raise ValueError(
+                            "You need to pass at least one addon to install."
                         )
-                    # installation of packages is not supported by Blender if
-                    # they aren't zipped
 
-                if addon_module_names:
-                    addons = list(
-                        filter(lambda a: a[0] in addon_module_names),
-                        addons,
-                    )
+                    for addon_module_name, addon_module_path in addons:
+                        bpy.ops.preferences.addon_install(
+                            filepath=addon_module_path, **kwargs
+                        )
+                        addon_utils.enable(
+                            addon_module_name,
+                            default_set=default_set,
+                            persistent=persistent,
+                        )
+                    if save_userpref:
+                        bpy.ops.wm.save_userpref()
 
-                if not addons:
-                    raise ValueError("You need to pass at least one addon to install.")
+                    return [modname for modname, _ in addons]
 
-                for addon_module_name, addon_module_path in addons:
-                    bpy.ops.preferences.addon_install(
-                        filepath=addon_module_path, **kwargs
-                    )
-                    addon_utils.enable(
-                        addon_module_name,
-                        default_set=default_set,
-                        persistent=persistent,
-                    )
-                if save_userpref:
-                    bpy.ops.wm.save_userpref()
-
-                return [modname for modname, _ in addons]
+                if quiet:
+                    stdout = io.StringIO()
+                    with contextlib.redirect_stdout(stdout):
+                        return _wrapper()
+                else:
+                    return _wrapper()
 
             return _install_addons_from_dir
 
@@ -351,8 +374,8 @@ def main():
                 Name of the addons modules or packages.
             """
 
-            def _uninstall_addons(addon_module_names):
-                _disable_addons(addon_module_names)
+            def _uninstall_addons(addon_module_names, quiet=False, **kwargs):
+                _disable_addons(addon_module_names, quiet=quiet, **kwargs)
                 addons_dir = get_addons_dir()
 
                 for modname in addon_module_names:

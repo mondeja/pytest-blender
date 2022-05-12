@@ -99,20 +99,20 @@ def pytest_configure(config):
         ]
     )
     logger.debug(f"Running blender from pytest-blender. CMD: {args}")
-    proc = subprocess.Popen(args, stdout=sys.stdout, stderr=sys.stderr)
+    with subprocess.Popen(args, stdout=sys.stdout, stderr=sys.stderr) as proc:
 
-    def handled_exit():
-        # hide "Exit:" message shown by pytest on exit
-        sys.stderr = io.StringIO()
-        pytest.exit(" ", returncode=proc.returncode)
+        def handled_exit():
+            # hide "Exit:" message shown by pytest on exit
+            sys.stderr = io.StringIO()
+            pytest.exit(" ", returncode=proc.returncode)
 
-    def on_sigint(signum, frame):
-        proc.send_signal(signum)
+        def on_sigint(signum, frame):
+            proc.send_signal(signum)
+            handled_exit()
+
+        signal.signal(signal.SIGINT, on_sigint)
+        signal.signal(signal.SIGHUP, on_sigint)
+        signal.signal(signal.SIGTERM, on_sigint)
+        proc.communicate()
+
         handled_exit()
-
-    signal.signal(signal.SIGINT, on_sigint)
-    signal.signal(signal.SIGHUP, on_sigint)
-    signal.signal(signal.SIGTERM, on_sigint)
-    proc.communicate()
-
-    handled_exit()

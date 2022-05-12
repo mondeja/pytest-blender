@@ -164,7 +164,8 @@ if is not defined attempts to discover it from the `PATH`.
 <a name="install_addons_from_dir" href="#install_addons_from_dir">#</a>
 <b>install_addons_from_dir</b>(<i>addons_dir</i>,
 <i>addon_module_names=None</i>, <i>save_userpref=True</i>,
-<i>default_set=True</i>, <i>persistent=True</i>, <i>\*\*kwargs</i>) ⇒ `list`
+<i>default_set=True</i>, <i>persistent=True</i>, <i>quiet=True</i>,
+<i>\*\*kwargs</i>) ⇒ `list`
 
 Function that installs and enables a set of addons which are located in
 a directory. By "addons" Blender understands Python scripts whose file names
@@ -211,6 +212,7 @@ files there, allowing you to enable it manually from the preferences.
 - **default_set** (bool) Set the user-preference calling `addon_utils.enable`.
 - **persistent** (bool) Ensure the addon is enabled for the entire session
  (after loading new files).
+ - **quiet** (bool) If enabled, don't show stdout produced installing addons.
 - **\*\*kwargs** (dict) Subsecuent keyword arguments are passed to
  [`bpy.ops.preferences.addon_install`].
 
@@ -219,7 +221,7 @@ Returns the addon module names as a list, ready to be passed to
 
 <a name="disable_addons" href="#disable_addons">#</a>
 <b>disable_addons</b>(<i>addon_module_names</i>, <i>save_userpref=True</i>,
-<i>default_set=True</i>, <i>\*\*kwargs</i>)
+<i>default_set=True</i>, <i>quiet=True</i>, <i>\*\*kwargs</i>)
 
 Function that disables a set of addons by module name. Is designed to disable
 your addons after a pytest suite execution (check 
@@ -229,11 +231,12 @@ your addons after a pytest suite execution (check
  [`install_addons_from_dir`](#install_addons_from_dir).
 - **save_userpref** (bool) Save user preferences after installation.
 - **default_set** (bool) Set the user-preference calling `addon_utils.disable`.
+- **quiet** (bool) If enabled, don't show stdout produced disabling addons.
 - **\*\*kwargs** (dict) Subsecuent keyword arguments are passed to 
  `addon_utils.disable`.
 
 <a name="uninstall_addons" href="#uninstall_addons">#</a>
-<b>uninstall_addons</b>(<i>addon_module_names</i>)
+<b>uninstall_addons</b>(<i>addon_module_names</i>, <i>quiet=True</i>)
 
 Function that uninstall a set of addons by module name. Is designed to
 remove your addons from the Blender's addons directory after a pytest suite
@@ -242,6 +245,7 @@ for an example).
 
 - **addon_module_names** (list) Name of the addons modules as is returned by
  [`install_addons_from_dir`](#install_addons_from_dir).
+- **quiet** (bool) If enabled, don't show stdout produced disabling addons.
 
 ### CI integration
 
