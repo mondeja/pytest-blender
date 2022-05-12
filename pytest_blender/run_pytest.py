@@ -68,7 +68,7 @@ def get_blender_binary_path_python(blender_executable, blend_version=None):
             "--python-expr",
             python_expr,
         ],
-        stderr=subprocess.STDERR,
+        stderr=subprocess.STDOUT,
     )
 
     blender_python_path = None
