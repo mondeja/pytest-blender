@@ -16,19 +16,36 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform:
-          - ubuntu-latest
-          - macos-latest
-        pytest-version:
-          - '7.0.1'
-          - '6.2.5'
-        blender-version:
-          - '2.83.9'
-          - '2.93.9'
-          - '3.1.2'
-        python-version:
-          - '3.9'
-          - '3.10'
+        include:
+          # Test against Pytest v7
+          - platform: ubuntu-latest
+            pytest-version: '7.0.1'
+            blender-version: '3.1.2'
+            python-version: '3.10'
+          # Test against Pytest v6
+          - platform: ubuntu-latest
+            pytest-version: '6.2.5'
+            blender-version: '2.93.9'
+            python-version: '3.9'
+          # Test in MacOS (Py310)
+          - platform: macos-latest
+            pytest-version: '7.0.1'
+            blender-version: '3.1.2'
+            python-version: '3.10'
+          # Test in MacOS (Py39)
+          - platform: macos-latest
+            pytest-version: '6.2.5'
+            blender-version: '2.93.9'
+            python-version: '3.9'
+          # Test previous Blender versions
+          - platform: macos-latest
+            pytest-version: '7.0.1'
+            blender-version: '2.83.9'
+            python-version: '3.8'
+          - platform: macos-latest
+            pytest-version: '7.0.1'
+            blender-version: '2.82'
+            python-version: '3.7'
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python v${{ matrix.python-version }}
