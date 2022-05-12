@@ -2,6 +2,7 @@
 
 import logging
 import os
+import sys
 import zipfile
 
 import pytest
@@ -47,7 +48,7 @@ except ImportError:
 if pytest_blender_active:
 
     @pytest.fixture(scope="session", autouse=True)
-    def register_addons_from_dir(install_addons_from_dir, disable_addons):
+    def register_addons_from_dir(install_addons_from_dir, uninstall_addons):
         # create zipped addon from data
         addon_to_zip_dirpath = os.path.join(DATA_DIR, "pytest_blender_zipped")
         zipify_addon_dir(addon_to_zip_dirpath, ADDONS_DIR)
@@ -55,4 +56,5 @@ if pytest_blender_active:
         # register addons
         addon_module_names = install_addons_from_dir(ADDONS_DIR, quiet=True)
         yield
-        disable_addons(addon_module_names, quiet=True)
+        sys.stdout.write("\n")
+        uninstall_addons(addon_module_names, quiet=True)
