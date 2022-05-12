@@ -8,11 +8,17 @@ builtin Python intepreter shouldn't be mandatory, so avoid
 """
 
 import os
+import pprint
 import shlex
+import shutil
 import subprocess
 import sys
 
 import pytest
+
+
+def removesuffix(value, suffix):
+    return value[: -len(suffix)]
 
 
 def _join(value):
@@ -84,6 +90,26 @@ def get_blender_version(blender_executable):
     """
     version_stdout = subprocess.check_output([blender_executable, "--version"])
     return version_stdout.decode("utf-8").splitlines()[0].split(" ")[1]
+
+
+def get_addons_dir():
+    response = None
+    expected_enddir = os.path.join("scripts", "addons").rstrip(os.sep)
+
+    # reversed because user's addons directory is added later to PATH
+    for path in reversed(sys.path):
+        if path.rstrip(os.sep).endswith(expected_enddir):
+            response = path
+            break
+
+    if response is None:
+        raise OSError(
+            "Failed to obtain Blender's addons directory from"
+            " PATH environment variable. Please, open a report in"
+            " https://github.com/mondeja/pytest-blender/issues/new"
+            f" including the next data:\n\n{pprint.pformat(sys.path)}"
+        )
+    return response
 
 
 def main():
@@ -198,17 +224,30 @@ def main():
             return response
 
         @pytest.fixture(scope="session")
-        def install_addons_from_dir(self, request):
-            """Install Blender's addons from directory.
+        def blender_addons_dir(self, request):
+            """Get the path to the directory where addons are installed.
 
-            Installs a set of Blender's addons into the current Blender's
-            session specifying the names of the addons to be installed.
-            """
+            See https://docs.blender.org/manual/en/latest/advanced/blender_directory_layout.html
+            """  # noqa E501
+            response = None
+
+            if hasattr(request.config, "cache"):
+                response = request.config.cache.get(
+                    "pytest-blender/addons_dir",
+                    None,
+                )
+
+            if response is None:
+                response = get_addons_dir()
+            return response
+
+        @pytest.fixture(scope="session")
+        def install_addons_from_dir(self, request):
+            """Install Blender addons located into a directory."""
 
             def _install_addons_from_dir(
                 addons_dir,
                 addon_module_names=None,
-                recursive=False,
                 save_userpref=True,
                 default_set=True,
                 persistent=True,
@@ -217,25 +256,38 @@ def main():
                 import addon_utils  # noqa F401
                 import bpy  # noqa F401
 
-                if addon_module_names is None:
-                    addon_module_names = bpy.path.module_names(
-                        addons_dir, recursive=recursive
-                    )
-                    if not addon_module_names:
-                        raise ValueError(
-                            f"Any addons found in '{addons_dir}' directory."
-                        )
-                elif not addon_module_names:
-                    raise ValueError("You need to pass at least one addon to install.")
-                else:
-                    _addon_module_names = []
-                    for addon_module_name in addon_module_names:
-                        modname = addon_module_name.rstrip(".py")
-                        addon_filepath = os.path.join(addons_dir, f"{modname}.py")
-                        _addon_module_names.append((modname, addon_filepath))
-                    addon_module_names = _addon_module_names
+                addons = []
+                for filename in os.listdir(addons_dir):
+                    if filename == "__init__.py":
+                        continue  # exclude '__init__.py' from root
 
-                for addon_module_name, addon_module_path in addon_module_names:
+                    if filename.endswith(".py"):
+                        addons.append(
+                            [
+                                removesuffix(filename, ".py"),
+                                os.path.join(addons_dir, filename),
+                            ]
+                        )
+                    elif filename.endswith(".zip"):
+                        addons.append(
+                            [
+                                removesuffix(filename, ".zip"),
+                                os.path.join(addons_dir, filename),
+                            ]
+                        )
+                    # installation of packages is not supported by Blender if
+                    # they aren't zipped
+
+                if addon_module_names:
+                    addons = list(
+                        filter(lambda a: a[0] in addon_module_names),
+                        addons,
+                    )
+
+                if not addons:
+                    raise ValueError("You need to pass at least one addon to install.")
+
+                for addon_module_name, addon_module_path in addons:
                     bpy.ops.preferences.addon_install(
                         filepath=addon_module_path, **kwargs
                     )
@@ -247,13 +299,17 @@ def main():
                 if save_userpref:
                     bpy.ops.wm.save_userpref()
 
-                return [modname for modname, _ in addon_module_names]
+                return [modname for modname, _ in addons]
 
             return _install_addons_from_dir
 
         @pytest.fixture(scope="session")
         def disable_addons(self, request):
-            """Disable installed addons in the current Blender's session."""
+            """Disable installed addons in the current Blender's session.
+
+            This does not includes deleting of data files from the Blender's
+            addons directory.
+            """
 
             def _disable_addons(
                 addon_module_names,
@@ -267,7 +323,7 @@ def main():
                 ----------
 
                 addon_module_names : list
-                  Name of the addons modules (without the ``.py`` extension).
+                  Name of the addons modules or packages.
 
                 save_userpref : bool
                   Save user preferences after disable.
@@ -286,6 +342,31 @@ def main():
                     bpy.ops.wm.save_userpref()
 
             return _disable_addons
+
+        @pytest.fixture(scope="session")
+        def uninstall_addons(self, request):
+            """Removes the addons files from the Blender's addons directory.
+
+            Parameters
+            ----------
+
+            addon_module_names : list
+                Name of the addons modules or packages.
+            """
+
+            def _uninstall_addons(addon_module_names):
+                _addons_dir = get_addons_dir()
+
+                for modname in addon_module_names:
+                    modpath = os.path.join(_addons_dir, modname)
+                    if os.path.isfile(f"{modpath}.py"):
+                        os.remove(f"{modpath}.py")
+                    if os.path.isdir(modpath) and os.path.isfile(
+                        os.path.join(modpath, "__init__.py")
+                    ):
+                        shutil.rmtree(modpath)
+
+            return _uninstall_addons
 
     return pytest.main(argv, plugins=[PytestBlenderPlugin()])
 

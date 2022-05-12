@@ -70,3 +70,13 @@ def test_blender_python_version(blender_python_version, blender_python_executabl
 
     assert blender_python_version == expected_blender_python_version
     assert re.match(r"\d+\.\d\.?\d*", blender_python_version)
+
+
+@pytest.mark.skipif(
+    pytest_blender_unactive,
+    reason="Requires testing loading the pytest-blender plugin.",
+)
+def test_blender_addons_dir(blender_addons_dir):
+    blender_addons_files = os.listdir(blender_addons_dir)
+    assert "pytest_blender_basic.py" in blender_addons_files
+    assert "pytest_blender_zipped" in blender_addons_files
