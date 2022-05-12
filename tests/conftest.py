@@ -50,9 +50,7 @@ except ImportError:
 if pytest_blender_active:
 
     @pytest.fixture(scope="session", autouse=True)
-    def register_addons_from_dir(
-        request, install_addons_from_dir, disable_addons, uninstall_addons
-    ):
+    def register_addons_from_dir(install_addons_from_dir, uninstall_addons):
         # create zipped addon from data
         addon_to_zip_dirpath = os.path.join(DATA_DIR, "pytest_blender_zipped")
         zipify_addon_dir(addon_to_zip_dirpath, ADDONS_DIR)
@@ -64,5 +62,4 @@ if pytest_blender_active:
         yield
         sys.stdout.write("\n")
         with redirect_stdout(stdout):
-            disable_addons(addon_module_names)
-        uninstall_addons(addon_module_names)
+            uninstall_addons(addon_module_names)

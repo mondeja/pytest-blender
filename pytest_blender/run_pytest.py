@@ -93,6 +93,12 @@ def get_blender_version(blender_executable):
 
 
 def get_addons_dir():
+    # try with environment variable
+    blender_user_scripts = os.environ.get("BLENDER_USER_SCRIPTS")
+    if blender_user_scripts:
+        return os.path.join(blender_user_scripts, "addons")
+
+    # try dicovering from PATH
     response = None
     expected_enddir = os.path.join("scripts", "addons").rstrip(os.sep)
 
@@ -109,7 +115,29 @@ def get_addons_dir():
             " https://github.com/mondeja/pytest-blender/issues/new"
             f" including the next data:\n\n{pprint.pformat(sys.path)}"
         )
+
     return response
+
+
+def _disable_addons(
+    addon_module_names,
+    save_userpref=True,
+    default_set=True,
+    **kwargs,
+):
+    """Disables a set of addons by module names."""
+    import addon_utils  # noqa F401
+
+    for addon_module_name in addon_module_names:
+        addon_utils.disable(
+            addon_module_name,
+            default_set=default_set,
+            **kwargs,
+        )
+    if save_userpref:
+        import bpy  # noqa F401
+
+        bpy.ops.wm.save_userpref()
 
 
 def main():
@@ -242,7 +270,7 @@ def main():
             return response
 
         @pytest.fixture(scope="session")
-        def install_addons_from_dir(self, request):
+        def install_addons_from_dir(self):
             """Install Blender addons located into a directory."""
 
             def _install_addons_from_dir(
@@ -304,47 +332,16 @@ def main():
             return _install_addons_from_dir
 
         @pytest.fixture(scope="session")
-        def disable_addons(self, request):
+        def disable_addons(self):
             """Disable installed addons in the current Blender's session.
 
             This does not includes deleting of data files from the Blender's
             addons directory.
             """
-
-            def _disable_addons(
-                addon_module_names,
-                save_userpref=True,
-                default_set=True,
-                **kwargs,
-            ):
-                """Disables a set of addons by module name.
-
-                Parameters
-                ----------
-
-                addon_module_names : list
-                  Name of the addons modules or packages.
-
-                save_userpref : bool
-                  Save user preferences after disable.
-                """
-                import addon_utils  # noqa F401
-
-                for addon_module_name in addon_module_names:
-                    addon_utils.disable(
-                        addon_module_name,
-                        default_set=default_set,
-                        **kwargs,
-                    )
-                if save_userpref:
-                    import bpy  # noqa F401
-
-                    bpy.ops.wm.save_userpref()
-
             return _disable_addons
 
         @pytest.fixture(scope="session")
-        def uninstall_addons(self, request):
+        def uninstall_addons(self):
             """Removes the addons files from the Blender's addons directory.
 
             Parameters
@@ -355,10 +352,11 @@ def main():
             """
 
             def _uninstall_addons(addon_module_names):
-                _addons_dir = get_addons_dir()
+                _disable_addons(addon_module_names)
+                addons_dir = get_addons_dir()
 
                 for modname in addon_module_names:
-                    modpath = os.path.join(_addons_dir, modname)
+                    modpath = os.path.join(addons_dir, modname)
                     if os.path.isfile(f"{modpath}.py"):
                         os.remove(f"{modpath}.py")
                     if os.path.isdir(modpath) and os.path.isfile(
