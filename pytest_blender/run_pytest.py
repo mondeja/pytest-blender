@@ -25,6 +25,7 @@ PYTEST_BLENDER_ADDONS_DIR_TEMP = os.path.join(
     tempfile.gettempdir(),
     "pytest-blender-addons-dir",
 )
+ZIP_ROOTS_IGNORE = [".DStore", ".git", ".gitignore", "__pycache__"]
 
 
 def removesuffix(value, suffix):
@@ -52,6 +53,8 @@ def _zipify_addon_package(in_dirpath, out_dirpath):
 
     with zipfile.ZipFile(zipped_path, "w", zipfile.ZIP_DEFLATED) as zipf:
         for root, _, files in os.walk(in_dirpath):
+            if os.path.basename(root) in ZIP_ROOTS_IGNORE:
+                continue
             for file in files:
                 filepath = os.path.join(root, file)
                 zipf.write(
