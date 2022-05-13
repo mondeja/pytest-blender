@@ -113,9 +113,10 @@ def pytest_configure(config):
     args_groups, args_group_index = ([], [], []), 0
     argv = sys.argv[1:]
     i = 0
+    options_cli_args = [f"--{arg}" for arg in OPTIONS.keys()]
     while i < len(argv):
         arg = argv[i]
-        if arg in OPTIONS.keys():
+        if arg in options_cli_args:
             i += 2
             continue
         elif arg in ["-h", "--help"]:
