@@ -199,6 +199,7 @@ def _install_addons_from_dir(
         addons_names_to_zipify = []
 
         addons = []
+        print("HERE", os.listdir(addons_dir))
         for filename in os.listdir(addons_dir):
             if filename == "__init__.py":
                 continue  # exclude '__init__.py' from root
