@@ -80,3 +80,4 @@ def test_blender_addons_dir(blender_addons_dir):
     blender_addons_files = os.listdir(blender_addons_dir)
     assert "pytest_blender_basic.py" in blender_addons_files
     assert "pytest_blender_zipped" in blender_addons_files
+    assert "pytest_blender_zipped_from_dir" in blender_addons_files

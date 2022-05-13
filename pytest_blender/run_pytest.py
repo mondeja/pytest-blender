@@ -491,32 +491,28 @@ def main():
         def zipify_addon_package(self):
             return _zipify_addon_package
 
-        @pytest.fixture(scope="session", autouse=True)
-        def _pytest_blender_configure_addons(self):
-            if _addons_dirs:
-                addon_module_names = []
-                for addons_dir in _addons_dirs:
-                    addon_module_names.extend(
-                        _install_addons_from_dir(addons_dir, quiet=True)
-                    )
-            yield
-            if _addons_dirs:
-                # follow chosen addons cleaning strategy
-                if _addons_cleaning == "uninstall":
-                    _uninstall_addons(addon_module_names, quiet=True)
-                elif _addons_cleaning == "disable":
-                    _disable_addons(addon_module_names, quiet=True)
-
-                # remove zipyfied addons temporal dir
-                if os.path.isdir(PYTEST_BLENDER_ADDONS_DIR_TEMP):
-                    shutil.rmtree(PYTEST_BLENDER_ADDONS_DIR_TEMP)
-
         def pytest_addoption(self, parser):
             # avoid warnings about pytest-blender ini options not defined
             for option in _inicfg_options:
                 parser.addini(option, "")  # empty help, is irrelevant here
 
-    return pytest.main(argv, plugins=[PytestBlenderPlugin()])
+    if _addons_dirs:
+        addon_module_names = []
+        for addons_dir in _addons_dirs:
+            addon_module_names.extend(_install_addons_from_dir(addons_dir, quiet=True))
+    exitcode = pytest.main(argv, plugins=[PytestBlenderPlugin()])
+
+    if _addons_dirs:
+        # follow chosen addons cleaning strategy
+        if _addons_cleaning == "uninstall":
+            _uninstall_addons(addon_module_names, quiet=True)
+        elif _addons_cleaning == "disable":
+            _disable_addons(addon_module_names, quiet=True)
+
+        # remove zipyfied addons temporal dir
+        if os.path.isdir(PYTEST_BLENDER_ADDONS_DIR_TEMP):
+            shutil.rmtree(PYTEST_BLENDER_ADDONS_DIR_TEMP)
+    return exitcode
 
 
 if __name__ == "__main__":
