@@ -84,7 +84,7 @@ jobs:
       - name: Test with Blender Python executable
         run: pytest -svv --blender-executable "${{ steps.install-dependencies.outputs.blender-executable }}" --strict-config --strict-markers tests
       - name: Test with local Python executable
-        run: BLENDER_EXECUTABLE="${{ steps.install-dependencies.outputs.blender-executable }}" pytest -svv -p no:pytest-blender --strict-config --strict-markers tests
+        run: BLENDER_EXECUTABLE="${{ steps.install-dependencies.outputs.blender-executable }}" pytest -svv -p no:pytest-blender --strict-markers tests
       - name: Integration tests
         run: BLENDER_EXECUTABLE="${{ steps.install-dependencies.outputs.blender-executable }}" sh tests/integration.sh
 
