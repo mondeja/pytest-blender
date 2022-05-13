@@ -32,3 +32,5 @@ if pytest_blender_active:
 
         addon_to_zip_dirpath = os.path.join(DATA_DIR, addon_id)
         zipify_addon_package(addon_to_zip_dirpath, ADDONS_DIR)
+
+        print("ADDONS_DIR", os.listdir(ADDONS_DIR))
