@@ -498,6 +498,7 @@ def main():
             for option in _inicfg_options:
                 parser.addini(option, "")  # empty help, is irrelevant here
 
+    print("_addons_dirs", _addons_dirs)
     if _addons_dirs:
         addon_module_names = []
         for addons_dir in _addons_dirs:
