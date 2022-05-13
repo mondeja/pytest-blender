@@ -6,7 +6,7 @@ import pytest
 
 
 @pytest.mark.skipif(
-    not os.environ.get("hola"),
+    not os.environ.get("SIGINT_PIDFILE"),
     reason="The environment variable SIGINT_PIDFILE must be set to run this test",
 )
 def test_sleep():

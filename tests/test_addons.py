@@ -3,6 +3,7 @@
 import pytest
 
 
+@pytest.mark.blender
 @pytest.mark.parametrize(
     ("addon_name", "expected_operator_class"),
     (
