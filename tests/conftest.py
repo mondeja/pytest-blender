@@ -13,7 +13,7 @@ pytest_blender_logger.setLevel(logging.DEBUG)
 pytest_blender_logger.addHandler(logging.StreamHandler())
 
 try:
-    from pytest_blender import utils
+    from pytest_blender import zipify_addon_package
 except ImportError:
     pass
 else:
@@ -24,4 +24,4 @@ else:
         os.remove(zipped_filepath)
 
     addon_to_zip_dirpath = os.path.join(DATA_DIR, addon_id)
-    utils.zipify_addon_package(addon_to_zip_dirpath, ADDONS_DIR)
+    zipify_addon_package(addon_to_zip_dirpath, ADDONS_DIR)
