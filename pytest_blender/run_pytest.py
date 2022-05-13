@@ -203,6 +203,8 @@ def _install_addons_from_dir(
             if filename == "__init__.py":
                 continue  # exclude '__init__.py' from root
 
+            print("filename", filename)
+
             filepath = os.path.join(addons_dir, filename)
             if filename.endswith(".py"):  # Python module addon
                 addons.append(
