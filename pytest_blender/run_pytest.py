@@ -279,12 +279,7 @@ def _install_addons_from_dir(
 
         return [modname for modname, _ in addons]
 
-    if quiet:
-        stdout = io.StringIO()
-        with contextlib.redirect_stdout(stdout):
-            return _wrapper()
-    else:
-        return _wrapper()
+    return _wrapper()
 
 
 def _uninstall_addons(addon_module_names, quiet=False, **kwargs):
