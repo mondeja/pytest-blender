@@ -1,11 +1,4 @@
-"""Script ran by ``plugin.py`` module using a builtin Blender Python interpreter.
-
-Keep in mind that may be some functions here that, although are used in other
-parts of the package like ``get_blender_binary_path_python``, can't be located
-outside this module because the installation of `pytest-blender` in the Blender
-builtin Python intepreter shouldn't be mandatory, so avoid
-``from pytest_blender...`` imports in this module.
-"""
+"""Script ran by ``plugin.py`` module using a builtin Blender Python interpreter."""
 
 import contextlib
 import io
@@ -16,7 +9,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
-import zipfile
+from importlib.machinery import SourceFileLoader
 
 import pytest
 
@@ -25,7 +18,13 @@ PYTEST_BLENDER_ADDONS_DIR_TEMP = os.path.join(
     tempfile.gettempdir(),
     "pytest-blender-addons-dir",
 )
-ZIP_ROOTS_IGNORE = [".DStore", ".git", ".gitignore", "__pycache__"]
+
+# Import utilities using importlib machinery because pytest_blender is not
+# installed inside Blender's Python interpreter
+utils = SourceFileLoader(
+    "pytest_blender.utils",
+    os.path.join(os.path.abspath(os.path.dirname(__file__)), "utils.py"),
+).load_module()
 
 
 def removesuffix(value, suffix):
@@ -39,90 +38,6 @@ def _join(value):
         return " ".join(value)
     else:
         return join(value)
-
-
-def _parse_version(version_string):
-    return tuple(int(i) for i in version_string.split(".") if i.isdigit())
-
-
-def _zipify_addon_package(in_dirpath, out_dirpath):
-    zipped_path = os.path.join(
-        out_dirpath,
-        f"{os.path.basename(in_dirpath)}.zip",
-    )
-
-    with zipfile.ZipFile(zipped_path, "w", zipfile.ZIP_DEFLATED) as zipf:
-        for root, _, files in os.walk(in_dirpath):
-            if os.path.basename(root) in ZIP_ROOTS_IGNORE:
-                continue
-            for file in files:
-                filepath = os.path.join(root, file)
-                zipf.write(
-                    filepath,
-                    os.path.relpath(
-                        filepath,
-                        os.path.join(in_dirpath, ".."),
-                    ),
-                )
-    return zipped_path
-
-
-def get_blender_binary_path_python(blender_executable, blend_version=None):
-    """Get Blender's Python executable location.
-
-    This function can't be in utils because the module is not loaded from
-    Blender (current script is executed inside Blender's Python executable).
-
-    Parameters
-    ----------
-
-    blender_executable : str
-      Blender's executable location.
-
-    Returns
-    -------
-
-    str: Blender's Python executable path.
-    """
-    if blend_version is None:
-        blend_version = get_blender_version(blender_executable)
-    python_expr = (
-        "import sys;print(sys.executable);"
-        if _parse_version(blend_version) >= (2, 91)
-        else "import bpy;print(bpy.app.binary_path_python)"
-    )
-
-    stdout = subprocess.check_output(
-        [
-            blender_executable,
-            "-b",
-            "--python-expr",
-            python_expr,
-        ],
-        stderr=subprocess.STDOUT,
-    )
-
-    blender_python_path = None
-    for line in stdout.decode("utf-8").splitlines():
-        if line.startswith(os.sep) and os.path.exists(line):
-            blender_python_path = line
-            break
-    return blender_python_path
-
-
-def get_blender_version(blender_executable):
-    """Get Blender's version goving its executable location.
-
-    blender_executable : str
-      Blender's executable location.
-
-    Returns
-    -------
-
-    str: Blender's version.
-    """
-    version_stdout = subprocess.check_output([blender_executable, "--version"])
-    return version_stdout.decode("utf-8").splitlines()[0].split(" ")[1]
 
 
 def get_addons_dir():
@@ -199,12 +114,9 @@ def _install_addons_from_dir(
         addons_names_to_zipify = []
 
         addons = []
-        print("HERE", os.listdir(addons_dir))
         for filename in os.listdir(addons_dir):
             if filename == "__init__.py":
                 continue  # exclude '__init__.py' from root
-
-            print("filename", filename)
 
             filepath = os.path.join(addons_dir, filename)
             if filename.endswith(".py"):  # Python module addon
@@ -250,7 +162,7 @@ def _install_addons_from_dir(
 
             for addon_name in addons_names_to_zipify:
                 in_filepath = os.path.join(addons_dir, addon_name)
-                out_filepath = _zipify_addon_package(
+                out_filepath = utils.zipify_addon_package(
                     in_filepath, PYTEST_BLENDER_ADDONS_DIR_TEMP
                 )
                 addons.append([addon_name, out_filepath])
@@ -366,7 +278,7 @@ def main():
                 )
 
             if response is None:
-                response = get_blender_binary_path_python(
+                response = utils.get_blender_binary_path_python(
                     _blender_executable,
                     blend_version=self._blender_version(request),
                 )
@@ -397,7 +309,7 @@ def main():
                 )
 
             if response is None:
-                response = get_blender_version(_blender_executable)
+                response = utils.get_blender_version(_blender_executable)
                 if hasattr(request.config, "cache"):
                     request.config.cache.set(
                         "pytest-blender/blender-version",
@@ -485,16 +397,11 @@ def main():
             """
             return _uninstall_addons
 
-        @pytest.fixture(scope="session")
-        def zipify_addon_package(self):
-            return _zipify_addon_package
-
         def pytest_addoption(self, parser):
             # avoid warnings about pytest-blender ini options not defined
             for option in _inicfg_options:
                 parser.addini(option, "")  # empty help, is irrelevant here
 
-    print("_addons_dirs", _addons_dirs)
     if _addons_dirs:
         addon_module_names = []
         for addons_dir in _addons_dirs:

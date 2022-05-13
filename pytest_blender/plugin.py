@@ -9,7 +9,7 @@ import sys
 
 import pytest
 
-from pytest_blender.utils import which_blender_by_os
+from pytest_blender import utils
 
 
 logger = logging.getLogger("pytest-blender")
@@ -48,7 +48,7 @@ def get_blender_executable(config):
         return config.inicfg["blender-executable"]
 
     # discover from system
-    return which_blender_by_os()
+    return utils.which_blender_by_os()
 
 
 def get_addons_dir(config):
@@ -95,6 +95,11 @@ def add_template_arg(config, args):
         args.append(os.path.abspath(template))
     elif "blender-template" in config.inicfg:
         args.append(os.path.abspath(config.inicfg["blender-template"]))
+
+
+@pytest.fixture(scope="session")
+def zipify_addon_package(self):
+    return utils.zipify_addon_package
 
 
 @pytest.hookimpl(tryfirst=True)
@@ -182,24 +187,20 @@ def pytest_configure(config):
     )
 
     logger.debug(f"Running blender from pytest-blender. CMD: {args}")
-    try:
-        with subprocess.Popen(args, stdout=sys.stdout, stderr=sys.stderr) as proc:
+    with subprocess.Popen(args, stdout=sys.stdout, stderr=sys.stderr) as proc:
 
-            def handled_exit():
-                # hide "Exit:" message shown by pytest on exit
-                sys.stderr = io.StringIO()
-                pytest.exit(" ", returncode=proc.returncode)
+        def handled_exit():
+            # hide "Exit:" message shown by pytest on exit
+            sys.stderr = io.StringIO()
+            pytest.exit(" ", returncode=proc.returncode)
 
-            def on_sigint(signum, frame):
-                proc.send_signal(signum)
-                handled_exit()
-
-            signal.signal(signal.SIGINT, on_sigint)
-            signal.signal(signal.SIGHUP, on_sigint)
-            signal.signal(signal.SIGTERM, on_sigint)
-            proc.communicate()
-
+        def on_sigint(signum, frame):
+            proc.send_signal(signum)
             handled_exit()
-    except FileNotFoundError:
-        sys.stderr.write(f"Blender executable '{blender_executable}' not found!\n")
-        raise SystemExit(1)
+
+        signal.signal(signal.SIGINT, on_sigint)
+        signal.signal(signal.SIGHUP, on_sigint)
+        signal.signal(signal.SIGTERM, on_sigint)
+        proc.communicate()
+
+        handled_exit()
