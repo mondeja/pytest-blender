@@ -61,14 +61,15 @@ def get_addons_dir():
             "Failed to obtain Blender's addons directory from"
             " PATH environment variable. Please, open a report in"
             " https://github.com/mondeja/pytest-blender/issues/new"
-            f" including the next data:\n\n{pprint.pformat(sys.path)}"
+            f" including the next data:\n\nPlatform: {sys.platform}"
+            f" - PATH: {pprint.pformat(sys.path)}"
         )
 
     return response
 
 
 def _disable_addons(
-    addon_module_names,
+    addons_ids,
     save_userpref=True,
     default_set=True,
     quiet=False,
@@ -79,7 +80,7 @@ def _disable_addons(
     def _wrapper():
         import addon_utils  # noqa F401
 
-        for addon_module_name in addon_module_names:
+        for addon_module_name in addons_ids:
             addon_utils.disable(
                 addon_module_name,
                 default_set=default_set,
@@ -100,7 +101,7 @@ def _disable_addons(
 
 def _install_addons_from_dir(
     addons_dir,
-    addon_module_names=None,
+    addons_ids=None,
     save_userpref=True,
     default_set=True,
     persistent=True,
@@ -111,7 +112,7 @@ def _install_addons_from_dir(
         import addon_utils  # noqa F401
         import bpy  # noqa F401
 
-        addons_names_to_zipify = []
+        addons_to_zipify = []
 
         addons = []
         for filename in os.listdir(addons_dir):
@@ -143,24 +144,18 @@ def _install_addons_from_dir(
                 # they aren't zipped, so we zip the package into a temporal
                 # directory and execute the `_install_addons_from_dir` function
                 # against passing that directory
-                addons_names_to_zipify.append(filename)
+                addons_to_zipify.append(filename)
 
-        if addon_module_names:
-            addons = list(
-                filter(lambda a: a[0] in addon_module_names),
-                addons,
-            )
-            addons_names_to_zipify = list(
-                filter(lambda a: a in addon_module_names),
-                addons,
-            )
+        if addons_ids:
+            addons = list(filter(lambda a: a[0] in addons_ids), addons)
+            addons_to_zipify = list(filter(lambda a: a in addons_ids), addons)
 
         # zipify addons packages and install them
-        if addons_names_to_zipify:
+        if addons_to_zipify:
             if not os.path.isdir(PYTEST_BLENDER_ADDONS_DIR_TEMP):
                 os.mkdir(PYTEST_BLENDER_ADDONS_DIR_TEMP)
 
-            for addon_name in addons_names_to_zipify:
+            for addon_name in addons_to_zipify:
                 in_filepath = os.path.join(addons_dir, addon_name)
                 out_filepath = utils.zipify_addon_package(
                     in_filepath, PYTEST_BLENDER_ADDONS_DIR_TEMP
@@ -194,11 +189,11 @@ def _install_addons_from_dir(
     return _wrapper()
 
 
-def _uninstall_addons(addon_module_names, quiet=False, **kwargs):
-    _disable_addons(addon_module_names, quiet=quiet, **kwargs)
+def _uninstall_addons(addons_ids, quiet=False, **kwargs):
+    _disable_addons(addons_ids, quiet=quiet, **kwargs)
     addons_dir = get_addons_dir()
 
-    for modname in addon_module_names:
+    for modname in addons_ids:
         modpath = os.path.join(addons_dir, modname)
         if os.path.isfile(f"{modpath}.py"):
             os.remove(f"{modpath}.py")
@@ -387,14 +382,7 @@ def main():
 
         @pytest.fixture(scope="session")
         def uninstall_addons(self):
-            """Removes the addons files from the Blender's addons directory.
-
-            Parameters
-            ----------
-
-            addon_module_names : list
-                Name of the addons modules or packages.
-            """
+            """Removes the addons files from the Blender's addons directory."""
             return _uninstall_addons
 
         def pytest_addoption(self, parser):
@@ -402,22 +390,23 @@ def main():
             for option in _inicfg_options:
                 parser.addini(option, "")  # empty help, is irrelevant here
 
-    if _addons_dirs:
-        addon_module_names = []
-        for addons_dir in _addons_dirs:
-            addon_module_names.extend(_install_addons_from_dir(addons_dir, quiet=True))
+    if not _addons_dirs:
+        return pytest.main(argv, plugins=[PytestBlenderPlugin()])
+
+    addons_ids = []
+    for addons_dir in _addons_dirs:
+        addons_ids.extend(_install_addons_from_dir(addons_dir, quiet=True))
     exitcode = pytest.main(argv, plugins=[PytestBlenderPlugin()])
 
-    if _addons_dirs:
-        # follow chosen addons cleaning strategy
-        if _addons_cleaning == "uninstall":
-            _uninstall_addons(addon_module_names, quiet=True)
-        elif _addons_cleaning == "disable":
-            _disable_addons(addon_module_names, quiet=True)
+    # follow chosen addons cleaning strategy
+    if _addons_cleaning == "uninstall":
+        _uninstall_addons(addons_ids, quiet=True)
+    elif _addons_cleaning == "disable":
+        _disable_addons(addons_ids, quiet=True)
 
-        # remove zipyfied addons temporal dir
-        if os.path.isdir(PYTEST_BLENDER_ADDONS_DIR_TEMP):
-            shutil.rmtree(PYTEST_BLENDER_ADDONS_DIR_TEMP)
+    # remove zipyfied addons temporal dir
+    if os.path.isdir(PYTEST_BLENDER_ADDONS_DIR_TEMP):
+        shutil.rmtree(PYTEST_BLENDER_ADDONS_DIR_TEMP)
     return exitcode
 
 

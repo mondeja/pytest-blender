@@ -1,4 +1,4 @@
-__version__ = "2.1.0"
+__version__ = "3.0.0"
 
 from pytest_blender.utils import (
     get_blender_binary_path_python,

@@ -60,11 +60,17 @@ PASSED
 =========================== 1 passed in 0.01s ==================================
 ```
 
-You can specify a custom blender executable path using `--blender-executable`
+You can specify a custom `blender` executable path using either
+`--blender-executable` CLI argument or `blender-executable` configuration
 option:
 
 ```bash
 pytest --blender-executable ~/blender-2.91.2-linux64/blender
+```
+
+```ini
+[tools:pytest]
+blender-executable = ~/blender-2.91.2-linux64/blender
 ```
 
 ```
@@ -104,10 +110,16 @@ pytest -svv -- -- -b
 
 #### Load startup template
 
-You can use the `--blender-template` argument to pass a custom startup file:
+You can use the `--blender-template` argument or `blender-template`
+configuration option to pass a custom startup file:
 
 ```sh
 pytest -svv --blender-template ~/.config/blender/2.93/config/startup.blend
+```
+
+```ini
+[tool:pytest]
+blender-template = ~/.config/blender/2.93/config/startup.blend
 ```
 
 #### Enable logging
@@ -124,6 +136,10 @@ pytest_blender_logger.addHandler(logging.StreamHandler())
 ```
 
 ### Reference
+
+#### Configuration
+
+TODO: Table with all CLI arguments and INI options with correpondent links.
 
 #### Fixtures
 
@@ -154,7 +170,7 @@ the currently running session.
 <b>blender_addons_dir</b> ⇒ `str`
 
 Returns the `scripts/addons` directory of Blender (see
-[Blender Directory Layout), the directory in which by default are located
+[Blender Directory Layout]), the directory in which by default are located
 the addons installed using the
 [`install_addons_from_dir`](#install_addons_from_dir) fixture.
 
@@ -162,14 +178,14 @@ It tries to get it using the `BLENDER_USER_SCRIPTS` environment variable, but
 if is not defined attempts to discover it from the `PATH`.
 
 <a name="install_addons_from_dir" href="#install_addons_from_dir">#</a>
-<b>install_addons_from_dir</b>(<i>addons_dir</i>,
-<i>addon_module_names=None</i>, <i>save_userpref=True</i>,
-<i>default_set=True</i>, <i>persistent=True</i>, <i>quiet=True</i>,
-<i>\*\*kwargs</i>) ⇒ `list`
+<b>install_addons_from_dir</b>(<i>addons_dir</i>, <i>addon_ids=None</i>,
+<i>save_userpref=True</i>, <i>default_set=True</i>, <i>persistent=True</i>,
+<i>quiet=True</i>, <i>\*\*kwargs</i>) ⇒ `list`
 
 Function that installs and enables a set of addons which are located in
 a directory. By "addons" Blender understands Python scripts whose file names
-end with `.py` or `.zip` files for packages with multiple modules.
+end with `.py`, `.zip` files for compressed packages with multiple modules
+or directories for Python packages which contain a `__init__.py` file.
 
 This function is designed to be executed before the pytest session
 to install the addons that you want to test, using the others fixtures
@@ -183,9 +199,9 @@ import pytest
 
 @pytest.fixture(scope="session", autouse=True)
 def register_addons(install_addons_from_dir, disable_addons):
-    addon_module_names = install_addons_from_dir(os.path.abspath("src"))
+    addons_ids = install_addons_from_dir(os.path.abspath("src"))
     yield
-    disable_addons(addon_module_names)
+    disable_addons(addons_ids)
 ```
 
 ```python
@@ -195,39 +211,49 @@ import pytest
 
 @pytest.fixture(scope="session", autouse=True)
 def register_addons(install_addons_from_dir, uninstall_addons):
-    addon_module_names = install_addons_from_dir(os.path.abspath("src"))
+    addons_ids = install_addons_from_dir(os.path.abspath("src"))
     yield
-    uninstall_addons(addon_module_names)
+    uninstall_addons(addons_ids)
 ```
 
 The difference between disabling addons and uninstalling them is that disabling
 removes the files from the Blender's addons directory but disabling keep the
 files there, allowing you to enable it manually from the preferences.
 
-- **addons_dir** (str) Directory in which are located the files of the addons.
-- **addon_module_names** (list) Name of the addons modules. If not defined
- (default) these will be discovered searching for addons in `addons_dir`
- directory.
-- **save_userpref** (bool) Save user preferences after installation.
+- **addons_dir** (str) Directory in whose root are located the files of the
+ addons.
+- **addons_ids** (list) Identifiers of the addons modules, packages or ZIP
+ files (without extensions) to install. If not defined (default) all Python
+ modules, Python packages and ZIP files containing addon packages or modules
+ located at the root of the `addons_dir` directory will be installed.
+ These identifiers are either:
+  - The name of the module for addons composed by a single file
+   (`[identifier].py`).
+  - The name of the directory for addons composed by a package.
+  - The name of the ZIP file without extension for addons composed by a
+   ZIP file (`[identifier].zip`).
+- **save_userpref** (bool) Save user preferences after installation calling
+ [`bpy.ops.wm.save_userpref`]
 - **default_set** (bool) Set the user-preference calling `addon_utils.enable`.
-- **persistent** (bool) Ensure the addon is enabled for the entire session
- (after loading new files).
- - **quiet** (bool) If enabled, don't show stdout produced installing addons.
+- **persistent** (bool) Ensure that the addon is enabled for the entire
+ session, after loading new files.
+ - **quiet** (bool) If enabled, don't show standard output produced
+ installing addons.
 - **\*\*kwargs** (dict) Subsecuent keyword arguments are passed to
  [`bpy.ops.preferences.addon_install`].
 
-Returns the addon module names as a list, ready to be passed to
+Returns the addons identifiers as a list, ready to be passed to
 [`disable_addons`](#disable_addons) or [`uninstall_addons`](#uninstall_addons).
 
 <a name="disable_addons" href="#disable_addons">#</a>
-<b>disable_addons</b>(<i>addon_module_names</i>, <i>save_userpref=True</i>,
+<b>disable_addons</b>(<i>addons_ids</i>, <i>save_userpref=True</i>,
 <i>default_set=True</i>, <i>quiet=True</i>, <i>\*\*kwargs</i>)
 
-Function that disables a set of addons by module name. Is designed to disable
-your addons after a pytest suite execution (check 
+Function that disables a set of addons by addons identifiers. Is designed
+to disable your addons after a pytest suite execution (check
 [`install_addons_from_dir`](#install_addons_from_dir) for an example).
 
-- **addon_module_names** (list) Name of the addons modules as is returned by
+- **addons_ids** (list) Identifiers of the addons modules as are returned by
  [`install_addons_from_dir`](#install_addons_from_dir).
 - **save_userpref** (bool) Save user preferences after installation.
 - **default_set** (bool) Set the user-preference calling `addon_utils.disable`.
@@ -236,14 +262,14 @@ your addons after a pytest suite execution (check
  `addon_utils.disable`.
 
 <a name="uninstall_addons" href="#uninstall_addons">#</a>
-<b>uninstall_addons</b>(<i>addon_module_names</i>, <i>quiet=True</i>)
+<b>uninstall_addons</b>(<i>addons_ids</i>, <i>quiet=True</i>)
 
-Function that uninstall a set of addons by module name. Is designed to
+Function that uninstall a set of addons by addon identifiers. Is designed to
 remove your addons from the Blender's addons directory after a pytest suite
 execution (check [`install_addons_from_dir`](#install_addons_from_dir)
 for an example).
 
-- **addon_module_names** (list) Name of the addons modules as is returned by
+- **addons_ids** (list) Name of the addons modules as is returned by
  [`install_addons_from_dir`](#install_addons_from_dir).
 - **quiet** (bool) If enabled, don't show stdout produced disabling addons.
 
@@ -322,3 +348,4 @@ jobs:
 [v1.2.1]: https://github.com/mondeja/pytest-blender/releases/tag/v1.2.1
 [Blender Directory Layout]: https://docs.blender.org/manual/en/latest/advanced/blender_directory_layout.html
 [`bpy.ops.preferences.addon_install`]: https://docs.blender.org/api/current/bpy.ops.preferences.html#bpy.ops.preferences.addon_install
+[`bpy.ops.wm.save_userpref`]: https://docs.blender.org/api/current/bpy.ops.wm.html#bpy.ops.wm.save_userpref
