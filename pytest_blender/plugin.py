@@ -12,39 +12,74 @@ import pytest
 from pytest_blender.utils import which_blender_by_os
 
 
-logger = logging.getLogger("pytest_blender")
+logger = logging.getLogger("pytest-blender")
+
+OPTIONS = {
+    "blender-executable": {"help": "Blender executable location."},
+    "blender-template": {
+        "help": "Open Blender using an empty layout as start template."
+    },
+    "blender-addons-dirs": {
+        "help": "Directory with addons to install for testing them.",
+        "opts": {"nargs": "+", "default": []},
+    },
+}
 
 
-def pytest_addoption(parser):
-    parser.addoption(
-        "--blender-executable",
-        nargs=1,
-        default=which_blender_by_os,
-        help="Blender executable location.",
-    )
-    parser.addoption(
-        "--blender-template",
-        nargs=1,
-        default=None,
-        help="Open Blender using an empty layout as start template.",
-    )
-
-
-def _get_blender_executable(config):
+def get_blender_executable(config):
+    # from CLI
     blender_executable = config.getoption("--blender-executable")
-    if hasattr(blender_executable, "__call__"):
-        return blender_executable()
-    return blender_executable[0]
+    if blender_executable is not None:
+        return blender_executable
+
+    # from inicfg
+    if "blender-executable" in config.inicfg:
+        return config.inicfg["blender-executable"]
+
+    # discover from system
+    return which_blender_by_os()
 
 
-def _add_template_arg(config, args):
+def get_addons_dir(config):
+    # from CLI
+    # --blender-addons-dirs tests/addons tests/other
+    addons_dirs = config.getoption("--blender-addons-dirs")
+    if addons_dirs:
+        return [os.path.abspath(d) for d in addons_dirs]
+
+    # from inicfg
+    if "blender-addons-dirs" not in config.inicfg:
+        return []
+    addons_dirs = config.inicfg["blender-addons-dirs"]
+    if "\n" in addons_dirs:
+        addons_dirs = addons_dirs.split("\n")
+    else:  # passed as str
+        addons_dirs = [addons_dirs]
+    return [os.path.abspath(d) for d in addons_dirs if d]
+
+
+def add_template_arg(config, args):
     template = config.getoption("--blender-template")
     if template:
-        args.append(template[0])
+        args.append(os.path.abspath(template))
+    elif "blender-template" in config.inicfg:
+        args.append(os.path.abspath(config.inicfg["blender-template"]))
+
+
+@pytest.hookimpl(tryfirst=True)
+def pytest_addoption(parser):
+    for arg, argdef in OPTIONS.items():
+        kwargs = argdef["opts"] if "opts" in argdef else {"default": None}
+        parser.addoption(f"--{arg}", help=argdef["help"], **kwargs)
+        parser.addini(arg, argdef["help"])
 
 
 @pytest.hookimpl(tryfirst=True)
 def pytest_configure(config):
+    from pprint import pprint
+
+    print(config.inicfg)
+
     pytest_help_opt = False
 
     # build propagated CLI args
@@ -53,7 +88,7 @@ def pytest_configure(config):
     i = 0
     while i < len(argv):
         arg = argv[i]
-        if arg in ["--blender-executable", "--blender-template"]:
+        if arg in OPTIONS.keys():
             i += 2
             continue
         elif arg in ["-h", "--help"]:
@@ -69,7 +104,7 @@ def pytest_configure(config):
     if pytest_help_opt:
         return
 
-    blender_executable = _get_blender_executable(config)
+    blender_executable = get_blender_executable(config)
 
     if not blender_executable:
         pytest.exit("'blender' executable not found.", returncode=1)
@@ -81,7 +116,13 @@ def pytest_configure(config):
     args = [blender_executable, "-b"]
 
     # template to open
-    _add_template_arg(config, args)
+    add_template_arg(config, args)
+
+    # addons directory to install them
+    addons_dirs_args = []
+    for addons_dir in get_addons_dir(config):
+        addons_dirs_args.extend(["--pytest-blender-addons-dir", addons_dir])
+    print(addons_dirs_args)
 
     args.extend(
         [
@@ -95,24 +136,32 @@ def pytest_configure(config):
             "--",
             "--pytest-blender-executable",
             blender_executable,
+            "--pytest-blender-inicfg-options",
+            ",".join(list(OPTIONS.keys())),
+            *addons_dirs_args,
             *pytest_opts,  # propagate Pytest command line arguments
         ]
     )
+
     logger.debug(f"Running blender from pytest-blender. CMD: {args}")
-    with subprocess.Popen(args, stdout=sys.stdout, stderr=sys.stderr) as proc:
+    try:
+        with subprocess.Popen(args, stdout=sys.stdout, stderr=sys.stderr) as proc:
 
-        def handled_exit():
-            # hide "Exit:" message shown by pytest on exit
-            sys.stderr = io.StringIO()
-            pytest.exit(" ", returncode=proc.returncode)
+            def handled_exit():
+                # hide "Exit:" message shown by pytest on exit
+                sys.stderr = io.StringIO()
+                pytest.exit(" ", returncode=proc.returncode)
 
-        def on_sigint(signum, frame):
-            proc.send_signal(signum)
+            def on_sigint(signum, frame):
+                proc.send_signal(signum)
+                handled_exit()
+
+            signal.signal(signal.SIGINT, on_sigint)
+            signal.signal(signal.SIGHUP, on_sigint)
+            signal.signal(signal.SIGTERM, on_sigint)
+            proc.communicate()
+
             handled_exit()
-
-        signal.signal(signal.SIGINT, on_sigint)
-        signal.signal(signal.SIGHUP, on_sigint)
-        signal.signal(signal.SIGTERM, on_sigint)
-        proc.communicate()
-
-        handled_exit()
+    except FileNotFoundError:
+        sys.stderr.write(f"Blender executable '{blender_executable}' not found!\n")
+        raise SystemExit(1)

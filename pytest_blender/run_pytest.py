@@ -152,11 +152,99 @@ def _disable_addons(
         _wrapper()
 
 
+def _install_addons_from_dir(
+    addons_dir,
+    addon_module_names=None,
+    save_userpref=True,
+    default_set=True,
+    persistent=True,
+    quiet=False,
+    **kwargs,
+):
+    def _wrapper():
+        import addon_utils  # noqa F401
+        import bpy  # noqa F401
+
+        addons = []
+        for filename in os.listdir(addons_dir):
+            if filename == "__init__.py":
+                continue  # exclude '__init__.py' from root
+
+            if filename.endswith(".py"):
+                addons.append(
+                    [
+                        removesuffix(filename, ".py"),
+                        os.path.join(addons_dir, filename),
+                    ]
+                )
+            elif filename.endswith(".zip"):
+                addons.append(
+                    [
+                        removesuffix(filename, ".zip"),
+                        os.path.join(addons_dir, filename),
+                    ]
+                )
+            # installation of packages is not supported by Blender if
+            # they aren't zipped
+
+        if addon_module_names:
+            addons = list(
+                filter(lambda a: a[0] in addon_module_names),
+                addons,
+            )
+
+        if not addons:
+            raise ValueError("You need to pass at least one addon to install.")
+
+        for addon_module_name, addon_module_path in addons:
+            bpy.ops.preferences.addon_install(filepath=addon_module_path, **kwargs)
+            addon_utils.enable(
+                addon_module_name,
+                default_set=default_set,
+                persistent=persistent,
+            )
+        if save_userpref:
+            bpy.ops.wm.save_userpref()
+
+        return [modname for modname, _ in addons]
+
+    if quiet:
+        stdout = io.StringIO()
+        with contextlib.redirect_stdout(stdout):
+            return _wrapper()
+    else:
+        return _wrapper()
+
+
+def _uninstall_addons(addon_module_names, quiet=False, **kwargs):
+    _disable_addons(addon_module_names, quiet=quiet, **kwargs)
+    addons_dir = get_addons_dir()
+
+    for modname in addon_module_names:
+        modpath = os.path.join(addons_dir, modname)
+        if os.path.isfile(f"{modpath}.py"):
+            os.remove(f"{modpath}.py")
+        if os.path.isdir(modpath) and os.path.isfile(
+            os.path.join(modpath, "__init__.py")
+        ):
+            shutil.rmtree(modpath)
+
+
 def main():
     raw_argv = shlex.split(_join(sys.argv).split(" -- ")[1:][0])
 
     # disable self-propagation, if installed in Blender Python interpreter
     argv = ["-p", "no:pytest-blender"]
+
+    # TODO: parse blender-template?
+    # TODO: add argument to only disable addons installed from inicfg or CLI
+    # TODO: add argument to zipify packages 'blender-zip-package-addons'
+
+    # parse addons directories location
+    _addons_dirs, _inside_addons_dir_arg = ([], None)
+
+    # parse inicfg options to avoid pytest warnings
+    _inicfg_options, _inside_inicfg_options = (None, None)
 
     # parse Blender executable location, propagated from hook
     _blender_executable, _inside_bexec_arg = (None, None)
@@ -167,6 +255,20 @@ def main():
         elif _inside_bexec_arg:
             _blender_executable = arg
             _inside_bexec_arg = False
+            continue
+        elif arg == "--pytest-blender-addons-dir":
+            _inside_addons_dir_arg = True
+            continue
+        elif _inside_addons_dir_arg:
+            _addons_dirs.append(arg)
+            _inside_addons_dir_arg = False
+            continue
+        elif arg == "--pytest-blender-inicfg-options":
+            _inside_inicfg_options = True
+            continue
+        elif _inside_inicfg_options:
+            _inicfg_options = arg.split(",")
+            _inside_inicfg_options = False
             continue
         argv.append(arg)
 
@@ -284,74 +386,6 @@ def main():
         @pytest.fixture(scope="session")
         def install_addons_from_dir(self):
             """Install Blender addons located into a directory."""
-
-            def _install_addons_from_dir(
-                addons_dir,
-                addon_module_names=None,
-                save_userpref=True,
-                default_set=True,
-                persistent=True,
-                quiet=False,
-                **kwargs,
-            ):
-                def _wrapper():
-                    import addon_utils  # noqa F401
-                    import bpy  # noqa F401
-
-                    addons = []
-                    for filename in os.listdir(addons_dir):
-                        if filename == "__init__.py":
-                            continue  # exclude '__init__.py' from root
-
-                        if filename.endswith(".py"):
-                            addons.append(
-                                [
-                                    removesuffix(filename, ".py"),
-                                    os.path.join(addons_dir, filename),
-                                ]
-                            )
-                        elif filename.endswith(".zip"):
-                            addons.append(
-                                [
-                                    removesuffix(filename, ".zip"),
-                                    os.path.join(addons_dir, filename),
-                                ]
-                            )
-                        # installation of packages is not supported by Blender if
-                        # they aren't zipped
-
-                    if addon_module_names:
-                        addons = list(
-                            filter(lambda a: a[0] in addon_module_names),
-                            addons,
-                        )
-
-                    if not addons:
-                        raise ValueError(
-                            "You need to pass at least one addon to install."
-                        )
-
-                    for addon_module_name, addon_module_path in addons:
-                        bpy.ops.preferences.addon_install(
-                            filepath=addon_module_path, **kwargs
-                        )
-                        addon_utils.enable(
-                            addon_module_name,
-                            default_set=default_set,
-                            persistent=persistent,
-                        )
-                    if save_userpref:
-                        bpy.ops.wm.save_userpref()
-
-                    return [modname for modname, _ in addons]
-
-                if quiet:
-                    stdout = io.StringIO()
-                    with contextlib.redirect_stdout(stdout):
-                        return _wrapper()
-                else:
-                    return _wrapper()
-
             return _install_addons_from_dir
 
         @pytest.fixture(scope="session")
@@ -373,24 +407,27 @@ def main():
             addon_module_names : list
                 Name of the addons modules or packages.
             """
-
-            def _uninstall_addons(addon_module_names, quiet=False, **kwargs):
-                _disable_addons(addon_module_names, quiet=quiet, **kwargs)
-                addons_dir = get_addons_dir()
-
-                for modname in addon_module_names:
-                    modpath = os.path.join(addons_dir, modname)
-                    if os.path.isfile(f"{modpath}.py"):
-                        os.remove(f"{modpath}.py")
-                    if os.path.isdir(modpath) and os.path.isfile(
-                        os.path.join(modpath, "__init__.py")
-                    ):
-                        shutil.rmtree(modpath)
-
             return _uninstall_addons
+
+        @pytest.fixture(scope="session", autouse=True)
+        def _pytest_blender_configure_addons(self):
+            if _addons_dirs:
+                addon_module_names = []
+                for addons_dir in _addons_dirs:
+                    addon_module_names.extend(
+                        _install_addons_from_dir(addons_dir, quiet=True)
+                    )
+            yield
+            if _addons_dirs:
+                _uninstall_addons(addon_module_names, quiet=True)
+
+        def pytest_addoption(self, parser):
+            # avoid warnings about pytest-blender ini options not defined
+            for option in _inicfg_options:
+                parser.addini(option, "")
 
     return pytest.main(argv, plugins=[PytestBlenderPlugin()])
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    raise SystemExit(main())
