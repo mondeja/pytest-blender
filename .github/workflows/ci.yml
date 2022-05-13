@@ -58,8 +58,8 @@ jobs:
         uses: actions/cache@v3
         id: cache-blender
         with:
+          #blender-*
           path: |
-            blender-*
             _blender-executable-path.txt
           key: ${{ runner.os }}-${{ matrix.blender-version }}
       - name: Download Blender ${{ matrix.blender-version }}
