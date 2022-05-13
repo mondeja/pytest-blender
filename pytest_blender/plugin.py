@@ -20,8 +20,19 @@ OPTIONS = {
         "help": "Open Blender using an empty layout as start template."
     },
     "blender-addons-dirs": {
-        "help": "Directory with addons to install for testing them.",
+        "help": "Directory with addons to install before test suite execution.",
         "opts": {"nargs": "+", "default": []},
+    },
+    "blender-addons-cleaning": {
+        "help": (
+            "What to do with addons installed after test suite execution."
+            " It accepts one of the next strings: 'uninstall' (default,"
+            " remove addons from Blender's user repository after testing),"
+            " 'disable' (just disable the addons in Blender preferences)"
+            " or 'keep' (keep the addons installed after testing, useful"
+            " for manual reviews)."
+        ),
+        "opts": {"default": "uninstall", "choices": ["uninstall", "disable", "keep"]},
     },
 }
 
@@ -58,6 +69,26 @@ def get_addons_dir(config):
     return [os.path.abspath(d) for d in addons_dirs if d]
 
 
+def get_addons_cleaning_strategy(config):
+    addons_cleaning_strategy = config.getoption("--blender-addons-cleaning")
+    if addons_cleaning_strategy:
+        return addons_cleaning_strategy
+
+    addons_cleaning_strategy = OPTIONS["blender-addons-cleaning"]["opts"]["default"]
+    value = config.inicfg.get("blender-addons-cleaning")
+    if value:
+        choices = OPTIONS["blender-addons-cleaning"]["opts"]["choices"]
+        rel_inipath = os.path.relpath(config.inipath, os.getcwd())
+        if value not in choices:
+            raise ValueError(
+                f"The configuration for blender-addons-cleaning option '{value}'"
+                f" defined inside {rel_inipath} must have one of the"
+                f" next values: {', '.join(choices)}"
+            )
+        addons_cleaning_strategy = value
+    return addons_cleaning_strategy
+
+
 def add_template_arg(config, args):
     template = config.getoption("--blender-template")
     if template:
@@ -76,10 +107,6 @@ def pytest_addoption(parser):
 
 @pytest.hookimpl(tryfirst=True)
 def pytest_configure(config):
-    from pprint import pprint
-
-    print(config.inicfg)
-
     pytest_help_opt = False
 
     # build propagated CLI args
@@ -120,9 +147,18 @@ def pytest_configure(config):
 
     # addons directory to install them
     addons_dirs_args = []
-    for addons_dir in get_addons_dir(config):
-        addons_dirs_args.extend(["--pytest-blender-addons-dir", addons_dir])
-    print(addons_dirs_args)
+    addons_dirs = get_addons_dir(config)
+    if addons_dirs:
+        for addons_dir in addons_dirs:
+            addons_dirs_args.extend(["--pytest-blender-addons-dir", addons_dir])
+
+        # installed addons cleaning strategy
+        addons_cleaning_strategy_args = [
+            "--pytest-blender-addons-cleaning",
+            get_addons_cleaning_strategy(config),
+        ]
+    else:
+        addons_cleaning_strategy_args = []
 
     args.extend(
         [
@@ -139,6 +175,7 @@ def pytest_configure(config):
             "--pytest-blender-inicfg-options",
             ",".join(list(OPTIONS.keys())),
             *addons_dirs_args,
+            *addons_cleaning_strategy_args,
             *pytest_opts,  # propagate Pytest command line arguments
         ]
     )

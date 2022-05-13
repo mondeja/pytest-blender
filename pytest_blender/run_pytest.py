@@ -15,8 +15,16 @@ import shlex
 import shutil
 import subprocess
 import sys
+import tempfile
+import zipfile
 
 import pytest
+
+
+PYTEST_BLENDER_ADDONS_DIR_TEMP = os.path.join(
+    tempfile.gettempdir(),
+    "pytest-blender-addons-dir",
+)
 
 
 def removesuffix(value, suffix):
@@ -34,6 +42,26 @@ def _join(value):
 
 def _parse_version(version_string):
     return tuple(int(i) for i in version_string.split(".") if i.isdigit())
+
+
+def _zipify_addon_package(in_dirpath, out_dirpath):
+    zipped_path = os.path.join(
+        out_dirpath,
+        f"{os.path.basename(in_dirpath)}.zip",
+    )
+
+    with zipfile.ZipFile(zipped_path, "w", zipfile.ZIP_DEFLATED) as zipf:
+        for root, _, files in os.walk(in_dirpath):
+            for file in files:
+                filepath = os.path.join(root, file)
+                zipf.write(
+                    filepath,
+                    os.path.relpath(
+                        filepath,
+                        os.path.join(in_dirpath, ".."),
+                    ),
+                )
+    return zipped_path
 
 
 def get_blender_binary_path_python(blender_executable, blend_version=None):
@@ -165,32 +193,69 @@ def _install_addons_from_dir(
         import addon_utils  # noqa F401
         import bpy  # noqa F401
 
+        addons_names_to_zipify = []
+
         addons = []
         for filename in os.listdir(addons_dir):
             if filename == "__init__.py":
                 continue  # exclude '__init__.py' from root
 
-            if filename.endswith(".py"):
+            filepath = os.path.join(addons_dir, filename)
+            if filename.endswith(".py"):  # Python module addon
                 addons.append(
                     [
                         removesuffix(filename, ".py"),
-                        os.path.join(addons_dir, filename),
+                        filepath,
                     ]
                 )
-            elif filename.endswith(".zip"):
+            elif filename.endswith(".zip"):  # ZIP file addon
                 addons.append(
                     [
                         removesuffix(filename, ".zip"),
-                        os.path.join(addons_dir, filename),
+                        filepath,  #
                     ]
                 )
-            # installation of packages is not supported by Blender if
-            # they aren't zipped
+            elif (
+                os.path.isdir(filepath)
+                and addons_dir != PYTEST_BLENDER_ADDONS_DIR_TEMP
+                and os.path.isfile(os.path.join(filepath, "__init__.py"))
+            ):  # package adddon, must be converted to ZIP
+                #
+                # installation of packages is not supported by Blender if
+                # they aren't zipped, so we zip the package into a temporal
+                # directory and execute the `_install_addons_from_dir` function
+                # against passing that directory
+                addons_names_to_zipify.append(filename)
 
         if addon_module_names:
             addons = list(
                 filter(lambda a: a[0] in addon_module_names),
                 addons,
+            )
+            addons_names_to_zipify = list(
+                filter(lambda a: a in addon_module_names),
+                addons,
+            )
+
+        # zipify addons packages and install them
+        if addons_names_to_zipify:
+            if not os.path.isdir(PYTEST_BLENDER_ADDONS_DIR_TEMP):
+                os.mkdir(PYTEST_BLENDER_ADDONS_DIR_TEMP)
+
+            for addon_name in addons_names_to_zipify:
+                in_filepath = os.path.join(addons_dir, addon_name)
+                out_filepath = _zipify_addon_package(
+                    in_filepath, PYTEST_BLENDER_ADDONS_DIR_TEMP
+                )
+                addons.append([addon_name, out_filepath])
+
+            _install_addons_from_dir(
+                PYTEST_BLENDER_ADDONS_DIR_TEMP,
+                save_userpref=save_userpref,
+                default_set=default_set,
+                persistent=persistent,
+                quiet=quiet,
+                **kwargs,
             )
 
         if not addons:
@@ -237,11 +302,13 @@ def main():
     argv = ["-p", "no:pytest-blender"]
 
     # TODO: parse blender-template?
-    # TODO: add argument to only disable addons installed from inicfg or CLI
-    # TODO: add argument to zipify packages 'blender-zip-package-addons'
+    # TODO: add argument to debug invocation of Blender from pytest-blender
 
     # parse addons directories location
     _addons_dirs, _inside_addons_dir_arg = ([], None)
+
+    # parse addons cleaning strategy for installed addons from directories
+    _addons_cleaning, _inside_addons_cleaning_arg = ("uninstall", None)
 
     # parse inicfg options to avoid pytest warnings
     _inicfg_options, _inside_inicfg_options = (None, None)
@@ -249,12 +316,12 @@ def main():
     # parse Blender executable location, propagated from hook
     _blender_executable, _inside_bexec_arg = (None, None)
     for arg in raw_argv:
-        if arg == "--pytest-blender-executable":
-            _inside_bexec_arg = True
+        if arg == "--pytest-blender-inicfg-options":
+            _inside_inicfg_options = True
             continue
-        elif _inside_bexec_arg:
-            _blender_executable = arg
-            _inside_bexec_arg = False
+        elif _inside_inicfg_options:
+            _inicfg_options = arg.split(",")
+            _inside_inicfg_options = False
             continue
         elif arg == "--pytest-blender-addons-dir":
             _inside_addons_dir_arg = True
@@ -263,13 +330,21 @@ def main():
             _addons_dirs.append(arg)
             _inside_addons_dir_arg = False
             continue
-        elif arg == "--pytest-blender-inicfg-options":
-            _inside_inicfg_options = True
+        elif arg == "--pytest-blender-addons-cleaning":
+            _inside_addons_cleaning_arg = True
             continue
-        elif _inside_inicfg_options:
-            _inicfg_options = arg.split(",")
-            _inside_inicfg_options = False
+        elif _inside_addons_cleaning_arg:
+            _addons_cleaning = arg
+            _inside_addons_cleaning_arg = False
             continue
+        elif arg == "--pytest-blender-executable":
+            _inside_bexec_arg = True
+            continue
+        elif _inside_bexec_arg:
+            _blender_executable = arg
+            _inside_bexec_arg = False
+            continue
+
         argv.append(arg)
 
     class PytestBlenderPlugin:
@@ -409,6 +484,10 @@ def main():
             """
             return _uninstall_addons
 
+        @pytest.fixture(scope="session")
+        def zipify_addon_package(self):
+            return _zipify_addon_package
+
         @pytest.fixture(scope="session", autouse=True)
         def _pytest_blender_configure_addons(self):
             if _addons_dirs:
@@ -419,12 +498,20 @@ def main():
                     )
             yield
             if _addons_dirs:
-                _uninstall_addons(addon_module_names, quiet=True)
+                # follow chosen addons cleaning strategy
+                if _addons_cleaning == "uninstall":
+                    _uninstall_addons(addon_module_names, quiet=True)
+                elif _addons_cleaning == "disable":
+                    _disable_addons(addon_module_names, quiet=True)
+
+                # remove zipyfied addons temporal dir
+                if os.path.isdir(PYTEST_BLENDER_ADDONS_DIR_TEMP):
+                    shutil.rmtree(PYTEST_BLENDER_ADDONS_DIR_TEMP)
 
         def pytest_addoption(self, parser):
             # avoid warnings about pytest-blender ini options not defined
             for option in _inicfg_options:
-                parser.addini(option, "")
+                parser.addini(option, "")  # empty help, is irrelevant here
 
     return pytest.main(argv, plugins=[PytestBlenderPlugin()])
 
