@@ -80,11 +80,11 @@ jobs:
           $python_blender_executable -m pip install pytest==${{ matrix.pytest-version }}
           echo "::set-output name=blender-executable::$blender_executable"
       - name: Test with Blender Python executable (no cache)
-        run: pytest -svv -p no:cacheprovider --blender-executable "${{ steps.install-dependencies.outputs.blender-executable }}" tests
+        run: pytest -svv -p no:cacheprovider --blender-executable "${{ steps.install-dependencies.outputs.blender-executable }}" --strict-config --strict-markers tests
       - name: Test with Blender Python executable
-        run: pytest -svv --blender-executable "${{ steps.install-dependencies.outputs.blender-executable }}" tests
+        run: pytest -svv --blender-executable "${{ steps.install-dependencies.outputs.blender-executable }}" --strict-config --strict-markers tests
       - name: Test with local Python executable
-        run: BLENDER_EXECUTABLE="${{ steps.install-dependencies.outputs.blender-executable }}" pytest -svv -p no:pytest-blender tests
+        run: BLENDER_EXECUTABLE="${{ steps.install-dependencies.outputs.blender-executable }}" pytest -svv -p no:pytest-blender --strict-config --strict-markers tests
       - name: Integration tests
         run: BLENDER_EXECUTABLE="${{ steps.install-dependencies.outputs.blender-executable }}" sh tests/integration.sh
 

@@ -5,16 +5,6 @@ import sys
 import pytest
 
 
-try:
-    from pytest_blender.test import pytest_blender_active
-except ImportError:
-    pytest_blender_active = True
-
-
-@pytest.mark.skipif(
-    pytest_blender_active,
-    reason="Requires testing without loading the pytest-blender plugin.",
-)
 @pytest.mark.skipif(
     not os.environ.get("BLENDER_EXECUTABLE"),
     reason="The environment variable BLENDER_EXECUTABLE must be set to run this test",

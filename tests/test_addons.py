@@ -3,16 +3,6 @@
 import pytest
 
 
-try:
-    from pytest_blender.test import pytest_blender_unactive
-except ImportError:
-    pytest_blender_unactive = False
-
-
-@pytest.mark.skipif(
-    pytest_blender_unactive,
-    reason="Requires testing loading the pytest-blender plugin.",
-)
 @pytest.mark.parametrize(
     ("addon_name", "expected_operator_class"),
     (

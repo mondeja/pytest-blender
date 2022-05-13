@@ -97,11 +97,6 @@ def add_template_arg(config, args):
         args.append(os.path.abspath(config.inicfg["blender-template"]))
 
 
-@pytest.fixture(scope="session")
-def zipify_addon_package(self):
-    return utils.zipify_addon_package
-
-
 @pytest.hookimpl(tryfirst=True)
 def pytest_addoption(parser):
     for arg, argdef in OPTIONS.items():

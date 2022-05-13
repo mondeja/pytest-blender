@@ -10,7 +10,10 @@ _testSigIntPropagation() {
       _blender_executable_arg="--blender-executable $BLENDER_EXECUTABLE"
     fi;
     SIGINT_PIDFILE="$SIGINT_PIDFILE" \
-      python3 -m pytest -svv --noconftest \
+      python3 -m pytest -svv \
+      --noconftest \
+      --strict-config \
+      --strict-markers \
       $_blender_executable_arg \
       tests/integration/sigint.py &
     # wait some time to start the test suite execution
