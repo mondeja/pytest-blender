@@ -54,14 +54,14 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Upgrade PIP
         run: python -m pip install --upgrade pip
-      - name: Cache Blender ${{ matrix.blender-version }}
-        uses: actions/cache@v3
-        id: cache-blender
-        with:
-          #blender-*
-          path: |
-            _blender-executable-path.txt
-          key: ${{ runner.os }}-${{ matrix.blender-version }}
+      #- name: Cache Blender ${{ matrix.blender-version }}
+      #  uses: actions/cache@v3
+      #  id: cache-blender
+      #  with:
+      #    path: |
+      #      #blender-*
+      #      _blender-executable-path.txt
+      #    key: ${{ runner.os }}-${{ matrix.blender-version }}
       - name: Download Blender ${{ matrix.blender-version }}
         if: steps.cache-blender.outputs.cache-hit != 'true'
         id: download-blender
