@@ -3,26 +3,20 @@ import os
 import pytest
 from testing_utils import (
     ADDONS_DIRS,
+    EXPECTED_ADDONS,
     executable_param_id,
     parametrize_plugin_on_off_with,
 )
 
 
-expected_addons_dict = {
-    "pytest_blender_basic": "PytestBlenderBasicObjectMoveX",
-    "pytest_blender_zipped": "PytestBlenderZippedObjectMoveX",
-    "pytest_blender_zipped_from_dir": "PytestBlenderZippedFromDirObjectMoveX",
-}
-
-
 def addons_dict_from_ids(addons_ids):
     addons_dict = {}
     for addon_id in addons_ids:
-        if addon_id not in expected_addons_dict:
+        if addon_id not in EXPECTED_ADDONS:
             raise ValueError(
                 f"Addon '{addon_id}' not found in expected addons dictionary"
             )
-        addons_dict[addon_id] = expected_addons_dict[addon_id]
+        addons_dict[addon_id] = EXPECTED_ADDONS[addon_id]
     return addons_dict
 
 
@@ -45,7 +39,7 @@ def render_addons_installed_test(expected_addons_ids):
 
 
 FOO_ADDONS_DIR = ["pytest_blender_zipped", "pytest_blender_zipped_from_dir"]
-FOO_BAR_ADDONS_DIR = list(expected_addons_dict)
+FOO_BAR_ADDONS_DIR = list(EXPECTED_ADDONS)
 
 parametrize_addons_dirs = pytest.mark.parametrize(
     ("addons_dirs", "addons_ids"),
@@ -81,7 +75,7 @@ def test_blender_addons_dirs_cli_option(
         },
     ) as ctx:
         _, stderr, exitcode = ctx.run(
-            ["--blender-addons-dirs", *addons_dirs, *plugin_args, "tests"]
+            ["tests", *plugin_args, "--blender-addons-dirs", *addons_dirs]
         )
         assert exitcode == expected_exitcode, stderr
 
@@ -99,7 +93,7 @@ def test_blender_addons_dirs_inicfg_option(
             addons_dirs_inicfg_value += f"    {addons_dir}\n"
     with testing_context(
         files={
-            "tests/test_blender_addons_dirs_cli_option.py": (
+            "tests/test_blender_addons_dirs_inicfg_option.py": (
                 render_addons_installed_test(addons_ids)
             ),
             "pytest.ini": f"[pytest]\nblender-addons-dirs = {addons_dirs_inicfg_value}",

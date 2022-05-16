@@ -42,6 +42,16 @@ def removesuffix(value, suffix):
 
 
 def get_addons_dir():
+    # try with API
+    try:
+        import bpy
+
+        blender_user_scripts = bpy.utils.script_path_user()
+        if blender_user_scripts:
+            return os.path.join(blender_user_scripts, "addons")
+    except ImportError:
+        pass
+
     # try with environment variable
     blender_user_scripts = os.environ.get("BLENDER_USER_SCRIPTS")
     if blender_user_scripts:
@@ -381,13 +391,16 @@ def main():
             for option in OPTIONS:
                 parser.addini(option, "")  # empty help, is irrelevant here
 
+    run_pytest = lambda: pytest.main(argv, plugins=[PytestBlenderPlugin()])
+
     if not _addons_dirs:
-        return pytest.main(argv, plugins=[PytestBlenderPlugin()])
+        return run_pytest()
 
     addons_ids = []
     for addons_dir in _addons_dirs:
         addons_ids.extend(_install_addons_from_dir(addons_dir, quiet=True))
-    exitcode = pytest.main(argv, plugins=[PytestBlenderPlugin()])
+
+    exitcode = run_pytest()
 
     # follow chosen addons cleaning strategy
     if _addons_cleaning == "uninstall":

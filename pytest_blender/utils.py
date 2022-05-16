@@ -105,6 +105,25 @@ def get_blender_binary_path_python(blender_executable, blend_version=None):
     return blender_python_path
 
 
+def get_addons_dir(blender_executable):
+    stdout = subprocess.check_output(
+        [
+            blender_executable,
+            "-b",
+            "--python-expr",
+            "import bpy;print(bpy.utils.script_path_user())",
+        ],
+        stderr=subprocess.STDOUT,
+    )
+
+    scripts_dir = None
+    for line in stdout.decode("utf-8").splitlines():
+        if line.endswith("scripts") and os.path.exists(line):
+            scripts_dir = line
+            break
+    return os.path.join(scripts_dir, "addons")
+
+
 def shlex_join(value):
     try:
         from shlex import join

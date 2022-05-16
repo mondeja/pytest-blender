@@ -45,11 +45,6 @@ def get_addons_dir(config):
 
 
 def get_addons_cleaning_strategy(config):
-    addons_cleaning_strategy = config.getoption("--blender-addons-cleaning")
-    if addons_cleaning_strategy:
-        return addons_cleaning_strategy
-
-    addons_cleaning_strategy = OPTIONS["blender-addons-cleaning"]["opts"]["default"]
     value = config.inicfg.get("blender-addons-cleaning")
     if value:
         choices = OPTIONS["blender-addons-cleaning"]["opts"]["choices"]
@@ -60,8 +55,13 @@ def get_addons_cleaning_strategy(config):
                 f" defined inside {rel_inipath} must have one of the"
                 f" next values: {', '.join(choices)}"
             )
-        addons_cleaning_strategy = value
-    return addons_cleaning_strategy
+        return value
+
+    addons_cleaning_strategy = config.getoption("--blender-addons-cleaning")
+    if addons_cleaning_strategy:
+        return addons_cleaning_strategy
+
+    return OPTIONS["blender-addons-cleaning"]["opts"]["default"]
 
 
 def add_template_arg(config, args):
