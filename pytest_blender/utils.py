@@ -99,3 +99,12 @@ def get_blender_binary_path_python(blender_executable, blend_version=None):
             blender_python_path = line
             break
     return blender_python_path
+
+
+def shlex_join(value):
+    try:
+        from shlex import join
+    except ImportError:
+        return " ".join(value)
+    else:
+        return join(value)

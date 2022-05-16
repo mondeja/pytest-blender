@@ -21,23 +21,24 @@ PYTEST_BLENDER_ADDONS_DIR_TEMP = os.path.join(
 
 # Import utilities using importlib machinery because pytest_blender is not
 # installed inside Blender's Python interpreter
+plugin_dir = os.path.abspath(os.path.dirname(__file__))
 utils = SourceFileLoader(
     "pytest_blender.utils",
-    os.path.join(os.path.abspath(os.path.dirname(__file__)), "utils.py"),
+    os.path.join(plugin_dir, "utils.py"),
 ).load_module()
+
+OPTIONS = (
+    SourceFileLoader(
+        "pytest_blender.options",
+        os.path.join(plugin_dir, "options.py"),
+    )
+    .load_module()
+    .OPTIONS
+)
 
 
 def removesuffix(value, suffix):
     return value[: -len(suffix)]
-
-
-def _join(value):
-    try:
-        from shlex import join
-    except ImportError:
-        return " ".join(value)
-    else:
-        return join(value)
 
 
 def get_addons_dir():
@@ -204,7 +205,7 @@ def _uninstall_addons(addons_ids, quiet=False, **kwargs):
 
 
 def main():
-    raw_argv = shlex.split(_join(sys.argv).split(" -- ")[1:][0])
+    raw_argv = shlex.split(utils.shlex_join(sys.argv).split(" -- ")[1:][0])
 
     # disable self-propagation, if installed in Blender Python interpreter
     argv = ["-p", "no:pytest-blender"]
@@ -218,20 +219,10 @@ def main():
     # parse addons cleaning strategy for installed addons from directories
     _addons_cleaning, _inside_addons_cleaning_arg = ("uninstall", None)
 
-    # parse inicfg options to avoid pytest warnings
-    _inicfg_options, _inside_inicfg_options = (None, None)
-
     # parse Blender executable location, propagated from hook
     _blender_executable, _inside_bexec_arg = (None, None)
     for arg in raw_argv:
-        if arg == "--pytest-blender-inicfg-options":
-            _inside_inicfg_options = True
-            continue
-        elif _inside_inicfg_options:
-            _inicfg_options = arg.split(",")
-            _inside_inicfg_options = False
-            continue
-        elif arg == "--pytest-blender-addons-dir":
+        if arg == "--pytest-blender-addons-dir":
             _inside_addons_dir_arg = True
             continue
         elif _inside_addons_dir_arg:
@@ -387,7 +378,7 @@ def main():
 
         def pytest_addoption(self, parser):
             # avoid warnings about pytest-blender ini options not defined
-            for option in _inicfg_options:
+            for option in OPTIONS:
                 parser.addini(option, "")  # empty help, is irrelevant here
 
     if not _addons_dirs:

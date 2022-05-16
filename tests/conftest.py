@@ -1,6 +1,5 @@
 """pytest-blender tests configuration."""
 
-import logging
 import os
 
 import pytest
@@ -9,10 +8,6 @@ import pytest
 ROOT_DIR = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 DATA_DIR = os.path.join(ROOT_DIR, "tests", "data")
 ADDONS_DIR = os.path.join(ROOT_DIR, "tests", "addons")
-
-pytest_blender_logger = logging.getLogger("pytest_blender")
-pytest_blender_logger.setLevel(logging.DEBUG)
-pytest_blender_logger.addHandler(logging.StreamHandler())
 
 try:
     from pytest_blender import zipify_addon_package

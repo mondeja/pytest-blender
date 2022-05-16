@@ -122,19 +122,6 @@ pytest -svv --blender-template ~/.config/blender/2.93/config/startup.blend
 blender-template = ~/.config/blender/2.93/config/startup.blend
 ```
 
-#### Enable logging
-
-Sometimes is useful to print debugging messages from `pytest_blender`.
-You can enable logging in your `conftest.py` file by the next way:
-
-```python
-import logging
-
-pytest_blender_logger = logging.getLogger("pytest_blender")
-pytest_blender_logger.setLevel(logging.DEBUG)
-pytest_blender_logger.addHandler(logging.StreamHandler())
-```
-
 ### Reference
 
 #### Configuration
@@ -193,25 +180,21 @@ to install the addons that you want to test, using the others fixtures
 to disable or remove them after the execution of the test suite:
 
 ```python
-import os
-
 import pytest
 
 @pytest.fixture(scope="session", autouse=True)
 def register_addons(install_addons_from_dir, disable_addons):
-    addons_ids = install_addons_from_dir(os.path.abspath("src"))
+    addons_ids = install_addons_from_dir("src")
     yield
     disable_addons(addons_ids)
 ```
 
 ```python
-import os
-
 import pytest
 
 @pytest.fixture(scope="session", autouse=True)
 def register_addons(install_addons_from_dir, uninstall_addons):
-    addons_ids = install_addons_from_dir(os.path.abspath("src"))
+    addons_ids = install_addons_from_dir("src")
     yield
     uninstall_addons(addons_ids)
 ```

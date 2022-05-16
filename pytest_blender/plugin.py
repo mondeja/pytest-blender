@@ -1,7 +1,6 @@
 """pytest-blender plugin"""
 
 import io
-import logging
 import os
 import signal
 import subprocess
@@ -10,31 +9,7 @@ import sys
 import pytest
 
 from pytest_blender import utils
-
-
-logger = logging.getLogger("pytest-blender")
-
-OPTIONS = {
-    "blender-executable": {"help": "Blender executable location."},
-    "blender-template": {
-        "help": "Open Blender using an empty layout as start template."
-    },
-    "blender-addons-dirs": {
-        "help": "Directory with addons to install before test suite execution.",
-        "opts": {"nargs": "+", "default": []},
-    },
-    "blender-addons-cleaning": {
-        "help": (
-            "What to do with addons installed after test suite execution."
-            " It accepts one of the next strings: 'uninstall' (default,"
-            " remove addons from Blender's user repository after testing),"
-            " 'disable' (just disable the addons in Blender preferences)"
-            " or 'keep' (keep the addons installed after testing, useful"
-            " for manual reviews)."
-        ),
-        "opts": {"default": "uninstall", "choices": ["uninstall", "disable", "keep"]},
-    },
-}
+from pytest_blender.options import OPTIONS
 
 
 def get_blender_executable(config):
@@ -97,6 +72,12 @@ def add_template_arg(config, args):
         args.append(os.path.abspath(config.inicfg["blender-template"]))
 
 
+def get_pytest_blender_debug(config):
+    return "pytest-blender-debug" in config.inicfg or config.getoption(
+        "--pytest-blender-debug"
+    )
+
+
 @pytest.hookimpl(tryfirst=True)
 def pytest_addoption(parser):
     for arg, argdef in OPTIONS.items():
@@ -108,6 +89,9 @@ def pytest_addoption(parser):
 @pytest.hookimpl(tryfirst=True)
 def pytest_configure(config):
     pytest_help_opt = False
+
+    # execute with debugging capabilities
+    pytest_blender_debug = get_pytest_blender_debug(config)
 
     # build propagated CLI args
     args_groups, args_group_index = ([], [], []), 0
@@ -173,15 +157,18 @@ def pytest_configure(config):
             "--",
             "--pytest-blender-executable",
             blender_executable,
-            "--pytest-blender-inicfg-options",
-            ",".join(list(OPTIONS.keys())),
             *addons_dirs_args,
             *addons_cleaning_strategy_args,
             *pytest_opts,  # propagate Pytest command line arguments
         ]
     )
 
-    logger.debug(f"Running blender from pytest-blender. CMD: {args}")
+    if pytest_blender_debug:
+        sys.stdout.write(
+            "[DEBUG] Running blender from pytest-blender:\n"
+            f"[DEBUG] {utils.shlex_join(args)}\n"
+        )
+
     with subprocess.Popen(args, stdout=sys.stdout, stderr=sys.stderr) as proc:
 
         def handled_exit():
