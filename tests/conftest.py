@@ -1,13 +1,21 @@
 """pytest-blender tests configuration."""
 
+import contextlib
 import os
+import subprocess
+import sys
+import tempfile
 
 import pytest
 
 
 ROOT_DIR = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
-DATA_DIR = os.path.join(ROOT_DIR, "tests", "data")
-ADDONS_DIR = os.path.join(ROOT_DIR, "tests", "addons")
+TESTS_DIR = os.path.join(ROOT_DIR, "tests")
+DATA_DIR = os.path.join(TESTS_DIR, "data")
+ADDONS_DIR = os.path.join(TESTS_DIR, "addons")
+
+if TESTS_DIR not in sys.path:
+    sys.path.append(TESTS_DIR)
 
 try:
     from pytest_blender import zipify_addon_package
@@ -26,13 +34,45 @@ else:
     zipify_addon_package(addon_to_zip_dirpath, ADDONS_DIR)
 
 
-def pytest_configure(config):
-    config.addinivalue_line(
-        "markers",
-        "blender: skip test if not running inside Python's Blender interpreter",
-    )
+@pytest.fixture
+def testing_context():
+    @contextlib.contextmanager
+    def _testing_context(files={}):
+        with tempfile.TemporaryDirectory() as root_dirpath:
+            for rel_filepath, content in files.items():
+                filepath = os.path.join(root_dirpath, rel_filepath)
 
+                # ensure that its directory exists
+                basedir = os.path.abspath(os.path.dirname(filepath))
+                os.makedirs(basedir)
 
-def pytest_runtest_setup(item):
-    if not inside_blender_interpreter and list(item.iter_markers("blender")):
-        pytest.skip("The plugin 'pytest-blender' is required to run this test")
+                with open(filepath, "w") as f:
+                    f.write(content)
+
+            def run_in_context(additional_pytest_args=[], **kwargs):
+                with subprocess.Popen(
+                    [
+                        sys.executable,
+                        "-mpytest",
+                        "-svv",
+                        "--strict-markers",
+                        "--strict-config",
+                        *additional_pytest_args,
+                    ],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    cwd=root_dirpath,
+                    **kwargs,
+                ) as proc:
+                    stdout, stderr = proc.communicate()
+                    return stdout, stderr, proc.returncode
+
+            yield type(
+                "PytestBlenderTestingContext",
+                (),
+                {
+                    "run": run_in_context,
+                },
+            )
+
+    return _testing_context
