@@ -158,8 +158,8 @@ def _install_addons_from_dir(
                 addons_to_zipify.append(filename)
 
         if addons_ids:
-            addons = list(filter(lambda a: a[0] in addons_ids), addons)
-            addons_to_zipify = list(filter(lambda a: a in addons_ids), addons)
+            addons = list(filter(lambda a: a[0] in addons_ids, addons))
+            addons_to_zipify = list(filter(lambda a: a in addons_ids, addons))
 
         # zipify addons packages and install them
         if addons_to_zipify:
