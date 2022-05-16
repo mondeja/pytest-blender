@@ -165,8 +165,8 @@ def pytest_configure(config):
 
     if pytest_blender_debug:
         sys.stdout.write(
-            "[DEBUG] Running blender from pytest-blender:\n"
-            f"[DEBUG] {utils.shlex_join(args)}\n"
+            "[DEBUG (pytest-blender)] Running blender with:"
+            f" {utils.shlex_join(args)}\n"
         )
 
     with subprocess.Popen(args, stdout=sys.stdout, stderr=sys.stderr) as proc:
