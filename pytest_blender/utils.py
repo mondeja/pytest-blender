@@ -30,8 +30,12 @@ def zipify_addon_package(in_dirpath, out_dirpath):
     return zipped_path
 
 
-def which_blender_by_os():
+def which_blender():
     """Get the expected Blender executable location by operative system."""
+    _blender_executable = os.environ.get("BLENDER_EXECUTABLE")
+    if _blender_executable is not None:
+        return _blender_executable
+
     return (
         shutil.which("Blender")
         if sys.platform == "darwin"

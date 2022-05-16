@@ -23,7 +23,7 @@ def get_blender_executable(config):
         return config.inicfg["blender-executable"]
 
     # discover from system
-    return utils.which_blender_by_os()
+    return utils.which_blender()
 
 
 def get_addons_dir(config):
