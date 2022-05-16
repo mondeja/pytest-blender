@@ -78,9 +78,10 @@ jobs:
           python_blender_executable="$(pytest-blender --blender-executable $blender_executable)"
           $python_blender_executable -m ensurepip
           $python_blender_executable -m pip install pytest==${{ matrix.pytest-version }}
+          alias blender="$blender_executable"
           echo "::set-output name=blender-executable::$blender_executable"
       - name: Unit tests
-        run: pytest -svv --blender-executable "${{ steps.install-dependencies.outputs.blender-executable }}" --strict-config --strict-markers tests
+        run: pytest -svv --strict-config --strict-markers tests
       - name: Integration tests
         run: BLENDER_EXECUTABLE="${{ steps.install-dependencies.outputs.blender-executable }}" sh tests/integration.sh
 
