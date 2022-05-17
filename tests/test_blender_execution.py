@@ -46,3 +46,29 @@ def test_python_cache_prefix():
 
         # pyc files directories added
         assert len(custom_pyc_files_dir) > 1
+
+
+def test_enable_plugin_explicitly_from_pytest_cli(testing_context):
+    with testing_context(
+        {
+            "tests/test_no_explicit_enabling.py": """
+import sys
+
+def test_no_explicit_pytest_blender_plugin_enabling():
+    assert '-p' not in sys.argv
+    assert 'pytest-blender' not in sys.argv
+""",
+        }
+    ) as ctx:
+        # if we explicitly enable pytest-blender using `-p pytest-blender`
+        # the tests itself are tried to be executed with pytest-blender
+        # which could result in a infinite loop, but is not the case because
+        # the arguments are malformed in the second execution
+        #
+        # the solution here is to remove the invalid argument in the Blender
+        # execution at `plugin.py`
+        stdout, stderr, exitcode = ctx.run(
+            ["-p", "pytest-blender", "--pytest-blender-debug"]
+        )
+        assert exitcode == 0, stderr
+        assert "-p pytest-blender" not in stdout

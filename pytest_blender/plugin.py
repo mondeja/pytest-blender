@@ -90,9 +90,7 @@ def pytest_addoption(parser):
 
 @pytest.hookimpl(tryfirst=True)
 def pytest_configure(config):
-    pytest_help_opt = False
-
-    # execute with debugging capabilities
+    # execute with debugging capabilities?
     pytest_blender_debug = get_pytest_blender_debug(config)
 
     # build propagated CLI args
@@ -100,23 +98,27 @@ def pytest_configure(config):
     argv = sys.argv[1:]
     i = 0
     options_cli_args = [f"--{arg}" for arg in OPTIONS.keys()]
-    while i < len(argv):
+
+    argv_length = len(argv)
+    while i < argv_length:
         arg = argv[i]
         if arg in options_cli_args:
             i += 2
             continue
         elif arg in ["-h", "--help"]:
-            pytest_help_opt = True
-            break
+            return  # pytest's help, abort
         elif arg == "--":
             args_group_index += 1
             i += 1
             continue
+        elif arg == "-p" and i < argv_length - 1 and argv[i + 1] == "pytest-blender":
+            # the user is enabling the plugin explicitly, but we shouldn't
+            # pass this enabling option to the Blender execution
+            i += 2
+            continue
+
         args_groups[args_group_index].append(arg)
         i += 1
-
-    if pytest_help_opt:
-        return
 
     blender_executable = get_blender_executable(config)
 
