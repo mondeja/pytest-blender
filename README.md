@@ -11,7 +11,7 @@ Blender in headless mode using its builtin Python interpreter.
 
 ## Install
 
-```bash
+```sh
 pip install pytest-blender
 ```
 
@@ -23,7 +23,7 @@ Before execute it, you need to install your testing dependencies inside the
 builtin Blender Python interpreter. To get the interpreter location you can
 use the CLI utility `pytest-blender`, something like:
 
-```bash
+```sh
 blender_python="$(pytest-blender)"
 $blender_python -m ensurepip
 $blender_python -m pip install -r test-requirements.txt
@@ -31,7 +31,7 @@ $blender_python -m pip install -r test-requirements.txt
 
 After installing dependencies, just call pytest as usually.
 
-```bash
+```sh
 pytest -svv
 ```
 
@@ -60,7 +60,7 @@ defined inside a [configuration file][pytest-configuration].
 
 Specify a custom `blender` executable location.
 
-```bash
+```sh
 pytest --blender-executable ~/blender-2.91.2-linux64/blender
 ```
 
