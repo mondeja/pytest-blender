@@ -338,20 +338,11 @@ for an example).
 When you call `pytest`, all options like `--blender-executable` are passed
 to the `pytest` suite running `pytest-blender`. If you want to pass arguments
 to `blender` in its headless execution, add a `--` between `pytest` and
-`blender` arguments. If you want to pass arguments to the `python` Blender's
-interpreter, you need to add another `--` between arguments in a third group.
-
+`blender` arguments.
 For example:
 
 ```sh
-pytest -svv --blender-executable ~/blender -- --enable-event-simulate -- -b
-```
-
-In case that you don't want to pass arguments to `blender` but yes
-to `python`, use double arguments group separation (`-- --`):
-
-```sh
-pytest -svv -- -- -b
+pytest -svv --blender-executable ~/blender -- --debug
 ```
 
 ### CI integration

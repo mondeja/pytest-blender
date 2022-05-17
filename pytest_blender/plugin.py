@@ -171,7 +171,9 @@ def pytest_configure(config):
             f" {utils.shlex_join(args)}\n"
         )
 
-    with subprocess.Popen(args, stdout=sys.stdout, stderr=sys.stderr) as proc:
+    with subprocess.Popen(
+        args, stdout=sys.stdout, stderr=sys.stderr, env=os.environ
+    ) as proc:
 
         def handled_exit():
             # hide "Exit:" message shown by pytest on exit
