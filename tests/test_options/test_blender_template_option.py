@@ -3,7 +3,8 @@ import os
 import pytest
 from testing_utils import empty_test
 
-from pytest_blender.utils import get_blender_version, parse_version, which_blender
+from pytest_blender import get_blender_version, which_blender
+from pytest_blender.utils import parse_version
 
 
 blender_userpref_expected_location = os.path.join(

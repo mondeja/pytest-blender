@@ -4,7 +4,7 @@ import shutil
 
 import pytest
 
-from pytest_blender.utils import get_addons_dir, which_blender
+from pytest_blender import get_addons_dir, which_blender
 
 
 TESTS_DIR = os.path.abspath(os.path.dirname(__file__))

@@ -1,6 +1,6 @@
 from testing_utils import empty_test
 
-from pytest_blender.utils import which_blender
+from pytest_blender import which_blender
 
 
 blender_executable = which_blender()
