@@ -67,9 +67,11 @@ def get_addons_cleaning_strategy(config):
 def add_template_arg(config, args):
     template = config.getoption("--blender-template")
     if template:
-        args.append(os.path.abspath(template))
+        args.append(os.path.abspath(os.path.expanduser(template)))
     elif "blender-template" in config.inicfg:
-        args.append(os.path.abspath(config.inicfg["blender-template"]))
+        args.append(
+            os.path.abspath(os.path.expanduser(config.inicfg["blender-template"]))
+        )
 
 
 def get_pytest_blender_debug(config):

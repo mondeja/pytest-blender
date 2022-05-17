@@ -1,4 +1,5 @@
 import pytest
+from testing_utils import empty_test
 
 
 def assert_debug_output(output):
@@ -12,8 +13,8 @@ def assert_debug_output(output):
 
 def test_pytest_blender_debug_cli_option(testing_context):
     with testing_context(
-        files={
-            "tests/test_foo.py": "def test_foo():\n    pass",
+        {
+            "tests/test_foo.py": empty_test,
         },
     ) as ctx:
         stdout, stderr, exitcode = ctx.run(["--pytest-blender-debug"])
@@ -24,8 +25,8 @@ def test_pytest_blender_debug_cli_option(testing_context):
 @pytest.mark.parametrize("option_value", ("true", "foobarbaz", ""))
 def test_pytest_blender_debug_inicfg_option(testing_context, option_value):
     with testing_context(
-        files={
-            "tests/test_foo.py": "def test_foo():\n    pass",
+        {
+            "tests/test_foo.py": empty_test,
             "pytest.ini": f"[pytest]\npytest-blender-debug = {option_value}",
         },
     ) as ctx:

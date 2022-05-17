@@ -1,8 +1,9 @@
+from testing_utils import empty_test
+
 from pytest_blender.utils import which_blender
 
 
 blender_executable = which_blender()
-empty_test = "def test_foo():\n    pass\n"
 blender_executable_test = f"""
 def test_blender_executable(blender_executable):
     assert blender_executable == "{blender_executable}"

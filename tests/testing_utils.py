@@ -55,6 +55,7 @@ render_addon_installed_test = functools.partial(_render_addon_installation_test,
 render_addon_not_installed_test = functools.partial(
     _render_addon_installation_test, "not in"
 )
+empty_test = "def test_foo():\n    pass\n"
 
 
 def clean_addons():

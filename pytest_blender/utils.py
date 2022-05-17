@@ -43,7 +43,7 @@ def which_blender():
     )
 
 
-def _parse_version(version_string):
+def parse_version(version_string):
     return tuple(int(i) for i in version_string.split(".") if i.isdigit())
 
 
@@ -83,7 +83,7 @@ def get_blender_binary_path_python(blender_executable, blend_version=None):
         blend_version = get_blender_version(blender_executable)
     python_expr = (
         "import sys;print(sys.executable);"
-        if _parse_version(blend_version) >= (2, 91)
+        if parse_version(blend_version) >= (2, 91)
         else "import bpy;print(bpy.app.binary_path_python)"
     )
 
