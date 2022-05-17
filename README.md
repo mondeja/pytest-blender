@@ -19,8 +19,6 @@ pip install pytest-blender
 
 ### Usage
 
-#### Install dependencies in Blender Python interpreter
-
 Before execute it, you need to install your testing dependencies inside the
 builtin Blender Python interpreter. To get the interpreter location you can
 use the CLI utility `pytest-blender`, something like:
@@ -31,15 +29,6 @@ $blender_python -m ensurepip
 $blender_python -m pip install -r test-requirements.txt
 ```
 
-You can also get the intepreter for a custom Blender installation location
-with `--blender-executable` option:
-
-```bash
-pytest-blender --blender-executable ~/blender-2.91.2-linux64/blender
-```
-
-#### Execute tests
-
 After installing dependencies, just call pytest as usually.
 
 ```bash
@@ -49,7 +38,7 @@ pytest -svv
 ```
 Blender 2.82 (sub 7)
 Read prefs: ~/.config/blender/2.82/config/userpref.blend
-========================= test session starts ==================================
+=================== test session starts ===================
 platform linux -- Python 3.8.5, pytest-6.1.2, py-1.9.0, pluggy-0.13.1 -- /usr/bin/blender
 cachedir: .pytest_cache
 rootdir: /home/mondeja/files/code/pytest-blender
@@ -57,19 +46,26 @@ collected 1 item
 
 tests/test_bpy_import.py::test_inside_blender <module 'bpy' from '/usr/share/blender/scripts/modules/bpy/__init__.py'>
 PASSED
-=========================== 1 passed in 0.01s ==================================
+==================== 1 passed in 0.01s ====================
 ```
 
-You can specify a custom `blender` executable path using either
-`--blender-executable` CLI argument or `blender-executable` configuration
-option:
+### Reference
+
+#### Configuration
+
+All options can be passed as a CLI argument like `--[option-name]` or
+defined inside a [configuration file][pytest-configuration].
+
+##### `blender-executable`
+
+Specify a custom `blender` executable location.
 
 ```bash
 pytest --blender-executable ~/blender-2.91.2-linux64/blender
 ```
 
 ```ini
-[tools:pytest]
+[pytest]
 blender-executable = ~/blender-2.91.2-linux64/blender
 ```
 
@@ -77,56 +73,137 @@ blender-executable = ~/blender-2.91.2-linux64/blender
 Blender 2.91.2 (hash 5be9ef417703 built 2021-01-19 16:16:34)
 Read prefs: ~/.config/blender/2.91/config/userpref.blend
 found bundled python: ~/blender-2.91.2-linux64/2.91/python
-============================ test session starts ===============================
+=================== test session starts ===================
 platform linux -- Python 3.7.7, pytest-6.2.2, py-1.10.0, pluggy-0.13.1
 rootdir: ~/pytest-blender
 collected 1 item
 
 tests/test_bpy_import.py .                                                [100%]
 
-============================== 1 passed in 0.00s ===============================
+==================== 1 passed in 0.00s ====================
 ```
 
-#### Arguments propagation
+##### `blender-template`
 
-When you call `pytest`, all options like `--blender-executable` are passed
-to the `pytest` suite running `pytest-blender`. If you want to pass arguments
-to `blender` in its headless execution, add a `--` between `pytest` and
-`blender` arguments. If you want to pass arguments to the `python` Blender's
-interpreter, you need to add another `--` between arguments in a third group.
-
-For example:
-
-```sh
-pytest -svv --blender-executable ~/blender -- --enable-event-simulate -- -b
-```
-
-In case that you don't want to pass arguments to `blender` but yes to `python`,
-use double arguments group separation (`-- --`):
-
-```sh
-pytest -svv -- -- -b
-```
-
-#### Load startup template
-
-You can use the `--blender-template` argument or `blender-template`
-configuration option to pass a custom startup file:
+Load a custom startup `.blend` template.
 
 ```sh
 pytest -svv --blender-template ~/.config/blender/2.93/config/startup.blend
 ```
 
 ```ini
-[tool:pytest]
+[pytest]
 blender-template = ~/.config/blender/2.93/config/startup.blend
+addopts = -svv
 ```
 
-### Reference
+##### `blender-addons-dirs`
 
-#### Configuration
+Install addons inside Blender before executing the test suite. This allows
+you to easily test them.
 
-TODO: Table with all CLI arguments and INI options with correpondent links.
+By "addons" Blender understands Python scripts whose file names
+end with `.py`, `.zip` files for compressed packages with multiple modules
+or directories for Python packages which contain a `__init__.py` file.
+These must be located in the root of each directory passed to
+`blender-addons-dirs`.
+
+For example, given the next directory tree:
+
+```tree
+📁 addons-dirs
+├── 📁 private-addons
+│   └── 📁 package_addon
+│       ├── 📄 __init__.py 
+│       └── 📄 main.py
+|
+└── 📁 public-addons
+    ├── 📄 module_addon.py
+    └── 📄 compressed_addon.zip
+        ├── 📄 __init__.py 
+        └── 📄 main.py
+```
+
+The next configurations will install the addons `package_addon`,
+`module_addon` and `compressed_addon`.
+
+```sh
+pytest tests --blender-addons-dirs addons-dirs/private-addons addons-dirs/public-addons
+```
+
+```ini
+[pytest]
+blender-addons-dirs =
+    addons-dirs/private-addons
+    addons-dirs/public-addons
+```
+
+You can also define a unique addons directory in configuration files
+defining it as a string:
+
+```ini
+[pytest]
+blender-addons-dirs = addons-dirs/public-addons
+```
+
+If you need more complex setups see the fixtures
+[`install_addons_from_dir`](#install_addons_from_dir),
+[`disable_addons`](#disable_addons) and
+[`uninstall_addons`](#uninstall_addons).
+
+##### `blender-addons-cleaning`
+
+Define the addons cleaning strategy to follow after executing your
+test suite. It only affects to the addons installed using
+[`blender-addons-dirs`](#blender-addons-dirs).
+
+It accepts a string one of the next values:
+
+- `uninstall` (default): Uninstall the addons after executing the
+ test suite.
+- `disable`: Just disable the addons in user preferences, but does
+ not uninstall them.
+- `keep`: Keep the addons enabled. Useful if you want to manually
+ review the addons or while you're developing. 
+
+```sh
+pytest --blender-addons-cleaning disable
+```
+
+```ini
+[pytest]
+blender-addons-cleaning = disable
+```
+
+##### `pytest-blender-debug`
+
+Show in STDOUT the command executed by pytest-blender executing your
+test suite.
+
+```sh
+pytest --pytest-blender-debug
+```
+
+```ini
+[pytest]
+pytest-blender-debug = true
+```
+
+```
+[DEBUG (pytest-blender)] Running blender with: /usr/bin/blender -b --python /home/foo/files/code/pytest-blender/pytest_blender/run_pytest.py -- --pytest-blender-executable /usr/bin/blender -svv --rootdir=/tmp/tmpdsh0wnsf --strict-markers --strict-config -c /tmp/tmpdsh0wnsf/pytest.ini
+Blender 2.82 (sub 7)
+Read prefs: /home/foo/.config/blender/2.82/config/userpref.blend
+=================== test session starts ===================
+platform linux -- Python 3.8.10, pytest-7.0.1, pluggy-0.13.1 -- /usr/bin/blender
+cachedir: .pytest_cache
+rootdir: /tmp/tmpyio7hlc2, configfile: pytest.ini
+plugins: cov-3.0.0, Faker-12.1.0
+collecting ... collected 1 item
+
+tests/test_foo.py::test_foo PASSED
+
+==================== 1 passed in 0.09s ====================
+```
 
 #### Fixtures
 
@@ -256,6 +333,27 @@ for an example).
  [`install_addons_from_dir`](#install_addons_from_dir).
 - **quiet** (bool) If enabled, don't show stdout produced disabling addons.
 
+### Arguments propagation
+
+When you call `pytest`, all options like `--blender-executable` are passed
+to the `pytest` suite running `pytest-blender`. If you want to pass arguments
+to `blender` in its headless execution, add a `--` between `pytest` and
+`blender` arguments. If you want to pass arguments to the `python` Blender's
+interpreter, you need to add another `--` between arguments in a third group.
+
+For example:
+
+```sh
+pytest -svv --blender-executable ~/blender -- --enable-event-simulate -- -b
+```
+
+In case that you don't want to pass arguments to `blender` but yes
+to `python`, use double arguments group separation (`-- --`):
+
+```sh
+pytest -svv -- -- -b
+```
+
 ### CI integration
 
 You can use [blender-downloader] to download multiple
@@ -332,3 +430,4 @@ jobs:
 [Blender Directory Layout]: https://docs.blender.org/manual/en/latest/advanced/blender_directory_layout.html
 [`bpy.ops.preferences.addon_install`]: https://docs.blender.org/api/current/bpy.ops.preferences.html#bpy.ops.preferences.addon_install
 [`bpy.ops.wm.save_userpref`]: https://docs.blender.org/api/current/bpy.ops.wm.html#bpy.ops.wm.save_userpref
+[pytest-configuration]: https://docs.pytest.org/en/latest/reference/customize.html?highlight=configuration
