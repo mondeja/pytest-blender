@@ -14,6 +14,7 @@ _testSigIntPropagation() {
       --noconftest \
       --strict-config \
       --strict-markers \
+      --override-ini addopts=-svv \
       $_blender_executable_arg \
       tests/integration/sigint.py &
     # wait some time to start the test suite execution
