@@ -67,7 +67,7 @@ def test_blender_addons_dirs_cli_option(
     testing_context, plugin_args, addons_dirs, addons_ids, expected_exitcode
 ):
     with testing_context(
-        files={
+        {
             "tests/test_blender_addons_dirs_cli_option.py": (
                 render_addons_installed_test(addons_ids)
             ),

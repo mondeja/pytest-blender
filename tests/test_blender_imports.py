@@ -8,7 +8,7 @@ from testing_utils import parametrize_plugin_on_off
 @parametrize_plugin_on_off
 def test_bpy_import(testing_context, imported, plugin_args, expected_exitcode):
     with testing_context(
-        files={
+        {
             "tests/test_blender_import.py": f"""import pytest
 
 def test_blender_import():

@@ -38,7 +38,7 @@ def assert_userpref_file_read(stdout, stderr):
 @skip_if_userpref_does_not_exists
 def test_blender_template_cli_option(testing_context):
     with testing_context(
-        force_empty_inicfg=True,
+        empty_inicfg=True,
         files={"tests/test_foo.py": empty_test},
     ) as ctx:
         stdout, stderr, _ = ctx.run(
@@ -53,7 +53,7 @@ def test_blender_template_cli_option(testing_context):
 @skip_if_userpref_does_not_exists
 def test_blender_template_inicfg_option(testing_context):
     with testing_context(
-        files={
+        {
             "tests/test_foo.py": empty_test,
             "pytest.ini": f"""[pytest]
 blender-template = {blender_userpref_expected_location}

@@ -37,12 +37,12 @@ else:
 @pytest.fixture
 def testing_context():
     @contextlib.contextmanager
-    def _testing_context(files={}, force_empty_inicfg=False):
+    def _testing_context(files={}, empty_inicfg=False):
         with tempfile.TemporaryDirectory() as rootdir:
             # we need to force an empty ini file because pytest caches the
             # `setup.cfg` ini file used to execute the test suite itself,
             # reusing it so executing tests with `addopts` option defined
-            if force_empty_inicfg:
+            if empty_inicfg:
                 files["pytest.ini"] = "[pytest]\n"
 
             for rel_filepath, content in files.items():

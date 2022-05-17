@@ -12,7 +12,7 @@ def test_blender_executable(blender_executable):
 
 def test_blender_executable_cli_option_not_exists(testing_context):
     with testing_context(
-        force_empty_inicfg=True,
+        empty_inicfg=True,
         files={
             "tests/test_foo.py": empty_test,
         },
@@ -30,7 +30,7 @@ def test_blender_executable_cli_option_not_exists(testing_context):
 
 def test_blender_executable_cli_option_exists(testing_context):
     with testing_context(
-        force_empty_inicfg=True,
+        empty_inicfg=True,
         files={
             "tests/test_blender_executable.py": blender_executable_test,
         },
@@ -41,7 +41,7 @@ def test_blender_executable_cli_option_exists(testing_context):
 
 def test_blender_executable_inicfg_option_not_exists(testing_context):
     with testing_context(
-        files={
+        {
             "tests/test_foo.py": empty_test,
             "pytest.ini": (
                 "[pytest]\nblender-executable = foobarbazimpossibletoexist\n"

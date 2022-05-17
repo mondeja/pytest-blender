@@ -16,7 +16,7 @@ def test_install_addons_from_dir_fixture(testing_context):
     clean_addons()
 
     with testing_context(
-        force_empty_inicfg=True,
+        empty_inicfg=True,
         files={
             "tests/conftest.py": f"""
 import pytest

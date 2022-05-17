@@ -29,7 +29,7 @@ def test_blender_addons_cleaning_cli_option_default(testing_context, cleaning_ar
     clean_addons()
 
     with testing_context(
-        force_empty_inicfg=True,
+        empty_inicfg=True,
         files={"tests/test_addon_installed.py": addon_installed_test},
     ) as ctx:
         _, stderr, exitcode = ctx.run(
@@ -45,7 +45,7 @@ def test_blender_addons_cleaning_cli_option_disable(testing_context):
     clean_addons()
 
     with testing_context(
-        force_empty_inicfg=True,
+        empty_inicfg=True,
         files={"tests/test_addon_installed.py": addon_installed_test},
     ) as ctx:
         _, stderr, exitcode = ctx.run(
@@ -67,7 +67,7 @@ def test_blender_addons_cleaning_cli_option_keep(testing_context):
     clean_addons()
 
     with testing_context(
-        force_empty_inicfg=True,
+        empty_inicfg=True,
         files={"tests/test_addon_installed.py": addon_installed_test},
     ) as ctx:
         _, stderr, exitcode = ctx.run(
@@ -83,7 +83,7 @@ def test_blender_addons_cleaning_cli_option_keep(testing_context):
     assert "pytest_blender_basic.py" in os.listdir(BLENDER_USER_ADDONS_DIR)
 
     with testing_context(
-        force_empty_inicfg=True,
+        empty_inicfg=True,
         files={"tests/test_addon_installed.py": addon_installed_test},
     ) as ctx:
         _, stderr, exitcode = ctx.run()
@@ -102,7 +102,7 @@ def test_blender_addons_cleaning_inicfg_default_option(
     clean_addons()
 
     with testing_context(
-        files={
+        {
             "tests/test_addon_installed.py": addon_installed_test,
             "pytest.ini": f"""[pytest]
 {cleaning_option_value}blender-addons-dirs = {BAR_ADDONS_DIR}
@@ -119,7 +119,7 @@ def test_blender_addons_cleaning_inicfg_disable_option(testing_context):
     clean_addons()
 
     with testing_context(
-        files={
+        {
             "tests/test_addon_installed.py": addon_installed_test,
             "pytest.ini": f"""[pytest]
 blender-addons-cleaning = disable
@@ -153,7 +153,7 @@ blender-addons-dirs = {BAR_ADDONS_DIR}
     assert "pytest_blender_basic.py" in os.listdir(BLENDER_USER_ADDONS_DIR)
 
     with testing_context(
-        force_empty_inicfg=True,
+        empty_inicfg=True,
         files={"tests/test_addon_installed.py": addon_installed_test},
     ) as ctx:
         _, stderr, exitcode = ctx.run()
