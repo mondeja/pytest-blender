@@ -1,23 +1,20 @@
 import pytest
+from testing_utils import parametrize_plugin_on_off
 
 
-try:
-    from pytest_blender.test import pytest_blender_unactive
-except ImportError:
-    pytest_blender_unactive = False
-
-
-@pytest.mark.skipif(
-    pytest_blender_unactive,
-    reason="Requires testing loading the pytest-blender plugin.",
+@pytest.mark.parametrize(
+    "imported", ("bpy", "addon_utils"), ids=("import bpy", "import addon_utils")
 )
-def test_bpy_import():
-    import bpy  # noqa F401
+@parametrize_plugin_on_off
+def test_bpy_import(testing_context, imported, plugin_args, expected_exitcode):
+    with testing_context(
+        {
+            "tests/test_blender_import.py": f"""import pytest
 
-
-@pytest.mark.skipif(
-    pytest_blender_unactive,
-    reason="Requires testing loading the pytest-blender plugin.",
-)
-def test_addon_utils_import():
-    import addon_utils  # noqa F401
+def test_blender_import():
+    import {imported}
+"""
+        }
+    ) as ctx:
+        _, stderr, exitcode = ctx.run(plugin_args)
+        assert exitcode == expected_exitcode, stderr

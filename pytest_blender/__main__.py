@@ -2,8 +2,7 @@ import argparse
 import sys
 
 from pytest_blender import __version__
-from pytest_blender.run_pytest import get_blender_binary_path_python
-from pytest_blender.utils import which_blender_by_os
+from pytest_blender.utils import get_blender_binary_path_python, which_blender
 
 
 __description__ = "Show a Blender's builtin Python interpreter location."
@@ -22,7 +21,7 @@ def build_parser():
         "--blender-executable",
         dest="blender_executable",
         nargs=1,
-        default=which_blender_by_os,
+        default=which_blender,
         help="Custom Blender executable location for 'pytest-blender' plugin.",
     )
     return parser

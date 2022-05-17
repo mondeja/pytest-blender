@@ -1,60 +1,105 @@
 """pytest-blender tests configuration."""
 
-import logging
+import contextlib
+import copy
 import os
+import subprocess
 import sys
-import zipfile
+import tempfile
 
 import pytest
 
 
 TESTS_DIR = os.path.abspath(os.path.dirname(__file__))
-DATA_DIR = os.path.join(TESTS_DIR, "data")
-ADDONS_DIR = os.path.join(
-    TESTS_DIR,
-    "addons",
-)
-
-pytest_blender_logger = logging.getLogger("pytest_blender")
-pytest_blender_logger.setLevel(logging.DEBUG)
-pytest_blender_logger.addHandler(logging.StreamHandler())
-
-
-def zipify_addon_dir(in_dirpath, out_dirpath):
-    addon_zipped_path = os.path.join(
-        out_dirpath,
-        f"{os.path.basename(in_dirpath)}.zip",
-    )
-
-    with zipfile.ZipFile(addon_zipped_path, "w", zipfile.ZIP_DEFLATED) as zipf:
-        for root, _, files in os.walk(in_dirpath):
-            for file in files:
-                zipf.write(
-                    os.path.join(root, file),
-                    os.path.relpath(
-                        os.path.join(root, file),
-                        os.path.join(in_dirpath, ".."),
-                    ),
-                )
-    return addon_zipped_path
+if TESTS_DIR not in sys.path:
+    sys.path.append(TESTS_DIR)
+from testing_utils import ADDONS_DIRS, DATA_DIR
 
 
 try:
-    from pytest_blender.test import pytest_blender_active
+    from pytest_blender import zipify_addon_package
 except ImportError:
-    # executing pytest from Python Blender executable, the plugin is active
-    pytest_blender_active = True
+    inside_blender_interpreter = True
+else:
+    inside_blender_interpreter = False
 
-if pytest_blender_active:
+    # create zipped addon from data
+    addon_id = "pytest_blender_zipped"
+    foo_addons_dir = os.path.join(ADDONS_DIRS, "foo")
+    zipped_filepath = os.path.join(foo_addons_dir, f"{addon_id}.zip")
+    if os.path.isfile(zipped_filepath):
+        os.remove(zipped_filepath)
 
-    @pytest.fixture(scope="session", autouse=True)
-    def register_addons_from_dir(install_addons_from_dir, uninstall_addons):
-        # create zipped addon from data
-        addon_to_zip_dirpath = os.path.join(DATA_DIR, "pytest_blender_zipped")
-        zipify_addon_dir(addon_to_zip_dirpath, ADDONS_DIR)
+    addon_to_zip_dirpath = os.path.join(DATA_DIR, addon_id)
+    zipify_addon_package(addon_to_zip_dirpath, foo_addons_dir)
 
-        # register addons
-        addon_module_names = install_addons_from_dir(ADDONS_DIR, quiet=True)
-        yield
-        sys.stdout.write("\n")
-        uninstall_addons(addon_module_names, quiet=True)
+
+@pytest.fixture
+def testing_context():
+    @contextlib.contextmanager
+    def _testing_context(files={}, empty_inicfg=False):
+        with tempfile.TemporaryDirectory() as rootdir:
+            # we need to force an empty ini file because pytest caches the
+            # `setup.cfg` ini file used to execute the test suite itself,
+            # reusing it so executing tests with `addopts` option defined
+            if empty_inicfg:
+                files["pytest.ini"] = "[pytest]\n"
+
+            for rel_filepath, content in files.items():
+                filepath = os.path.join(rootdir, rel_filepath)
+
+                # ensure that its directory exists
+                basedir = os.path.abspath(os.path.dirname(filepath))
+                os.makedirs(basedir, exist_ok=True)
+
+                with open(filepath, "w") as f:
+                    f.write(content)
+
+            def run_in_context(additional_pytest_args=[], env={}, **kwargs):
+                _env = copy.copy(os.environ)
+                if "PWD" in _env:
+                    _env["PWD"] = rootdir
+                _env.update(env)
+
+                if "-c" not in additional_pytest_args and "pytest.ini" in files:
+                    additional_pytest_args = copy.copy(additional_pytest_args)
+                    additional_pytest_args.extend(
+                        ["-c", os.path.join(rootdir, "pytest.ini")]
+                    )
+
+                cmd = [
+                    sys.executable,
+                    "-m",
+                    "pytest",
+                    "-svv",
+                    f"--rootdir={rootdir}",
+                    "--strict-markers",
+                    "--strict-config",
+                    *additional_pytest_args,
+                ]
+                with subprocess.Popen(
+                    cmd,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    cwd=rootdir,
+                    env=_env,
+                    **kwargs,
+                ) as proc:
+                    stdout, stderr = proc.communicate()
+                    return (
+                        stdout.decode("utf-8"),
+                        stderr.decode("utf-8"),
+                        proc.returncode,
+                    )
+
+            ctx = type(
+                "PytestBlenderTestingContext",
+                (),
+                {
+                    "run": run_in_context,
+                },
+            )
+            ctx.rootdir = rootdir
+            yield ctx
+
+    return _testing_context
