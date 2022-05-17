@@ -1,7 +1,7 @@
 OPTIONS = {
     "blender-executable": {"help": "Blender executable location."},
     "blender-template": {
-        "help": "Open Blender using an empty layout as start template."
+        "help": "Open Blender using a custom layout as start template."
     },
     "blender-addons-dirs": {
         "help": "Directory with addons to install before test suite execution.",

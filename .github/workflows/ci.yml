@@ -61,7 +61,7 @@ jobs:
           path: |
             blender-*
             _blender-executable-path.txt
-          key: ${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.blender-version }}
+          key: ${{ runner.os }}-${{ matrix.blender-version }}
       - name: Download Blender ${{ matrix.blender-version }}
         if: steps.cache-blender.outputs.cache-hit != 'true'
         id: download-blender
