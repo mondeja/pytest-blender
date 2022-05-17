@@ -118,7 +118,6 @@ def get_addons_dir(blender_executable):
 
     scripts_dir = None
     for line in stdout.decode("utf-8").splitlines():
-        print("line", line)
         if line.endswith("scripts"):
             scripts_dir = line
             break

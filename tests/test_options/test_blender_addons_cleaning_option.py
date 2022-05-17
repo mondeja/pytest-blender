@@ -12,7 +12,10 @@ from testing_utils import (
 BAR_ADDONS_DIR = os.path.join(ADDONS_DIRS, "bar")
 
 
-parametrize_uninstall_cleaning_args = pytest.mark.parametrize(
+addon_installed_test = render_addon_installed_test("pytest_blender_basic")
+
+
+@pytest.mark.parametrize(
     "cleaning_args",
     (
         pytest.param([], id="cleaning_args=[]"),
@@ -22,12 +25,6 @@ parametrize_uninstall_cleaning_args = pytest.mark.parametrize(
         ),
     ),
 )
-
-
-addon_installed_test = render_addon_installed_test("pytest_blender_basic")
-
-
-@parametrize_uninstall_cleaning_args
 def test_blender_addons_cleaning_cli_option_default(testing_context, cleaning_args):
     clean_addons()
 
@@ -96,19 +93,19 @@ def test_blender_addons_cleaning_cli_option_keep(testing_context):
     clean_addons()
 
 
-@parametrize_uninstall_cleaning_args
-def test_blender_addons_cleaning_inicfg_default_option(testing_context, cleaning_args):
+@pytest.mark.parametrize(
+    "cleaning_option_value", (("blender-addons-cleaning = uninstall\n", ""))
+)
+def test_blender_addons_cleaning_inicfg_default_option(
+    testing_context, cleaning_option_value
+):
     clean_addons()
-
-    blender_addons_cleaning_config = (
-        "\nblender-addons-cleaning = uninstall" if len(cleaning_args) else ""
-    )
 
     with testing_context(
         files={
             "tests/test_addon_installed.py": addon_installed_test,
-            "pytest.ini": f"""[pytest]{blender_addons_cleaning_config}
-blender-addons-dirs = {BAR_ADDONS_DIR}
+            "pytest.ini": f"""[pytest]
+{cleaning_option_value}blender-addons-dirs = {BAR_ADDONS_DIR}
 """,
         },
     ) as ctx:

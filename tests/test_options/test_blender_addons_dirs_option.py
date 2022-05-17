@@ -67,7 +67,6 @@ def test_blender_addons_dirs_cli_option(
     testing_context, plugin_args, addons_dirs, addons_ids, expected_exitcode
 ):
     with testing_context(
-        force_empty_inicfg=True,
         files={
             "tests/test_blender_addons_dirs_cli_option.py": (
                 render_addons_installed_test(addons_ids)
@@ -75,7 +74,13 @@ def test_blender_addons_dirs_cli_option(
         },
     ) as ctx:
         _, stderr, exitcode = ctx.run(
-            ["tests", *plugin_args, "--blender-addons-dirs", *addons_dirs]
+            [
+                "--noconftest",
+                "tests",
+                *plugin_args,
+                "--blender-addons-dirs",
+                *addons_dirs,
+            ]
         )
         assert exitcode == expected_exitcode, stderr
 
