@@ -1,5 +1,7 @@
 import os
 
+from testing_utils import empty_test
+
 
 def test_blender_cli_arguments_propagation(testing_context):
     """CLI arguments propagation."""
@@ -72,3 +74,10 @@ def test_no_explicit_pytest_blender_plugin_enabling():
         )
         assert exitcode == 0, stderr
         assert "-p pytest-blender" not in stdout
+
+
+def test_pytest_help(testing_context):
+    with testing_context({"tests/test_foo.py": empty_test}) as ctx:
+        stdout, stderr, exitcode = ctx.run(["-h"])
+        assert stdout.startswith("usage:")
+        assert exitcode == 0, f"{stdout}\n----\n{stderr}"
