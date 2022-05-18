@@ -5,17 +5,13 @@ SIGINT_PIDFILE=/tmp/pytest-blender-integration-sigint.pid
 _testSigIntPropagation() {
     rm -f $SIGINT_PIDFILE
 
-    _blender_executable_arg=""
-    if [ -n "$BLENDER_EXECUTABLE" ]; then
-      _blender_executable_arg="--blender-executable $BLENDER_EXECUTABLE"
-    fi;
+    BLENDER_EXECUTABLE="$BLENDER_EXECUTABLE" \
     SIGINT_PIDFILE="$SIGINT_PIDFILE" \
-      python3 -m pytest -svv \
+      pytest -svv \
       --noconftest \
       --strict-config \
       --strict-markers \
       --override-ini addopts=-svv \
-      $_blender_executable_arg \
       tests/integration/sigint.py &
     # wait some time to start the test suite execution
     sleep 3
@@ -60,6 +56,12 @@ prepare() {
     curl -sSL https://raw.githubusercontent.com/kward/shunit2/master/shunit2 \
       -o shunit2
   fi
+
+  if [ -z "$BLENDER_EXECUTABLE" ]; then
+    printf "You must define the environment variable BLENDER_EXECUTABLE" >&2
+    printf " to execute the integration tests for pytest-blender\n" >&2
+    exit 1
+  fi;
 }
 
 prepare && . ./shunit2
