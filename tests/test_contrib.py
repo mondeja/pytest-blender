@@ -33,6 +33,7 @@ def test_coverage_with_pytest_cov(testing_context):
             elif line.startswith("my_foo_library/functions.py"):
                 functions_mod_cov_line = line
 
+        assert functions_mod_cov_line
         assert " 2 " in functions_mod_cov_line  # statements
         assert " 0 " in functions_mod_cov_line  # missed
         assert "100%" in functions_mod_cov_line  # covered
