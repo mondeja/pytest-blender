@@ -33,12 +33,14 @@ def test_coverage_with_pytest_cov(testing_context):
             elif line.startswith("my_foo_library/functions.py"):
                 functions_mod_cov_line = line
 
-        assert functions_mod_cov_line
-        assert " 2 " in functions_mod_cov_line  # statements
-        assert " 0 " in functions_mod_cov_line  # missed
-        assert "100%" in functions_mod_cov_line  # covered
+        msg = f"{stdout}\n----\n{stderr}"
+
+        assert functions_mod_cov_line, msg
+        assert " 2 " in functions_mod_cov_line, msg  # statements
+        assert " 0 " in functions_mod_cov_line, msg  # missed
+        assert "100%" in functions_mod_cov_line, msg  # covered
 
         coverage_data_file = os.path.join(ctx.rootdir, ".coverage")
-        assert os.path.isfile(coverage_data_file)
+        assert os.path.isfile(coverage_data_file), msg
 
-        assert exitcode == 0, stderr
+        assert exitcode == 0, msg
