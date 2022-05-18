@@ -77,7 +77,7 @@ jobs:
           blender_executable="$(< _blender-executable-path.txt tr -d '\n')"
           python_blender_executable="$(pytest-blender --blender-executable $blender_executable)"
           $python_blender_executable -m ensurepip
-          $python_blender_executable -m pip install pytest==${{ matrix.pytest-version }}
+          $python_blender_executable -m pip install pytest==${{ matrix.pytest-version }} pytest-cov
           echo "::set-output name=blender-executable::$blender_executable"
       - name: Unit tests
         run: BLENDER_EXECUTABLE="${{ steps.install-dependencies.outputs.blender-executable }}" pytest -svv --strict-config --strict-markers tests

@@ -10,3 +10,5 @@ shunit2
 *.zip
 .DS_Store
 .vscode
+.coverage
+htmlcov
