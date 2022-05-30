@@ -192,7 +192,7 @@ def _install_addons_from_dir(
             sys.stdout.write(
                 "[pytest-blender] Skipping installation of module"
                 f" '{addon_module_name}' as is not a Blender addon"
-                " (missing 'bl_info' module attribute)",
+                " (missing 'bl_info' module attribute)\n",
             )
             addons_to_uninstall.append(addon_module_name)
 
