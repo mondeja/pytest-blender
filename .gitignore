@@ -12,3 +12,6 @@ shunit2
 .vscode
 .coverage
 htmlcov
+*.img
+*.dmg
+Blender

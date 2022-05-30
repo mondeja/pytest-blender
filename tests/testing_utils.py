@@ -17,7 +17,12 @@ EXPECTED_ADDONS = {
     "pytest_blender_zipped_from_dir": "PytestBlenderZippedFromDirObjectMoveX",
 }
 
-BLENDER_USER_ADDONS_DIR = get_addons_dir(which_blender())
+blender_executable = which_blender()
+if blender_executable is None:
+    raise OSError(
+        "'blender' executable must be in PATH in order to run pytest-blender tests"
+    )
+BLENDER_USER_ADDONS_DIR = get_addons_dir(blender_executable)
 
 
 def parametrize_plugin_on_off_with(expected_exitcode_when_off=1):
@@ -76,4 +81,3 @@ def clean_addons():
             os.path.join(py_package_addon_path, "__init__.py")
         ):
             shutil.rmtree(py_package_addon_path)
-            continue

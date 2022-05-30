@@ -185,17 +185,50 @@ def _install_addons_from_dir(
         if not addons:
             raise ValueError("You need to pass at least one addon to install.")
 
-        for addon_module_name, addon_module_path in addons:
-            bpy.ops.preferences.addon_install(filepath=addon_module_path, **kwargs)
-            addon_utils.enable(
-                addon_module_name,
-                default_set=default_set,
-                persistent=persistent,
+        installed_addons_modnames = []
+        addons_to_uninstall = []
+
+        def skip_addon_installation(addon_module_name):
+            sys.stdout.write(
+                "[pytest-blender] Skipping installation of module"
+                f" '{addon_module_name}' as is not a Blender addon"
+                " (missing 'bl_info' module attribute)",
             )
+            addons_to_uninstall.append(addon_module_name)
+
+        for addon_module_name, addon_module_path in addons:
+            try:
+                bpy.ops.preferences.addon_install(filepath=addon_module_path, **kwargs)
+                addon_utils.enable(
+                    addon_module_name,
+                    default_set=default_set,
+                    persistent=persistent,
+                )
+            except AttributeError as exc:
+                if f"module '{addon_module_name}' has no attribute 'bl_info'" in str(
+                    exc
+                ):
+                    skip_addon_installation(addon_module_name)
+                else:
+                    raise
+            except ModuleNotFoundError as exc:
+                if f"No module named '{addon_module_name}'" in str(exc):
+                    skip_addon_installation(addon_module_name)
+                else:
+                    raise
+            else:
+                installed_addons_modnames.append(addon_module_name)
+
+        if addons_to_uninstall:
+            # addons could be installed because the attribute error
+            # for missing bl_info constants are raised in
+            # `addon_utils.enable`, after installing them
+            _uninstall_addons(addons_to_uninstall)
+
         if save_userpref:
             bpy.ops.wm.save_userpref()
 
-        return [modname for modname, _ in addons]
+        return installed_addons_modnames
 
     return _wrapper()
 
