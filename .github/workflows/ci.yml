@@ -17,6 +17,22 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          # Test in Windows
+          - platform: windows-latest
+            pytest-version: '7.1.2'
+            blender-version: '3.1.2'
+            # Using 3.10 in Windows due to PIP encoding errors:
+            # https://github.com/pypa/pip/issues/11066
+            python-version: '3.10'
+          # Test previous Blender versions
+          - platform: ubuntu-latest
+            pytest-version: '7.1.2'
+            blender-version: '2.83.9'
+            python-version: '3.8'
+          - platform: ubuntu-latest
+            pytest-version: '7.1.2'
+            blender-version: '2.82'
+            python-version: '3.7'
           # Test against Pytest v7
           - platform: ubuntu-latest
             pytest-version: '7.1.2'
@@ -37,22 +53,6 @@ jobs:
             pytest-version: '6.2.5'
             blender-version: '2.93.9'
             python-version: '3.9'
-          # Test previous Blender versions
-          - platform: ubuntu-latest
-            pytest-version: '7.1.2'
-            blender-version: '2.83.9'
-            python-version: '3.8'
-          - platform: ubuntu-latest
-            pytest-version: '7.1.2'
-            blender-version: '2.82'
-            python-version: '3.7'
-          # Test in Windows
-          - platform: windows-latest
-            pytest-version: '7.1.2'
-            blender-version: '3.1.2'
-            # Using 3.10 in Windows due to PIP encoding errors:
-            # https://github.com/pypa/pip/issues/11066
-            python-version: '3.10'
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python v${{ matrix.python-version }}
@@ -101,7 +101,7 @@ jobs:
           PYTHON_BLENDER_EXECUTABLE="$(pytest-blender --blender-executable $BLENDER_EXECUTABLE)"
           echo "PYTHON_BLENDER_EXECUTABLE: $PYTHON_BLENDER_EXECUTABLE"
           $PYTHON_BLENDER_EXECUTABLE -m ensurepip
-          $PYTHON_BLENDER_EXECUTABLE -m pip install pytest==${{ matrix.pytest-version }}
+          $PYTHON_BLENDER_EXECUTABLE -m pip install pytest==${{ matrix.pytest-version }} pytest-cov
           echo "::set-output name=blender-executable::$BLENDER_EXECUTABLE"
       # Install dependencies on Windows
       - name: Install dependencies
@@ -114,7 +114,7 @@ jobs:
           pytest-blender --blender-executable "$BLENDER_EXECUTABLE"
           $PYTHON_BLENDER_EXECUTABLE = (pytest-blender --blender-executable "$BLENDER_EXECUTABLE")
           echo "PYTHON_BLENDER_EXECUTABLE: $PYTHON_BLENDER_EXECUTABLE"
-          $PYTHON_BLENDER_EXECUTABLE -m pip install pytest==${{ matrix.pytest-version }}
+          $PYTHON_BLENDER_EXECUTABLE -m pip install pytest==${{ matrix.pytest-version }} pytest-cov
           echo "::set-output name=blender-executable::$BLENDER_EXECUTABLE"
       - name: Unit tests
         if: runner.os != 'Windows'
