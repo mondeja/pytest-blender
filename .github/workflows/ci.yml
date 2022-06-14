@@ -92,26 +92,28 @@ jobs:
       # Install dependencies on Unix-based systems
       - name: Install dependencies
         if: runner.os != 'Windows'
+        id: install-dependencies
         run: |
           python -m pip install .[test] pytest==${{ matrix.pytest-version }}
           BLENDER_EXECUTABLE="$(< _blender-executable-path.txt)"
-          echo "$BLENDER_EXECUTABLE"
+          echo "BLENDER_EXECUTABLE: $BLENDER_EXECUTABLE"
           pytest-blender --blender-executable "$BLENDER_EXECUTABLE"
           PYTHON_BLENDER_EXECUTABLE="$(pytest-blender --blender-executable $BLENDER_EXECUTABLE)"
-          echo "$PYTHON_BLENDER_EXECUTABLE"
+          echo "PYTHON_BLENDER_EXECUTABLE: $PYTHON_BLENDER_EXECUTABLE"
           $PYTHON_BLENDER_EXECUTABLE -m ensurepip
           $PYTHON_BLENDER_EXECUTABLE -m pip install pytest==${{ matrix.pytest-version }}
           echo "::set-output name=blender-executable::$BLENDER_EXECUTABLE"
       # Install dependencies on Windows
       - name: Install dependencies
         if: runner.os == 'Windows'
+        id: install-dependencies
         run: |
           python -m pip install .[test] pytest==${{ matrix.pytest-version }}
-          $BLENDER_EXECUTABLE = Get-Content _blender-executable-path.txt | Out-String
-          echo "$BLENDER_EXECUTABLE"
+          $BLENDER_EXECUTABLE = get-content _blender-executable-path.txt
+          echo "BLENDER_EXECUTABLE: $BLENDER_EXECUTABLE"
           pytest-blender --blender-executable "$BLENDER_EXECUTABLE"
           $PYTHON_BLENDER_EXECUTABLE = (pytest-blender --blender-executable "$BLENDER_EXECUTABLE")
-          echo "$PYTHON_BLENDER_EXECUTABLE"
+          echo "PYTHON_BLENDER_EXECUTABLE: $PYTHON_BLENDER_EXECUTABLE"
           $PYTHON_BLENDER_EXECUTABLE -m pip install pytest==${{ matrix.pytest-version }}
           echo "::set-output name=blender-executable::$BLENDER_EXECUTABLE"
       - name: Unit tests
