@@ -111,11 +111,11 @@ jobs:
           python -m pip install .[test] pytest==${{ matrix.pytest-version }}
           $BLENDER_EXECUTABLE = get-content _blender-executable-path.txt
           echo "BLENDER_EXECUTABLE: $BLENDER_EXECUTABLE"
-          pytest-blender --blender-executable "$BLENDER_EXECUTABLE"
-          $PYTHON_BLENDER_EXECUTABLE = (pytest-blender --blender-executable "$BLENDER_EXECUTABLE")
-          echo "PYTHON_BLENDER_EXECUTABLE: $PYTHON_BLENDER_EXECUTABLE"
-          $PYTHON_BLENDER_EXECUTABLE -m pip install pytest==${{ matrix.pytest-version }} pytest-cov
-          echo "::set-output name=blender-executable::$BLENDER_EXECUTABLE"
+        # pytest-blender --blender-executable "$BLENDER_EXECUTABLE"
+        # $PYTHON_BLENDER_EXECUTABLE = (pytest-blender --blender-executable "$BLENDER_EXECUTABLE")
+        # echo "PYTHON_BLENDER_EXECUTABLE: $PYTHON_BLENDER_EXECUTABLE"
+        # $PYTHON_BLENDER_EXECUTABLE -m pip install pytest==${{ matrix.pytest-version }} pytest-cov
+        # echo "::set-output name=blender-executable::$BLENDER_EXECUTABLE"
       - name: Unit tests
         if: runner.os != 'Windows'
         run: BLENDER_EXECUTABLE="${{ steps.install-dependencies-unix.outputs.blender-executable }}" pytest -svv --strict-config --strict-markers tests
