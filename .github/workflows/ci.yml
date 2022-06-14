@@ -77,9 +77,7 @@ jobs:
         run: |
           python -m pip install --upgrade blender-downloader
           python -m pip list
-          echo "$(blender-downloader ${{ matrix.blender-version }} \
-          --extract --remove-compressed --print-blender-executable --quiet)" \
-          > _blender-executable-path.txt
+          printf "%s" "$(blender-downloader ${{ matrix.blender-version }} --extract --remove-compressed --print-blender-executable --quiet)" > _blender-executable-path.txt
           cat _blender-executable-path.txt
       # Download Blender on Windows
       - name: Download Blender ${{ matrix.blender-version }}
@@ -96,7 +94,7 @@ jobs:
         if: runner.os != 'Windows'
         run: |
           python -m pip install .[test] pytest==${{ matrix.pytest-version }}
-          BLENDER_EXECUTABLE="$(< _blender-executable-path.txt tr -d '\n')"
+          BLENDER_EXECUTABLE="$(< _blender-executable-path.txt)"
           echo $BLENDER_EXECUTABLE
           pytest-blender --blender-executable $BLENDER_EXECUTABLE
           PYTHON_BLENDER_EXECUTABLE="$(pytest-blender --blender-executable $blender_executable)"
@@ -108,7 +106,8 @@ jobs:
         if: runner.os == 'Windows'
         run: |
           python -m pip install .[test] pytest==${{ matrix.pytest-version }}
-          pytest-blender --blender-executable D:\a\pytest-blender\pytest-blender\blender-3.1.2-windows-x64\blender.exe
+          $BLENDER_EXECUTABLE = Get-Content _blender-executable-path.txt | Out-String
+          pytest-blender --blender-executable $BLENDER_EXECUTABLE
 
       - name: Unit tests
         if: runner.os != 'Windows'
