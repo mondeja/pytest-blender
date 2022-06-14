@@ -70,18 +70,16 @@ jobs:
       - name: Download Blender ${{ matrix.blender-version }}
         if: |
           steps.cache-blender.outputs.cache-hit != 'true' &&
-          ${{ matrix.platform != 'windows-latest' }}
+          ${{ matrix.platform }} != 'windows-latest'
         run: |
           python -m pip install --upgrade blender-downloader
           python -m pip list
-          echo "$(blender-downloader ${{ matrix.blender-version }} \
-          --extract --remove-compressed --print-blender-executable \
-          --quiet)" > _blender-executable-path.txt
+          echo "$(blender-downloader ${{ matrix.blender-version }} --extract --remove-compressed --print-blender-executable --quiet)" > _blender-executable-path.txt
           cat _blender-executable-path.txt
       - name: Download Blender ${{ matrix.blender-version }}
         if: |
           steps.cache-blender.outputs.cache-hit != 'true' &&
-          ${{ matrix.platform == 'windows-latest' }}
+          ${{ matrix.platform }} == 'windows-latest'
         run: |
           python -m pip install --upgrade blender-downloader
           python -m pip list
