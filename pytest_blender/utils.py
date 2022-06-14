@@ -97,6 +97,8 @@ def get_blender_binary_path_python(blender_executable, blend_version=None):
         stderr=subprocess.STDOUT,
     )
 
+    print(stdout.decode("utf-8").splitlines())
+
     blender_python_path = None
     for line in stdout.decode("utf-8").splitlines():
         if line.startswith(os.sep) and os.path.exists(line):
