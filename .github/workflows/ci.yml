@@ -92,7 +92,7 @@ jobs:
       # Install dependencies on Unix-based systems
       - name: Install dependencies
         if: runner.os != 'Windows'
-        id: install-dependencies
+        id: install-dependencies-unix
         run: |
           python -m pip install .[test] pytest==${{ matrix.pytest-version }}
           BLENDER_EXECUTABLE="$(< _blender-executable-path.txt)"
@@ -106,7 +106,7 @@ jobs:
       # Install dependencies on Windows
       - name: Install dependencies
         if: runner.os == 'Windows'
-        id: install-dependencies
+        id: install-dependencies-windows
         run: |
           python -m pip install .[test] pytest==${{ matrix.pytest-version }}
           $BLENDER_EXECUTABLE = get-content _blender-executable-path.txt
@@ -118,13 +118,13 @@ jobs:
           echo "::set-output name=blender-executable::$BLENDER_EXECUTABLE"
       - name: Unit tests
         if: runner.os != 'Windows'
-        run: BLENDER_EXECUTABLE="${{ steps.install-dependencies.outputs.blender-executable }}" pytest -svv --strict-config --strict-markers tests
+        run: BLENDER_EXECUTABLE="${{ steps.install-dependencies-unix.outputs.blender-executable }}" pytest -svv --strict-config --strict-markers tests
       - name: Unit tests
         if: runner.os == 'Windows'
-        run: pwsh -Command { $env:BLENDER_EXECUTABLE="${{ steps.install-dependencies.outputs.blender-executable }}"; pytest -svv --strict-config --strict-markers tests }
+        run: pwsh -Command { $env:BLENDER_EXECUTABLE="${{ steps.install-dependencies-windows.outputs.blender-executable }}"; pytest -svv --strict-config --strict-markers tests }
       - name: Integration tests
         if: runner.os != 'Windows'
-        run: BLENDER_EXECUTABLE="${{ steps.install-dependencies.outputs.blender-executable }}" sh tests/integration.sh
+        run: BLENDER_EXECUTABLE="${{ steps.install-dependencies-unix.outputs.blender-executable }}" sh tests/integration.sh
       # TODO: integration tests on Windows?
       - run: exit 1
 
