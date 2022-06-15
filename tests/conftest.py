@@ -10,6 +10,13 @@ import tempfile
 import pytest
 
 
+if sys.platform == "windows" and "CI" in os.environ:
+    # https://github.com/pytest-dev/pytest/issues/4441
+    import _locale
+
+    _locale._getdefaultlocale = lambda *args: ["en_US", "utf8"]
+
+
 TESTS_DIR = os.path.abspath(os.path.dirname(__file__))
 if TESTS_DIR not in sys.path:
     sys.path.append(TESTS_DIR)

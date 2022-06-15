@@ -75,6 +75,7 @@ jobs:
           steps.cache-blender.outputs.cache-hit != 'true' &&
           runner.os != 'Windows'
         run: |
+          set -x
           python -m pip install --upgrade blender-downloader
           python -m pip list
           printf "%s" "$(blender-downloader ${{ matrix.blender-version }} --extract --remove-compressed --print-blender-executable --quiet)" > _blender-executable-path.txt
@@ -85,6 +86,7 @@ jobs:
           steps.cache-blender.outputs.cache-hit != 'true' &&
           runner.os == 'Windows'
         run: |
+          Set-PSDebug -Trace 2
           python -m pip install --upgrade blender-downloader
           python -m pip list
           blender-downloader ${{ matrix.blender-version }} --extract --remove-compressed --print-blender-executable --quiet | Out-File -FilePath _blender-executable-path.txt
@@ -109,7 +111,7 @@ jobs:
         if: runner.os == 'Windows'
         id: install-dependencies-windows
         run: |
-          Set-PSDebug -Trace 1
+          Set-PSDebug -Trace 2
           python -m pip install .[test] pytest==${{ matrix.pytest-version }}
           $BLENDER_EXECUTABLE = get-content _blender-executable-path.txt
           echo "BLENDER_EXECUTABLE: $BLENDER_EXECUTABLE"
