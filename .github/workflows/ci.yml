@@ -94,6 +94,7 @@ jobs:
         if: runner.os != 'Windows'
         id: install-dependencies-unix
         run: |
+          set -x
           python -m pip install .[test] pytest==${{ matrix.pytest-version }}
           BLENDER_EXECUTABLE="$(< _blender-executable-path.txt)"
           echo "BLENDER_EXECUTABLE: $BLENDER_EXECUTABLE"
@@ -108,6 +109,7 @@ jobs:
         if: runner.os == 'Windows'
         id: install-dependencies-windows
         run: |
+          Set-PSDebug -Trace 1
           python -m pip install .[test] pytest==${{ matrix.pytest-version }}
           $BLENDER_EXECUTABLE = get-content _blender-executable-path.txt
           echo "BLENDER_EXECUTABLE: $BLENDER_EXECUTABLE"
