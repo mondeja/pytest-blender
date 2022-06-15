@@ -1,12 +1,12 @@
-from testing_utils import empty_test
-
-from pytest_blender import which_blender
+from testing_utils import blender_executable, empty_test
 
 
-blender_executable = which_blender()
+# escape backslashes for Windows
+escaped_blender_executable = blender_executable.replace("\\", "\\\\")
+
 blender_executable_test = f"""
 def test_blender_executable(blender_executable):
-    assert blender_executable == "{blender_executable}"
+    assert blender_executable == "{escaped_blender_executable}"
 """
 
 

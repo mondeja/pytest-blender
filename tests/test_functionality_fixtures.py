@@ -16,6 +16,9 @@ FOO_ADDONS_DIR = os.path.join(ADDONS_DIRS, "foo")
 def test_install_addons_from_dir_fixture(testing_context):
     clean_addons()
 
+    # escape backslashes for Windows
+    escaped_addons_dir = FOO_ADDONS_DIR.replace("\\", "\\\\")
+
     with testing_context(
         empty_inicfg=True,
         files={
@@ -25,7 +28,7 @@ import pytest
 @pytest.fixture(scope="session", autouse=True)
 def install_addons(install_addons_from_dir, uninstall_addons):
     addons_ids = install_addons_from_dir(
-        "{FOO_ADDONS_DIR}",
+        "{escaped_addons_dir}",
         addons_ids=['pytest_blender_zipped'],
     )
     yield
