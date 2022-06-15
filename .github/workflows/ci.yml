@@ -118,7 +118,7 @@ jobs:
           pytest-blender --blender-executable $(Get-Variable -Name BLENDER_EXECUTABLE)
           $PYTHON_BLENDER_EXECUTABLE = pytest-blender --blender-executable "$(Get-Variable -Name BLENDER_EXECUTABLE)"
           echo "PYTHON_BLENDER_EXECUTABLE: $PYTHON_BLENDER_EXECUTABLE"
-          $(Get-Variable -Name PYTHON_BLENDER_EXECUTABLE) -m pip install pytest==${{ matrix.pytest-version }} pytest-cov
+          Invoke-Expression $PYTHON_BLENDER_EXECUTABLE -m pip install pytest==${{ matrix.pytest-version }} pytest-cov
           echo "::set-output name=blender-executable::$BLENDER_EXECUTABLE"
       - name: Unit tests
         if: runner.os != 'Windows'
