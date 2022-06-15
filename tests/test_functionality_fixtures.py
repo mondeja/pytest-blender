@@ -16,6 +16,9 @@ FOO_ADDONS_DIR = os.path.join(ADDONS_DIRS, "foo")
 def test_install_addons_from_dir_fixture(testing_context):
     clean_addons()
 
+    # escape backslashes for Windows
+    escaped_addons_dir = FOO_ADDONS_DIR.replace("\\", "\\\\")
+
     with testing_context(
         empty_inicfg=True,
         files={
@@ -25,7 +28,7 @@ import pytest
 @pytest.fixture(scope="session", autouse=True)
 def install_addons(install_addons_from_dir, uninstall_addons):
     addons_ids = install_addons_from_dir(
-        "{FOO_ADDONS_DIR}",
+        "{escaped_addons_dir}",
         addons_ids=['pytest_blender_zipped'],
     )
     yield
@@ -39,8 +42,8 @@ def install_addons(install_addons_from_dir, uninstall_addons):
             ),
         },
     ) as ctx:
-        _, stderr, exitcode = ctx.run()
-        assert exitcode == 0, stderr
+        stdout, stderr, exitcode = ctx.run()
+        assert exitcode == 0, f"{stdout}\n---\n{stderr}"
 
     assert "pytest_blender_zipped" not in os.listdir(BLENDER_USER_ADDONS_DIR)
     assert "pytest_blender_zipped_from_dir" not in os.listdir(BLENDER_USER_ADDONS_DIR)
@@ -92,7 +95,7 @@ def install_addons(install_addons_from_dir, uninstall_addons):
         assert (
             "[pytest-blender]"
             " Skipping installation of module 'helpers' as is not a"
-            " Blender addon (missing 'bl_info' module attribute)\n"
+            " Blender addon (missing 'bl_info' module attribute)"
         ) in stdout
 
     assert "pytest_blender_zipped" not in os.listdir(BLENDER_USER_ADDONS_DIR)

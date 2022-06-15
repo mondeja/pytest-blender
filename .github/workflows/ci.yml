@@ -17,9 +17,25 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          # Test in Windows
+          - platform: windows-latest
+            pytest-version: '7.1.2'
+            blender-version: '3.1.2'
+            # Using 3.10 in Windows due to PIP encoding errors:
+            # https://github.com/pypa/pip/issues/11066
+            python-version: '3.10'
+          # Test previous Blender versions
+          - platform: ubuntu-latest
+            pytest-version: '7.1.2'
+            blender-version: '2.83.9'
+            python-version: '3.8'
+          - platform: ubuntu-latest
+            pytest-version: '7.1.2'
+            blender-version: '2.82'
+            python-version: '3.7'
           # Test against Pytest v7
           - platform: ubuntu-latest
-            pytest-version: '7.0.1'
+            pytest-version: '7.1.2'
             blender-version: '3.1.1'
             python-version: '3.10'
           # Test against Pytest v6
@@ -29,7 +45,7 @@ jobs:
             python-version: '3.9'
           # Test in MacOS (Py310)
           - platform: macos-latest
-            pytest-version: '7.0.1'
+            pytest-version: '7.1.2'
             blender-version: '3.1.2'
             python-version: '3.10'
           # Test in MacOS (Py39)
@@ -37,15 +53,6 @@ jobs:
             pytest-version: '6.2.5'
             blender-version: '2.93.9'
             python-version: '3.9'
-          # Test previous Blender versions
-          - platform: ubuntu-latest
-            pytest-version: '7.0.1'
-            blender-version: '2.83.9'
-            python-version: '3.8'
-          - platform: ubuntu-latest
-            pytest-version: '7.0.1'
-            blender-version: '2.82'
-            python-version: '3.7'
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python v${{ matrix.python-version }}
@@ -62,27 +69,81 @@ jobs:
             blender-*
             _blender-executable-path.txt
           key: ${{ runner.os }}-${{ matrix.blender-version }}
+      # Download Blender on Linux and MacOS
       - name: Download Blender ${{ matrix.blender-version }}
-        if: steps.cache-blender.outputs.cache-hit != 'true'
-        id: download-blender
+        if: |
+          steps.cache-blender.outputs.cache-hit != 'true' &&
+          runner.os != 'Windows'
         run: |
+          set -x
           python -m pip install --upgrade blender-downloader
-          echo "$(blender-downloader \
-          ${{ matrix.blender-version }} --extract --remove-compressed \
-          --print-blender-executable --quiet)" > _blender-executable-path.txt
-      - name: Install dependencies
-        id: install-dependencies
+          python -m pip list
+          printf "%s" "$(blender-downloader ${{ matrix.blender-version }} --extract --remove-compressed --print-blender-executable --quiet)" > _blender-executable-path.txt
+          cat _blender-executable-path.txt
+      # Download Blender on Windows
+      - name: Download Blender ${{ matrix.blender-version }}
+        if: |
+          steps.cache-blender.outputs.cache-hit != 'true' &&
+          runner.os == 'Windows'
         run: |
+          Set-PSDebug -Trace 2
+          python -m pip install --upgrade blender-downloader
+          python -m pip list
+          blender-downloader ${{ matrix.blender-version }} --extract --remove-compressed --print-blender-executable --quiet | Out-File -FilePath _blender-executable-path.txt
+          get-content _blender-executable-path.txt
+      # Install dependencies on Unix-based systems
+      - name: Install dependencies
+        if: runner.os != 'Windows'
+        id: install-dependencies-unix
+        run: |
+          set -x
           python -m pip install .[test] pytest==${{ matrix.pytest-version }}
-          blender_executable="$(< _blender-executable-path.txt tr -d '\n')"
-          python_blender_executable="$(pytest-blender --blender-executable $blender_executable)"
-          $python_blender_executable -m ensurepip
-          $python_blender_executable -m pip install pytest==${{ matrix.pytest-version }} pytest-cov
-          echo "::set-output name=blender-executable::$blender_executable"
+          BLENDER_EXECUTABLE="$(< _blender-executable-path.txt)"
+          echo "BLENDER_EXECUTABLE: $BLENDER_EXECUTABLE"
+          pytest-blender --blender-executable "$BLENDER_EXECUTABLE"
+          PYTHON_BLENDER_EXECUTABLE="$(pytest-blender --blender-executable $BLENDER_EXECUTABLE)"
+          echo "PYTHON_BLENDER_EXECUTABLE: $PYTHON_BLENDER_EXECUTABLE"
+          $PYTHON_BLENDER_EXECUTABLE -m ensurepip
+          $PYTHON_BLENDER_EXECUTABLE -m pip install pytest==${{ matrix.pytest-version }} pytest-cov
+          echo "::set-output name=blender-executable::$BLENDER_EXECUTABLE"
+      # Install dependencies on Windows
+      - name: Install dependencies
+        if: runner.os == 'Windows'
+        id: install-dependencies-windows
+        run: |
+          Set-PSDebug -Trace 2
+          python -m pip install .[test] pytest==${{ matrix.pytest-version }}
+          $BLENDER_EXECUTABLE = get-content _blender-executable-path.txt
+          echo "BLENDER_EXECUTABLE: $BLENDER_EXECUTABLE"
+          pytest-blender --blender-executable $(Get-Variable -Name BLENDER_EXECUTABLE -ValueOnly)
+          $PYTHON_BLENDER_EXECUTABLE = pytest-blender --blender-executable "$(Get-Variable -Name BLENDER_EXECUTABLE -ValueOnly)"
+          echo "PYTHON_BLENDER_EXECUTABLE: $PYTHON_BLENDER_EXECUTABLE"
+          Invoke-Expression "$PYTHON_BLENDER_EXECUTABLE -m pip install pytest==${{ matrix.pytest-version }} pytest-cov"
+          echo "::set-output name=blender-executable::$BLENDER_EXECUTABLE"
       - name: Unit tests
-        run: BLENDER_EXECUTABLE="${{ steps.install-dependencies.outputs.blender-executable }}" pytest -svv --strict-config --strict-markers tests
+        if: runner.os != 'Windows'
+        run: pytest -svv --strict-config --strict-markers tests
+        env:
+          BLENDER_EXECUTABLE: ${{ steps.install-dependencies-unix.outputs.blender-executable }}
+      - name: Unit tests
+        if: runner.os == 'Windows'
+        # Created empty pytest.ini file to avoid the reading of setup.cfg
+        # because there is a problem with encoding on Windows, see:
+        # https://github.com/pytest-dev/pytest/issues/4441
+        #
+        # Note that pytest.ini will always take precedence, even if empty, see:
+        # https://docs.pytest.org/en/7.1.x/reference/customize.html#finding-the-rootdir
+        run: |
+          New-Item -Path 'pytest.ini' -ItemType File
+          pytest -svv -p no:pytest-blender -p pytester --strict-config --strict-markers tests
+        env:
+          BLENDER_EXECUTABLE: ${{ steps.install-dependencies-windows.outputs.blender-executable }}
       - name: Integration tests
-        run: BLENDER_EXECUTABLE="${{ steps.install-dependencies.outputs.blender-executable }}" sh tests/integration.sh
+        if: runner.os != 'Windows'
+        run: sh tests/integration.sh
+        env:
+          BLENDER_EXECUTABLE: ${{ steps.install-dependencies-unix.outputs.blender-executable }}
+      # TODO: integration tests on Windows?
 
   build-sdist:
     if: startsWith(github.ref, 'refs/tags/')

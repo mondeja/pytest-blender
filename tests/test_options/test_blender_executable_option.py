@@ -1,12 +1,12 @@
-from testing_utils import empty_test
-
-from pytest_blender import which_blender
+from testing_utils import blender_executable, empty_test
 
 
-blender_executable = which_blender()
+# escape backslashes for Windows
+escaped_blender_executable = blender_executable.replace("\\", "\\\\")
+
 blender_executable_test = f"""
 def test_blender_executable(blender_executable):
-    assert blender_executable == "{blender_executable}"
+    assert blender_executable == "{escaped_blender_executable}"
 """
 
 
@@ -25,7 +25,13 @@ def test_blender_executable_cli_option_not_exists(testing_context):
             ]
         )
         assert exitcode == 3, stderr
-        assert "No such file or directory: 'foobarbazimpossibletoexist'" in stderr
+        assert (
+            # unix
+            "No such file or directory: 'foobarbazimpossibletoexist'" in stderr
+            or
+            # windows
+            "The system cannot find the file specified" in stderr
+        )
 
 
 def test_blender_executable_cli_option_exists(testing_context):
@@ -35,8 +41,8 @@ def test_blender_executable_cli_option_exists(testing_context):
             "tests/test_blender_executable.py": blender_executable_test,
         },
     ) as ctx:
-        _, stderr, exitcode = ctx.run(["--blender-executable", blender_executable])
-        assert exitcode == 0, stderr
+        stdout, stderr, exitcode = ctx.run(["--blender-executable", blender_executable])
+        assert exitcode == 0, f"{stdout}\n---\n{stderr}"
 
 
 def test_blender_executable_inicfg_option_not_exists(testing_context):
@@ -50,7 +56,13 @@ def test_blender_executable_inicfg_option_not_exists(testing_context):
     ) as ctx:
         _, stderr, exitcode = ctx.run()
         assert exitcode == 3, stderr
-        assert "No such file or directory: 'foobarbazimpossibletoexist'" in stderr
+        assert (
+            # unix
+            "No such file or directory: 'foobarbazimpossibletoexist'" in stderr
+            or
+            # windows
+            "The system cannot find the file specified" in stderr
+        )
 
 
 def test_blender_executable_inicfg_option_exists(testing_context):
@@ -60,5 +72,5 @@ def test_blender_executable_inicfg_option_exists(testing_context):
             "pytest.ini": (f"[pytest]\nblender-executable = {blender_executable}\n"),
         },
     ) as ctx:
-        _, stderr, exitcode = ctx.run()
-        assert exitcode == 0, stderr
+        stdout, stderr, exitcode = ctx.run()
+        assert exitcode == 0, f"{stdout}\n---\n{stderr}"
