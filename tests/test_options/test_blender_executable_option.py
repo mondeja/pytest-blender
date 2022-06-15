@@ -41,8 +41,8 @@ def test_blender_executable_cli_option_exists(testing_context):
             "tests/test_blender_executable.py": blender_executable_test,
         },
     ) as ctx:
-        _, stderr, exitcode = ctx.run(["--blender-executable", blender_executable])
-        assert exitcode == 0, stderr
+        stdout, stderr, exitcode = ctx.run(["--blender-executable", blender_executable])
+        assert exitcode == 0, f"{stdout}\n---\n{stderr}"
 
 
 def test_blender_executable_inicfg_option_not_exists(testing_context):
@@ -72,5 +72,5 @@ def test_blender_executable_inicfg_option_exists(testing_context):
             "pytest.ini": (f"[pytest]\nblender-executable = {blender_executable}\n"),
         },
     ) as ctx:
-        _, stderr, exitcode = ctx.run()
-        assert exitcode == 0, stderr
+        stdout, stderr, exitcode = ctx.run()
+        assert exitcode == 0, f"{stdout}\n---\n{stderr}"

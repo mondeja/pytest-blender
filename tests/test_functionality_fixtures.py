@@ -39,8 +39,8 @@ def install_addons(install_addons_from_dir, uninstall_addons):
             ),
         },
     ) as ctx:
-        _, stderr, exitcode = ctx.run()
-        assert exitcode == 0, stderr
+        stdout, stderr, exitcode = ctx.run()
+        assert exitcode == 0, f"{stdout}\n---\n{stderr}"
 
     assert "pytest_blender_zipped" not in os.listdir(BLENDER_USER_ADDONS_DIR)
     assert "pytest_blender_zipped_from_dir" not in os.listdir(BLENDER_USER_ADDONS_DIR)
