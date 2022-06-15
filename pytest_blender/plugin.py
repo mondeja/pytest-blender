@@ -187,7 +187,8 @@ def pytest_configure(config):
             handled_exit()
 
         signal.signal(signal.SIGINT, on_sigint)
-        signal.signal(signal.SIGHUP, on_sigint)
+        if sys.platform != "windows":
+            signal.signal(signal.SIGHUP, on_sigint)
         signal.signal(signal.SIGTERM, on_sigint)
         proc.communicate()
 
