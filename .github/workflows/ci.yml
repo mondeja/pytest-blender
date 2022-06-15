@@ -115,10 +115,10 @@ jobs:
           python -m pip install .[test] pytest==${{ matrix.pytest-version }}
           $BLENDER_EXECUTABLE = get-content _blender-executable-path.txt
           echo "BLENDER_EXECUTABLE: $BLENDER_EXECUTABLE"
-          pytest-blender --blender-executable $(Get-Variable -Name $BLENDER_EXECUTABLE -ValueOnly)
-          $PYTHON_BLENDER_EXECUTABLE = (pytest-blender --blender-executable "$(Get-Variable -Name $BLENDER_EXECUTABLE -ValueOnly)")
+          pytest-blender --blender-executable $(Get-Variable -Name BLENDER_EXECUTABLE -ValueOnly)
+          $PYTHON_BLENDER_EXECUTABLE = (pytest-blender --blender-executable "$(Get-Variable -Name BLENDER_EXECUTABLE -ValueOnly)")
           echo "PYTHON_BLENDER_EXECUTABLE: $PYTHON_BLENDER_EXECUTABLE"
-        #$(Get-Variable -Name $PYTHON_BLENDER_EXECUTABLE -ValueOnly) -m pip install pytest==${{ matrix.pytest-version }} pytest-cov
+        #$(Get-Variable -Name $PYTBLENDER_EXECUTABLEHON_BLENDER_EXECUTABLE -ValueOnly) -m pip install pytest==${{ matrix.pytest-version }} pytest-cov
         #echo "::set-output name=blender-executable::$BLENDER_EXECUTABLE"
       - name: Unit tests
         if: runner.os != 'Windows'
@@ -144,7 +144,8 @@ jobs:
         env:
           BLENDER_EXECUTABLE: ${{ steps.install-dependencies-unix.outputs.blender-executable }}
       # TODO: integration tests on Windows?
-      - run: exit 1
+      - if: runner.os == 'Windows'
+        run: exit 1
 
   build-sdist:
     if: startsWith(github.ref, 'refs/tags/')
