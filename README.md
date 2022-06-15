@@ -349,7 +349,8 @@ pytest -svv --blender-executable ~/blender -- --debug
 
 You can use [blender-downloader] to download multiple
 versions of Blender in your CI and test against them. There is an example
-for Github Actions in the CI configuration of this repository:
+for Github Actions in the CI configuration of this repository, something
+like:
 
 ```yaml
 jobs:
@@ -386,14 +387,14 @@ jobs:
         id: download-blender
         run: |
           python -m pip install --upgrade blender-downloader
-          echo "$(blender-downloader \
+          printf "%s" "$(blender-downloader \
           ${{ matrix.blender-version }} --extract --remove-compressed \
           --quiet --print-blender-executable)" > _blender-executable-path.txt
       - name: Install dependencies
         id: install-dependencies
         run: |
           python -m pip install .[test]
-          blender_executable="$(< _blender-executable-path.txt tr -d '\n')"
+          blender_executable="$(< _blender-executable-path.txt)"
           python_blender_executable="$(pytest-blender --blender-executable $blender_executable)"
           $python_blender_executable -m ensurepip
           $python_blender_executable -m pip install pytest

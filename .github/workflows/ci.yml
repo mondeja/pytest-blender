@@ -118,7 +118,7 @@ jobs:
           pytest-blender --blender-executable $(Get-Variable -Name $BLENDER_EXECUTABLE -ValueOnly)
           $PYTHON_BLENDER_EXECUTABLE = (pytest-blender --blender-executable "$(Get-Variable -Name $BLENDER_EXECUTABLE -ValueOnly)")
           echo "PYTHON_BLENDER_EXECUTABLE: $PYTHON_BLENDER_EXECUTABLE"
-          $PYTHON_BLENDER_EXECUTABLE -m pip install pytest==${{ matrix.pytest-version }} pytest-cov
+          $(Get-Variable -Name $PYTHON_BLENDER_EXECUTABLE -ValueOnly) -m pip install pytest==${{ matrix.pytest-version }} pytest-cov
           echo "::set-output name=blender-executable::$BLENDER_EXECUTABLE"
       - name: Unit tests
         if: runner.os != 'Windows'
@@ -130,6 +130,9 @@ jobs:
         # Created empty pytest.ini file to avoid the reading of setup.cfg
         # because there is a problem with encoding on Windows, see:
         # https://github.com/pytest-dev/pytest/issues/4441
+        #
+        # Note that pytest.ini will always take precedence, even if empty, see:
+        # https://docs.pytest.org/en/7.1.x/reference/customize.html#finding-the-rootdir
         run: |
           New-Item -Path 'pytest.ini' -ItemType File
           pytest -svv -p no:pytest-blender -p pytester --strict-config --strict-markers tests
