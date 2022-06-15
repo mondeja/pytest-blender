@@ -75,9 +75,8 @@ jobs:
           steps.cache-blender.outputs.cache-hit != 'true' &&
           runner.os != 'Windows'
         run: |
-          set -x
-          python -m pip install --upgrade blender-downloader
-          python -m pip list
+          set -xenv:
+          BLENDER_EXECUTABLE: ${{ steps.install-dependencies-unix.outputs.blender-executable }}
           printf "%s" "$(blender-downloader ${{ matrix.blender-version }} --extract --remove-compressed --print-blender-executable --quiet)" > _blender-executable-path.txt
           cat _blender-executable-path.txt
       # Download Blender on Windows
@@ -122,13 +121,21 @@ jobs:
         # echo "::set-output name=blender-executable::$BLENDER_EXECUTABLE"
       - name: Unit tests
         if: runner.os != 'Windows'
-        run: BLENDER_EXECUTABLE="${{ steps.install-dependencies-unix.outputs.blender-executable }}" pytest -svv --strict-config --strict-markers tests
+        run: pytest -svv --strict-config --strict-markers tests
+        env:
+          BLENDER_EXECUTABLE: ${{ steps.install-dependencies-unix.outputs.blender-executable }}
       - name: Unit tests
         if: runner.os == 'Windows'
-        run: pwsh -Command { $env:BLENDER_EXECUTABLE="${{ steps.install-dependencies-windows.outputs.blender-executable }}"; pytest -svv --strict-config --strict-markers tests }
+        run: pytest -svv --strict-config --strict-markers tests
+        env:
+          BLENDER_EXECUTABLE: ${{ steps.install-dependencies-windows.outputs.blender-executable }}
+          # https://github.com/pytest-dev/pytest/issues/4441
+          PYTHONIOENCODING: utf-8
       - name: Integration tests
         if: runner.os != 'Windows'
-        run: BLENDER_EXECUTABLE="${{ steps.install-dependencies-unix.outputs.blender-executable }}" sh tests/integration.sh
+        run: sh tests/integration.sh
+        env:
+          BLENDER_EXECUTABLE: ${{ steps.install-dependencies-unix.outputs.blender-executable }}
       # TODO: integration tests on Windows?
       - run: exit 1
 
