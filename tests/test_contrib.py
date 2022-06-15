@@ -30,7 +30,7 @@ def test_coverage_with_pytest_cov(testing_context):
             if not _inside_coverage:
                 if "coverage:" in line:
                     _inside_coverage = True
-            elif line.startswith("my_foo_library/functions.py"):
+            elif "functions.py" in line:
                 functions_mod_cov_line = line
 
         msg = f"{stdout}\n----\n{stderr}"

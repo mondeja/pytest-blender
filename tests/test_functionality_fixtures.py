@@ -92,7 +92,7 @@ def install_addons(install_addons_from_dir, uninstall_addons):
         assert (
             "[pytest-blender]"
             " Skipping installation of module 'helpers' as is not a"
-            " Blender addon (missing 'bl_info' module attribute)\n"
+            " Blender addon (missing 'bl_info' module attribute)"
         ) in stdout
 
     assert "pytest_blender_zipped" not in os.listdir(BLENDER_USER_ADDONS_DIR)

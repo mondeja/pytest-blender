@@ -25,7 +25,13 @@ def test_blender_executable_cli_option_not_exists(testing_context):
             ]
         )
         assert exitcode == 3, stderr
-        assert "No such file or directory: 'foobarbazimpossibletoexist'" in stderr
+        assert (
+            # unix
+            "No such file or directory: 'foobarbazimpossibletoexist'" in stderr
+            or
+            # windows
+            "The system cannot find the file specified" in stderr
+        )
 
 
 def test_blender_executable_cli_option_exists(testing_context):
@@ -50,7 +56,13 @@ def test_blender_executable_inicfg_option_not_exists(testing_context):
     ) as ctx:
         _, stderr, exitcode = ctx.run()
         assert exitcode == 3, stderr
-        assert "No such file or directory: 'foobarbazimpossibletoexist'" in stderr
+        assert (
+            # unix
+            "No such file or directory: 'foobarbazimpossibletoexist'" in stderr
+            or
+            # windows
+            "The system cannot find the file specified" in stderr
+        )
 
 
 def test_blender_executable_inicfg_option_exists(testing_context):
