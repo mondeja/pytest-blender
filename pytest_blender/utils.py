@@ -21,6 +21,27 @@ class GetPythonBlenderPathError(PytestBlenderException):
 
 
 def zipify_addon_package(in_dirpath, out_dirpath):
+    """ Zip the files from one folders and return the path to the zipped directory.
+    
+    Used to zip the addons directory. It ignores the files of format specified
+    in the ZIP_ROOTS_IGNORE variable: 
+    [".DStore", ".git", ".gitignore", "__pycache__"]
+
+    Parameters
+    ----------
+
+    in_dirpath : str
+    Path to the directory to be zipped.
+    
+    out_dirpath : str
+    Directory path where to save the zipped files.
+
+    Returns
+    -------
+
+    str: Path to the new zip file.
+
+    """
     zipped_path = os.path.join(
         out_dirpath,
         f"{os.path.basename(in_dirpath)}.zip",
@@ -130,6 +151,19 @@ def get_blender_binary_path_python(blender_executable, blend_version=None):
 
 
 def get_addons_dir(blender_executable):
+    """ Get the path to the addon directory.
+    
+    Parameters
+    ----------
+
+    blender_executable : str
+      Blender's executable location.
+
+    Returns
+    -------
+
+    str: Path to directory where blender addons are located.
+    """
     stdout = subprocess.check_output(
         [
             blender_executable,
