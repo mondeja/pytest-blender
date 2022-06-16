@@ -27,7 +27,7 @@ jobs:
           # Test previous Blender versions
           - platform: ubuntu-latest
             pytest-version: '7.1.2'
-            blender-version: '2.83.9'
+            blender-version: '2.83.20'
             python-version: '3.8'
           - platform: ubuntu-latest
             pytest-version: '7.1.2'
@@ -41,8 +41,13 @@ jobs:
           # Test against Pytest v6
           - platform: ubuntu-latest
             pytest-version: '6.2.5'
-            blender-version: '2.93.8'
+            blender-version: '2.93.9'
             python-version: '3.9'
+          # Test latest Blender (Py311)
+          - platform: ubuntu-latest
+            pytest-version: '7.1.2'
+            blender-version: '3.3.0'
+            python-version: '3.11-dev'
           # Test in MacOS (Py310)
           - platform: macos-latest
             pytest-version: '7.1.2'
