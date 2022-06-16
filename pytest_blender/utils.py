@@ -1,11 +1,23 @@
 import os
+import pprint
 import shutil
 import subprocess
 import sys
 import zipfile
 
 
+PYTEST_BLENDER_NEW_ISSUE_URL = (
+    "https://github.com/mondeja/pytest-blender/issues/new/choose"
+)
 ZIP_ROOTS_IGNORE = [".DStore", ".git", ".gitignore", "__pycache__"]
+
+
+class PytestBlenderException(Exception):
+    pass
+
+
+class GetPythonBlenderPathError(PytestBlenderException):
+    pass
 
 
 def zipify_addon_package(in_dirpath, out_dirpath):
@@ -81,10 +93,11 @@ def get_blender_binary_path_python(blender_executable, blend_version=None):
     """
     if blend_version is None:
         blend_version = get_blender_version(blender_executable)
+    id_string = "BLENDER-PYTHON-PATH:"
     python_expr = (
-        "import sys;print(sys.executable);"
+        f"import sys;print('{id_string}',sys.executable);"
         if parse_version(blend_version) >= (2, 91)
-        else "import bpy;print(bpy.app.binary_path_python)"
+        else f"import bpy;print('{id_string}',bpy.app.binary_path_python)"
     )
 
     stdout = subprocess.check_output(
@@ -99,14 +112,20 @@ def get_blender_binary_path_python(blender_executable, blend_version=None):
 
     blender_python_path = None
     for line in stdout.decode("utf-8").splitlines():
-        # this should be enough to support Windows and Unix based systems
-        if (
-            os.path.exists(line)
-            and not os.path.isdir(line)
-            and "py" in os.path.basename(line.lower())
-        ):
-            blender_python_path = line
+        if line.startswith(id_string):
+            blender_python_path = line.split(" ", maxsplit=1)[1]
             break
+    if blender_python_path is None:
+        debugging_data = {
+            "platform": sys.platform,
+            "blender_executable": blender_executable,
+            "stdout": stdout,
+        }
+        raise GetPythonBlenderPathError(
+            "Failed to retrieve the Blender's Python interpreter path."
+            f" Please, submit a report at {PYTEST_BLENDER_NEW_ISSUE_URL}"
+            f" including the next data:\n{pprint.pformat(debugging_data)}"
+        )
     return blender_python_path
 
 

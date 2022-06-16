@@ -2,7 +2,11 @@ import argparse
 import sys
 
 from pytest_blender import __version__
-from pytest_blender.utils import get_blender_binary_path_python, which_blender
+from pytest_blender.utils import (
+    GetPythonBlenderPathError,
+    get_blender_binary_path_python,
+    which_blender,
+)
 
 
 __description__ = "Show a Blender's builtin Python interpreter location."
@@ -44,10 +48,14 @@ def parse_args(args):
 
 def run(args):
     opts = parse_args(args)
-    blender_python = get_blender_binary_path_python(opts.blender_executable)
-    sys.stdout.write(f"{blender_python}\n")
-
-    return 0
+    try:
+        blender_python = get_blender_binary_path_python(opts.blender_executable)
+    except GetPythonBlenderPathError as exc:
+        sys.stderr.write(f"{exc.args[0]}\n")
+        return 1
+    else:
+        sys.stdout.write(f"{blender_python}\n")
+        return 0
 
 
 def main():
