@@ -46,7 +46,7 @@ jobs:
           # Test latest Blender (Py311)
           - platform: ubuntu-latest
             pytest-version: '7.1.2'
-            blender-version: '3.3.0'
+            blender-version: '3.2.0'
             python-version: '3.11-dev'
           # Test in MacOS (Py310)
           - platform: macos-latest
