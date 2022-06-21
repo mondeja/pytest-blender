@@ -21,25 +21,17 @@ class GetPythonBlenderPathError(PytestBlenderException):
 
 
 def zipify_addon_package(in_dirpath, out_dirpath):
-    """Zip the files from one folders and return the path to the zipped directory.
+    """Zip the files from in_dirpath, returns the path to new compressed file.
 
     Used to zip the addons directory. It ignores the files of format specified
     in the ZIP_ROOTS_IGNORE variable:
-    [".DStore", ".git", ".gitignore", "__pycache__"]
 
-    Parameters
-    ----------
+    Args:
+        in_dirpath (str): Path to the directory to be zipped.
+        out_dirpath (str): Directory path where to save the zipped files.
 
-    in_dirpath : str
-    Path to the directory to be zipped.
-
-    out_dirpath : str
-    Directory path where to save the zipped files.
-
-    Returns
-    -------
-
-    str: Path to the new zip file.
+    Returns:
+        str: Path to the newly created zip file.
 
     """
     zipped_path = os.path.join(
@@ -81,15 +73,14 @@ def parse_version(version_string):
 
 
 def get_blender_version(blender_executable):
-    """Get Blender's version goving its executable location.
+    """Get the version of blender executable.
 
-    blender_executable : str
-      Blender's executable location.
+    Args:
+        blender_executable (str): Path to the blender executable file.
 
-    Returns
-    -------
+    Returns:
+        str: Blender's version in the format "3.1.2"
 
-    str: Blender's version.
     """
     version_stdout = subprocess.check_output([blender_executable, "--version"])
     return version_stdout.decode("utf-8").splitlines()[0].split(" ")[1]
@@ -101,16 +92,19 @@ def get_blender_binary_path_python(blender_executable, blend_version=None):
     This function can't be in utils because the module is not loaded from
     Blender (current script is executed inside Blender's Python executable).
 
-    Parameters
-    ----------
+    Args:
+        blender_executable (str): Blender's executable filepath.
+        blend_version (str, optional): Blender's version in the format "3.1.2",
+            Defaults to None.
 
-    blender_executable : str
-      Blender's executable location.
+    Returns:
+        str: Blender's Python executable path.
 
-    Returns
-    -------
+    Raises:
+        GetPythonBlenderPathError: If the python path cannot be found, the
+            error asks to sumbit a report. It also gives details of the
+            debugging data to include in the report.
 
-    str: Blender's Python executable path.
     """
     if blend_version is None:
         blend_version = get_blender_version(blender_executable)
@@ -153,16 +147,12 @@ def get_blender_binary_path_python(blender_executable, blend_version=None):
 def get_addons_dir(blender_executable):
     """Get the path to the addon directory.
 
-    Parameters
-    ----------
+    Args:
+        blender_executable (str): Blender's executable location.
 
-    blender_executable : str
-      Blender's executable location.
+    Returns:
+        str: Path to directory where blender addons are located.
 
-    Returns
-    -------
-
-    str: Path to directory where blender addons are located.
     """
     stdout = subprocess.check_output(
         [
