@@ -12,7 +12,6 @@ from src.my_foo_library.functions import my_foo_function
 def test_my_foo_library():
     assert my_foo_function()
 """,
-    "src/__init__.py": "",
     "src/my_foo_library/__init__.py": "bl_info = {'name': 'My Foo Library'}",
     "src/my_foo_library/functions.py": """
 def my_foo_function():
