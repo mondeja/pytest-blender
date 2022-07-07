@@ -55,7 +55,12 @@ def testing_context():
                 with open(filepath, "w") as f:
                     f.write(content)
 
-            def run_in_context(additional_pytest_args=[], env={}, **kwargs):
+            def run_in_context(
+                additional_pytest_args=[], env={}, cmd_prefix=None, **kwargs
+            ):
+                if cmd_prefix is None:
+                    cmd_prefix = [sys.executable]
+
                 _env = copy.copy(os.environ)
                 if "PWD" in _env:
                     _env["PWD"] = rootdir
@@ -68,7 +73,7 @@ def testing_context():
                     )
 
                 cmd = [
-                    sys.executable,
+                    *cmd_prefix,
                     "-m",
                     "pytest",
                     "-svv",

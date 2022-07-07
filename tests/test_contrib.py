@@ -2,20 +2,19 @@ import os
 
 
 library_and_test_files = {
+    "tests/__init__.py": "",
     "tests/test_my_foo_library.py": """
 import os
 import sys
 
-if os.getcwd() not in sys.path:
-    sys.path.append(os.getcwd())
-
-from my_foo_library.functions import my_foo_function
+from src.my_foo_library.functions import my_foo_function
 
 def test_my_foo_library():
     assert my_foo_function()
 """,
-    "my_foo_library/__init__.py": "",
-    "my_foo_library/functions.py": """
+    "src/__init__.py": "",
+    "src/my_foo_library/__init__.py": "bl_info = {'name': 'My Foo Library'}",
+    "src/my_foo_library/functions.py": """
 def my_foo_function():
     return True
 """,
@@ -24,22 +23,33 @@ def my_foo_function():
 
 def test_coverage_with_pytest_cov(testing_context):
     with testing_context(empty_inicfg=True, files=library_and_test_files) as ctx:
-        stdout, stderr, exitcode = ctx.run(["--cov=my_foo_library"])
-        _inside_coverage, functions_mod_cov_line = (False, None)
-        for line in stdout.splitlines():
-            if not _inside_coverage:
-                if "coverage:" in line:
-                    _inside_coverage = True
-            elif "functions.py" in line:
-                functions_mod_cov_line = line
-
+        stdout, stderr, exitcode = ctx.run(["--cov=src/my_foo_library"])
         msg = f"{stdout}\n----\n{stderr}"
 
-        assert functions_mod_cov_line, msg
-        assert " 2 " in functions_mod_cov_line, msg  # statements
-        assert " 0 " in functions_mod_cov_line, msg  # missed
-        assert "100%" in functions_mod_cov_line, msg  # covered
+        assert stdout.count("100%") == 3, msg
+        coverage_data_file = os.path.join(ctx.rootdir, ".coverage")
+        assert os.path.isfile(coverage_data_file), msg
 
+        assert exitcode == 0, msg
+
+
+def test_coverage_with_pytest_cov_blender_addons_dir(testing_context):
+    with testing_context(empty_inicfg=True, files=library_and_test_files) as ctx:
+        if os.path.isfile(os.path.join(ctx.rootdir, ".coverage")):
+            os.remove(os.path.join(ctx.rootdir, ".coverage"))
+        with open(os.path.join(ctx.rootdir, "pytest.ini"), "w") as f:
+            f.write(
+                """
+[pytest]
+pytest-blender-debug = true
+blender-addons-dirs = src
+addopts = --cov src/my_foo_library
+"""
+            )
+        stdout, stderr, exitcode = ctx.run([])
+        msg = f"{stdout}\n----\n{stderr}"
+
+        assert stdout.count("100%") == 3, msg
         coverage_data_file = os.path.join(ctx.rootdir, ".coverage")
         assert os.path.isfile(coverage_data_file), msg
 
