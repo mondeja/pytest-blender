@@ -151,7 +151,7 @@ def test_coverage_with_pytest_cov_pytest_pythonpath(testing_context, tmp_path):
         with open(os.path.join(ctx.rootdir, "pytest.ini"), "a") as f:
             f.write(
                 """pythonpath = nine
-addopts = --cov nine/ten
+addopts = --cov nine
 """
             )
         stdout, stderr, exitcode = ctx.run()
