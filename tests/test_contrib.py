@@ -103,7 +103,6 @@ addopts = --cov five/six
         assert exitcode == 0, msg
 
 
-"""
 def test_coverage_with_pytest_cov_blender_user_scripts_envvar(testing_context):
     files = test_files
     files.update(
@@ -128,4 +127,3 @@ def test_coverage_with_pytest_cov_blender_user_scripts_envvar(testing_context):
         assert os.path.isfile(coverage_data_file), msg
 
         assert exitcode == 0, msg
-"""

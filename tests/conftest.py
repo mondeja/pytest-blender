@@ -37,7 +37,9 @@ else:
 @pytest.fixture
 def testing_context():
     @contextlib.contextmanager
-    def _testing_context(files={}, empty_inicfg=False):
+    def _testing_context(files=None, empty_inicfg=False):
+        if files is None:
+            files = {}
         with tempfile.TemporaryDirectory() as rootdir:
             # we need to force an empty ini file because pytest caches the
             # `setup.cfg` ini file used to execute the test suite itself,
@@ -66,12 +68,14 @@ def testing_context():
                     cmd_prefix = [sys.executable]
 
                 if env is None:
-                    env = {}
+                    __env = {}
+                else:
+                    __env = copy.deepcopy(env)
 
-                _env = copy.copy(os.environ)
+                _env = copy.deepcopy(os.environ)
                 if "PWD" in _env:
                     _env["PWD"] = rootdir
-                _env.update(env)
+                _env.update(__env)
 
                 if additional_pytest_args is None:
                     additional_pytest_args = []
