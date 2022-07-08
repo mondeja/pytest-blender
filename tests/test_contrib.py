@@ -129,7 +129,7 @@ def test_coverage_with_pytest_cov_blender_user_scripts_envvar(testing_context):
         assert exitcode == 0, msg
 
 
-def test_coverage_with_pytest_cov_pytest_pythonpath(testing_context):
+def test_coverage_with_pytest_cov_pytest_pythonpath(testing_context, tmp_path):
     files = test_files
     files.update(
         {
@@ -143,9 +143,8 @@ def test_coverage_with_pytest_cov_pytest_pythonpath(testing_context):
             os.remove(os.path.join(ctx.rootdir, ".coverage"))
         with open(os.path.join(ctx.rootdir, "pytest.ini"), "a") as f:
             f.write(
-                """pytest-blender-debug = true
-pythonpath = nine
-addopts = --cov=nine
+                """pythonpath = nine
+addopts = --cov nine/ten
 """
             )
         stdout, stderr, exitcode = ctx.run()
