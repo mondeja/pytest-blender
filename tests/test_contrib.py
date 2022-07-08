@@ -37,7 +37,7 @@ def test_coverage_with_pytest_cov_pythonpath(testing_context):
     files["tests/test_my_foo_library.py"].replace(
         "from src.my_foo_library", "from my_foo_library"
     )
-    with testing_context(files=library_and_test_files) as ctx:
+    with testing_context(files=files) as ctx:
         if os.path.isfile(os.path.join(ctx.rootdir, ".coverage")):
             os.remove(os.path.join(ctx.rootdir, ".coverage"))
         stdout, stderr, exitcode = ctx.run(
@@ -66,7 +66,7 @@ blender-addons-dirs = src
 addopts = --cov src/my_foo_library
 """
             )
-        stdout, stderr, exitcode = ctx.run([])
+        stdout, stderr, exitcode = ctx.run()
         msg = f"{stdout}\n----\n{stderr}"
 
         assert stdout.count("100%") == 3, msg
