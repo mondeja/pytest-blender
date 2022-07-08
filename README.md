@@ -347,9 +347,9 @@ pytest -svv --blender-executable ~/blender -- --debug
 
 ### Measuring code coverage
 
-You can to use [pytest-cov] to measure code coverage. If so, instead of
+You can use [pytest-cov] to measure code coverage. If so, instead of
 using [`blender-addons-dirs`](#blender-addons-dirs) configuration option
-use [pytest's `pythonpath`].
+use [pytest's `pythonpath` option].
 
 Example for *pytest.ini*:
 
