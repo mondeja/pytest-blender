@@ -345,6 +345,20 @@ For example:
 pytest -svv --blender-executable ~/blender -- --debug
 ```
 
+### Measuring code coverage
+
+You can use [pytest-cov] to measure code coverage. If so, instead of
+using [`blender-addons-dirs`](#blender-addons-dirs) configuration option
+use [pytest's `pythonpath` option].
+
+Example for *pytest.ini*:
+
+```ini
+[pytest]
+pythonpath = path/to/blender/addons
+addopts = --cov path/to/blender/addons
+```
+
 ### CI integration
 
 You can use [blender-downloader] to download multiple
@@ -423,3 +437,5 @@ jobs:
 [`bpy.ops.preferences.addon_install`]: https://docs.blender.org/api/current/bpy.ops.preferences.html#bpy.ops.preferences.addon_install
 [`bpy.ops.wm.save_userpref`]: https://docs.blender.org/api/current/bpy.ops.wm.html#bpy.ops.wm.save_userpref
 [pytest-configuration]: https://docs.pytest.org/en/latest/reference/customize.html?highlight=configuration
+[pytest-cov]: https://github.com/pytest-dev/pytest-cov
+[pytest's `pythonpath`]: https://docs.pytest.org/en/latest/reference/reference.html#confval-pythonpath

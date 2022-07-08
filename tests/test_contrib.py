@@ -1,5 +1,8 @@
 import os
 
+import pytest
+from testing_utils import pytest_version_info
+
 
 test_files = {"tests/__init__.py": ""}
 
@@ -120,6 +123,38 @@ def test_coverage_with_pytest_cov_blender_user_scripts_envvar(testing_context):
             env={"BLENDER_USER_SCRIPTS": os.path.join(ctx.rootdir, "seven")},
         )
 
+        msg = f"{stdout}\n----\n{stderr}"
+
+        assert stdout.count("100%") == 3, msg
+        coverage_data_file = os.path.join(ctx.rootdir, ".coverage")
+        assert os.path.isfile(coverage_data_file), msg
+
+        assert exitcode == 0, msg
+
+
+@pytest.mark.skipif(
+    pytest_version_info < (7,),
+    reason="The pytest option pythonpath has been added in pytest v7",
+)
+def test_coverage_with_pytest_cov_pytest_pythonpath(testing_context, tmp_path):
+    files = test_files
+    files.update(
+        {
+            "tests/test_nine_ten_library.py": create_lib_tests_py("nine.ten"),
+            "nine/ten/__init__.py": create_init_py(),
+            "nine/ten/functions.py": create_functions_py(),
+        }
+    )
+    with testing_context(empty_inicfg=True, files=files) as ctx:
+        if os.path.isfile(os.path.join(ctx.rootdir, ".coverage")):
+            os.remove(os.path.join(ctx.rootdir, ".coverage"))
+        with open(os.path.join(ctx.rootdir, "pytest.ini"), "a") as f:
+            f.write(
+                """pythonpath = nine
+addopts = --cov nine
+"""
+            )
+        stdout, stderr, exitcode = ctx.run()
         msg = f"{stdout}\n----\n{stderr}"
 
         assert stdout.count("100%") == 3, msg
