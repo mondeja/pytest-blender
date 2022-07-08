@@ -56,21 +56,36 @@ def testing_context():
                     f.write(content)
 
             def run_in_context(
-                additional_pytest_args=[], env={}, cmd_prefix=None, **kwargs
+                additional_pytest_args=None,
+                additional_blender_args=None,
+                env=None,
+                cmd_prefix=None,
+                **kwargs,
             ):
                 if cmd_prefix is None:
                     cmd_prefix = [sys.executable]
+
+                if env is None:
+                    env = {}
 
                 _env = copy.copy(os.environ)
                 if "PWD" in _env:
                     _env["PWD"] = rootdir
                 _env.update(env)
 
+                if additional_pytest_args is None:
+                    additional_pytest_args = []
+
                 if "-c" not in additional_pytest_args and "pytest.ini" in files:
                     additional_pytest_args = copy.copy(additional_pytest_args)
                     additional_pytest_args.extend(
                         ["-c", os.path.join(rootdir, "pytest.ini")]
                     )
+
+                if additional_blender_args is None:
+                    additional_blender_args = []
+                else:
+                    additional_blender_args.insert(0, "--")
 
                 cmd = [
                     *cmd_prefix,
