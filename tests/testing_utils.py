@@ -7,6 +7,10 @@ import pytest
 from pytest_blender import get_addons_dir, which_blender
 
 
+pytest_version_info = tuple(
+    int(x) for x in pytest.__version__.split(".") if x.isdigit()
+)
+
 TESTS_DIR = os.path.abspath(os.path.dirname(__file__))
 DATA_DIR = os.path.join(TESTS_DIR, "data")
 ADDONS_DIRS = os.path.join(TESTS_DIR, "addons-dirs")
