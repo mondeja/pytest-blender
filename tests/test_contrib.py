@@ -41,7 +41,11 @@ def test_coverage_with_pytest_cov_pythonpath(testing_context):
         if os.path.isfile(os.path.join(ctx.rootdir, ".coverage")):
             os.remove(os.path.join(ctx.rootdir, ".coverage"))
         stdout, stderr, exitcode = ctx.run(
-            ["--cov=src/my_foo_library", "--pytest-blender-debug"],
+            [
+                "--cov=src/my_foo_library",
+                "--pytest-blender-debug",
+                "--import-mode=importlib",
+            ],
             ["--python-use-system-env"],
             env={"PYTHONPATH": os.path.join(ctx.rootdir, "src")},
         )
