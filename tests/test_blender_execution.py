@@ -29,11 +29,12 @@ def test_cli_env_propagation(testing_context):
         {
             "tests/test_python_cache_prefix.py": f"""
 import os
+import sys
 
 def test_python_cache_prefix():
     python_cache_prefix = os.environ.get("PYTHONPYCACHEPREFIX")
     assert os.path.basename(python_cache_prefix) == "{custom_pyc_files_dirname}"
-    print(python_cache_prefix)
+    sys.stdout(python_cache_prefix + '\\n')
 """,
             os.path.join(custom_pyc_files_dirname, "empty.txt"): "",
         }

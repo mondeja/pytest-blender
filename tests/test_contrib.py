@@ -36,16 +36,33 @@ def test_coverage_with_pytest_cov_blender_addons_dir(testing_context):
     with testing_context(empty_inicfg=True, files=library_and_test_files) as ctx:
         if os.path.isfile(os.path.join(ctx.rootdir, ".coverage")):
             os.remove(os.path.join(ctx.rootdir, ".coverage"))
-        with open(os.path.join(ctx.rootdir, "pytest.ini"), "w") as f:
+        with open(os.path.join(ctx.rootdir, "pytest.ini"), "a") as f:
             f.write(
-                """
-[pytest]
-pytest-blender-debug = true
+                """pytest-blender-debug = true
 blender-addons-dirs = src
 addopts = --cov src/my_foo_library
 """
             )
         stdout, stderr, exitcode = ctx.run([])
+        msg = f"{stdout}\n----\n{stderr}"
+
+        assert stdout.count("100%") == 3, msg
+        coverage_data_file = os.path.join(ctx.rootdir, ".coverage")
+        assert os.path.isfile(coverage_data_file), msg
+
+        assert exitcode == 0, msg
+
+
+def test_coverage_with_pytest_cov_pythonpath(testing_context):
+    with testing_context(files=library_and_test_files) as ctx:
+        if os.path.isfile(os.path.join(ctx.rootdir, ".coverage")):
+            os.remove(os.path.join(ctx.rootdir, ".coverage"))
+        stdout, stderr, exitcode = ctx.run(
+            ["--cov=src/my_foo_library", "--pytest-blender-debug"],
+            ["--python-use-system-env"],
+            env={"PYTHONPATH": "src"},
+        )
+
         msg = f"{stdout}\n----\n{stderr}"
 
         assert stdout.count("100%") == 3, msg
