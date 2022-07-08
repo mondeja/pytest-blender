@@ -127,3 +127,32 @@ def test_coverage_with_pytest_cov_blender_user_scripts_envvar(testing_context):
         assert os.path.isfile(coverage_data_file), msg
 
         assert exitcode == 0, msg
+
+
+def test_coverage_with_pytest_cov_pytest_pythonpath(testing_context):
+    files = test_files
+    files.update(
+        {
+            "tests/test_nine_ten_library.py": create_lib_tests_py("nine.ten"),
+            "nine/ten/__init__.py": create_init_py(),
+            "nine/ten/functions.py": create_functions_py(),
+        }
+    )
+    with testing_context(empty_inicfg=True, files=files) as ctx:
+        if os.path.isfile(os.path.join(ctx.rootdir, ".coverage")):
+            os.remove(os.path.join(ctx.rootdir, ".coverage"))
+        with open(os.path.join(ctx.rootdir, "pytest.ini"), "a") as f:
+            f.write(
+                """pytest-blender-debug = true
+pythonpath = nine
+addopts = --cov nine/ten
+"""
+            )
+        stdout, stderr, exitcode = ctx.run()
+        msg = f"{stdout}\n----\n{stderr}"
+
+        assert stdout.count("100%") == 3, msg
+        coverage_data_file = os.path.join(ctx.rootdir, ".coverage")
+        assert os.path.isfile(coverage_data_file), msg
+
+        assert exitcode == 0, msg
