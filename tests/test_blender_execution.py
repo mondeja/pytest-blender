@@ -34,17 +34,17 @@ import sys
 def test_python_cache_prefix():
     python_cache_prefix = os.environ.get("PYTHONPYCACHEPREFIX")
     assert os.path.basename(python_cache_prefix) == "{custom_pyc_files_dirname}"
-    sys.stdout(python_cache_prefix + '\\n')
+    sys.stdout.write(python_cache_prefix + '\\n')
 """,
             os.path.join(custom_pyc_files_dirname, "empty.txt"): "",
         }
     ) as ctx:
         custom_pyc_files_dir = os.path.join(ctx.rootdir, custom_pyc_files_dirname)
         stdout, stderr, exitcode = ctx.run(
-            [],
             env={"PYTHONPYCACHEPREFIX": custom_pyc_files_dir},
         )
-        assert exitcode == 0, stderr
+        msg = f"{stdout}\n---\n{stderr}\n"
+        assert exitcode == 0, msg
         assert custom_pyc_files_dir in stdout
 
         # pyc files directories added
