@@ -145,7 +145,7 @@ def test_coverage_with_pytest_cov_pytest_pythonpath(testing_context):
             f.write(
                 """pytest-blender-debug = true
 pythonpath = nine
-addopts = --cov nine/ten
+addopts = --cov=nine
 """
             )
         stdout, stderr, exitcode = ctx.run()
