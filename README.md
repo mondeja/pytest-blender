@@ -157,7 +157,7 @@ Define the addons cleaning strategy to follow after executing your
 test suite. It only affects to the addons installed using
 [`blender-addons-dirs`](#blender-addons-dirs).
 
-It accepts a string one of the next values:
+It accepts one of the next values:
 
 - `uninstall` (default): Uninstall the addons after executing the
  test suite.
