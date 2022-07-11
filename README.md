@@ -438,4 +438,4 @@ jobs:
 [`bpy.ops.wm.save_userpref`]: https://docs.blender.org/api/current/bpy.ops.wm.html#bpy.ops.wm.save_userpref
 [pytest-configuration]: https://docs.pytest.org/en/latest/reference/customize.html?highlight=configuration
 [pytest-cov]: https://github.com/pytest-dev/pytest-cov
-[pytest's `pythonpath`]: https://docs.pytest.org/en/latest/reference/reference.html#confval-pythonpath
+[pytest's `pythonpath` option]: https://docs.pytest.org/en/latest/reference/reference.html#confval-pythonpath
