@@ -78,7 +78,7 @@ def get_blender_version(blender_executable):
         blender_executable (str): Path to the blender executable file.
 
     Returns:
-        str: Blender's version in the format "3.1.2"
+        str: Blender's version.
 
     """
     version_stdout = subprocess.check_output([blender_executable, "--version"])
