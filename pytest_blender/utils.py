@@ -78,8 +78,7 @@ def get_blender_version(blender_executable):
         blender_executable (str): Path to the blender executable file.
 
     Returns:
-        str: Blender's version in the format "3.1.2"
-
+        str: Blender's version.
     """
     version_stdout = subprocess.check_output([blender_executable, "--version"])
     return version_stdout.decode("utf-8").splitlines()[0].split(" ")[1]
@@ -93,7 +92,7 @@ def get_blender_binary_path_python(blender_executable, blend_version=None):
 
     Args:
         blender_executable (str): Blender's executable file path.
-        blend_version (str, optional): Blender's version in the format "3.1.2",
+        blend_version (str, optional): Blender's version.
             Defaults to None.
 
     Returns:
@@ -151,7 +150,6 @@ def get_addons_dir(blender_executable):
 
     Returns:
         str: Path to directory where blender addons are located.
-
     """
     stdout = subprocess.check_output(
         [
