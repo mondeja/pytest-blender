@@ -92,7 +92,7 @@ def get_blender_binary_path_python(blender_executable, blend_version=None):
     Blender (current script is executed inside Blender's Python executable).
 
     Args:
-        blender_executable (str): Blender's executable filepath.
+        blender_executable (str): Blender's executable file path.
         blend_version (str, optional): Blender's version in the format "3.1.2",
             Defaults to None.
 
