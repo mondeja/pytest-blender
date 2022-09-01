@@ -151,7 +151,6 @@ def get_addons_dir(blender_executable):
 
     Returns:
         str: Path to directory where blender addons are located.
-
     """
     stdout = subprocess.check_output(
         [
