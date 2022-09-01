@@ -32,7 +32,6 @@ def zipify_addon_package(in_dirpath, out_dirpath):
 
     Returns:
         str: Path to the newly created zip file.
-
     """
     zipped_path = os.path.join(
         out_dirpath,
