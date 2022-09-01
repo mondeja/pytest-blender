@@ -24,7 +24,7 @@ def zipify_addon_package(in_dirpath, out_dirpath):
     """Zip the files from in_dirpath, returns the path to new compressed file.
 
     Used to zip the addons directory. It ignores the files of format specified
-    in the ZIP_ROOTS_IGNORE variable:
+    in the ZIP_ROOTS_IGNORE variable.
 
     Args:
         in_dirpath (str): Path to the directory to be zipped.
