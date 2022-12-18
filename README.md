@@ -427,7 +427,7 @@ jobs:
 [pypi-pyversions-badge-link]: https://img.shields.io/pypi/pyversions/pytest-blender?logo=python&logoColor=white
 [license-image]: https://img.shields.io/pypi/l/pytest-blender?color=light-green&logo=freebsd&logoColor=white
 [license-link]: https://github.com/mondeja/pytest-blender/blob/master/LICENSE
-[tests-image]: https://img.shields.io/github/workflow/status/mondeja/pytest-blender/CI?logo=github&label=tests
+[tests-image]: https://img.shields.io/github/actions/workflow/status/mondeja/pytest-blender/ci.yml?branch=master&logo=github&label=tests
 [tests-link]: https://github.com/mondeja/pytest-blender/actions?query=workflow%3ACI
 [pypi-downloads-image]: https://img.shields.io/pypi/dm/pytest-blender?logo=blender&logoColor=white
 [pypi-downloads-link]: https://pypistats.org/packages/pytest-blender
