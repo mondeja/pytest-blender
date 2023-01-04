@@ -35,7 +35,7 @@ jobs:
             python-version: '3.7'
           # Test against Pytest v7
           - platform: ubuntu-latest
-            pytest-version: '7.1.2'
+            pytest-version: '7.2.0'
             blender-version: '3.1.1'
             python-version: '3.10'
           # Test against Pytest v6
@@ -44,14 +44,10 @@ jobs:
             blender-version: '2.93.9'
             python-version: '3.9'
           # Latest Blender (Py311)
-          #
-          # FIXME: Blender uses for 3.2.0 Python3.10,
-          # but the pytest-cov test fails because
-          # it does not show coverage:
-          #- platform: ubuntu-latest
-          #  pytest-version: '7.1.2'
-          #  blender-version: '3.2.0'
-          #  python-version: '3.11-dev'
+          - platform: ubuntu-latest
+            pytest-version: '7.2.0'
+            blender-version: '3.1.2'
+            python-version: '3.11'
           # Test in MacOS (Py310)
           - platform: macos-latest
             pytest-version: '7.1.2'
@@ -114,7 +110,8 @@ jobs:
           echo "PYTHON_BLENDER_EXECUTABLE: $PYTHON_BLENDER_EXECUTABLE"
           $PYTHON_BLENDER_EXECUTABLE -m ensurepip
           $PYTHON_BLENDER_EXECUTABLE -m pip install pytest==${{ matrix.pytest-version }} pytest-cov
-          echo "::set-output name=blender-executable::$BLENDER_EXECUTABLE"
+          echo "blender-executable=$BLENDER_EXECUTABLE" >> $GITHUB_OUTPUT
+
       # Install dependencies on Windows
       - name: Install dependencies
         if: runner.os == 'Windows'
@@ -128,7 +125,7 @@ jobs:
           $PYTHON_BLENDER_EXECUTABLE = pytest-blender --blender-executable "$(Get-Variable -Name BLENDER_EXECUTABLE -ValueOnly)"
           echo "PYTHON_BLENDER_EXECUTABLE: $PYTHON_BLENDER_EXECUTABLE"
           Invoke-Expression "$PYTHON_BLENDER_EXECUTABLE -m pip install pytest==${{ matrix.pytest-version }} pytest-cov"
-          echo "::set-output name=blender-executable::$BLENDER_EXECUTABLE"
+          echo "blender-executable=$BLENDER_EXECUTABLE" >> $env:GITHUB_OUTPUT
       - name: Unit tests
         if: runner.os != 'Windows'
         run: pytest -svv --strict-config --strict-markers tests
@@ -220,7 +217,7 @@ jobs:
         id: tag
         run: |
           TAG_TITLE=${GITHUB_REF#refs/*/}
-          echo ::set-output name=title::$TAG_TITLE
+          echo "title=$TAG_TITLE" >> $GITHUB_OUTPUT
           git -c protocol.version=2 fetch --prune --progress \
             --no-recurse-submodules origin \
             +refs/heads/*:refs/remotes/origin/* +refs/tags/*:refs/tags/*
@@ -228,7 +225,7 @@ jobs:
           TAG_BODY="${TAG_BODY//'%'/'%25'}"
           TAG_BODY="${TAG_BODY//$'\n'/'%0A'}"
           TAG_BODY="${TAG_BODY//$'\r'/'%0D'}"
-          echo ::set-output name=body::$TAG_BODY
+          echo "body=$TAG_BODY" >> $GITHUB_OUTPUT
       - name: Create Release
         uses: actions/create-release@v1.1.4
         id: create-release

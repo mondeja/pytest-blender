@@ -412,9 +412,10 @@ jobs:
           python_blender_executable="$(pytest-blender --blender-executable $blender_executable)"
           $python_blender_executable -m ensurepip
           $python_blender_executable -m pip install pytest
-          echo "::set-output name=blender-executable::$blender_executable"
+          echo "blender-executable=$BLENDER_EXECUTABLE" >> $GITHUB_OUTPUT
       - name: Test with pytest
-        run: pytest -svv --blender-executable "${{ steps.install-dependencies.outputs.blender-executable }}" tests
+        run: pytest -svv --blender-executable \
+          "${{ steps.install-dependencies.outputs.blender-executable }}" tests
 ```
 
 ### Versions compatibility
