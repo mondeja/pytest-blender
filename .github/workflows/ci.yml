@@ -48,16 +48,21 @@ jobs:
             pytest-version: '7.2.0'
             blender-version: '3.1.2'
             python-version: '3.11'
-          # Test in MacOS (Py310)
-          - platform: macos-latest
-            pytest-version: '7.1.2'
+          # Latest Blender (Py312)
+          - platform: ubuntu-latest
+            pytest-version: '7.4.0'
             blender-version: '3.1.2'
-            python-version: '3.10'
+            python-version: 3.12.0-rc.1
           # Test in MacOS (Py39)
           - platform: macos-latest
             pytest-version: '6.2.5'
             blender-version: '2.93.9'
             python-version: '3.9'
+          # Test in MacOS (Py310)
+          - platform: macos-latest
+            pytest-version: '7.1.2'
+            blender-version: '3.1.2'
+            python-version: '3.10'
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python v${{ matrix.python-version }}
