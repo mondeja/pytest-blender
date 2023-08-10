@@ -166,7 +166,7 @@ jobs:
       - uses: actions/setup-python@v3
         name: Install Python
         with:
-          python-version: 3.x
+          python-version: '3.11'
       - name: Build sdist
         run: python setup.py sdist
       - uses: actions/upload-artifact@v3
@@ -181,9 +181,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
-        name: Set up Python v3.x
+        name: Set up Python
         with:
-          python-version: 3.x
+          python-version: '3.11'
       - name: Install wheel
         run: python -m pip install --upgrade wheel
       - name: Build wheel
