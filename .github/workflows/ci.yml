@@ -24,11 +24,7 @@ jobs:
             # Using 3.10 in Windows due to PIP encoding errors:
             # https://github.com/pypa/pip/issues/11066
             python-version: '3.10'
-          # Test previous Blender versions
-          - platform: ubuntu-latest
-            pytest-version: '7.1.2'
-            blender-version: '2.83.20'
-            python-version: '3.8'
+          # Test previous Blender version
           - platform: ubuntu-latest
             pytest-version: '7.1.2'
             blender-version: '2.82'
@@ -52,7 +48,7 @@ jobs:
           - platform: ubuntu-latest
             pytest-version: '7.4.0'
             blender-version: '3.1.2'
-            python-version: 3.12.0-rc.1
+            python-version: '3.12.1'
           # Test in MacOS (Py39)
           - platform: macos-latest
             pytest-version: '6.2.5'
@@ -85,7 +81,7 @@ jobs:
           steps.cache-blender.outputs.cache-hit != 'true' &&
           runner.os != 'Windows'
         run: |
-          set -ex
+          set -x
           python -m pip install --upgrade blender-downloader
           python -m pip list
           printf "%s" "$(blender-downloader ${{ matrix.blender-version }} --extract --remove-compressed --print-blender-executable --quiet)" > _blender-executable-path.txt
@@ -106,7 +102,7 @@ jobs:
         if: runner.os != 'Windows'
         id: install-dependencies-unix
         run: |
-          set -ex
+          set -x
           python -m pip install .[test] pytest==${{ matrix.pytest-version }}
           BLENDER_EXECUTABLE="$(< _blender-executable-path.txt)"
           echo "BLENDER_EXECUTABLE: $BLENDER_EXECUTABLE"
