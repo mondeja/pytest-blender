@@ -51,7 +51,7 @@ def which_blender():
     return (
         shutil.which("Blender")
         if sys.platform == "darwin"
-        else ("blender.exe" if "win" in sys.platform else shutil.which("blender"))
+        else shutil.which("blender")
     )
 
 
