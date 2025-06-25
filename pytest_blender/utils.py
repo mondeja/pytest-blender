@@ -49,9 +49,7 @@ def which_blender():
         return _blender_executable
 
     return (
-        shutil.which("Blender")
-        if sys.platform == "darwin"
-        else shutil.which("blender")
+        shutil.which("Blender") if sys.platform == "darwin" else shutil.which("blender")
     )
 
 
