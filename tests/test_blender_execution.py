@@ -22,6 +22,35 @@ def test_blender_argv():
         assert "argv[2] = --debug" in stdout, stderr
 
 
+def test_blender_cli_arguments_propagation_with_pytest_blender_debug(testing_context):
+    """CLI arguments propagation."""
+    with testing_context(
+        {
+            "tests/test_blender_argv.py": """
+import sys
+
+def test_blender_argv():
+    print("")
+    print(f"sys.argv: {sys.argv}")
+    assert '-b --python-use-system-env --python' in " ".join(sys.argv)
+"""
+        }
+    ) as ctx:
+        stdout, stderr, exitcode = ctx.run(
+            [
+                "--pytest-blender-debug",
+                "--",
+                "--python-use-system-env",
+            ]
+        )
+        print(f"\nstdout: {stdout}")
+        print(f"stderr: {stderr}")
+        assert exitcode == 0, stderr
+
+        # Blender debugging information with `--debug`
+        # assert "argv[2] = --python-use-system-env" in stdout, stderr
+
+
 def test_cli_env_propagation(testing_context):
     """Environment variables propagation."""
     custom_pyc_files_dirname = "custom_pyc_files_dir"
