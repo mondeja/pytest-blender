@@ -51,7 +51,7 @@ def test_coverage_with_pytest_cov_pythonpath(testing_context):
     files = copy.deepcopy(test_files)
     files.update(
         {
-            "tests/test_three_four_library.py": create_lib_tests_py("three.four"),
+            "tests/test_three_four_library.py": create_lib_tests_py("four"),
             "three/four/__init__.py": create_init_py(),
             "three/four/functions.py": create_functions_py(),
         }
