@@ -137,7 +137,7 @@ def test_coverage_with_pytest_cov_blender_user_scripts_envvar(testing_context):
     pytest_version_info < (7,),
     reason="The pytest option pythonpath has been added in pytest v7",
 )
-def test_coverage_with_pytest_cov_pytest_pythonpath(testing_context, tmp_path):
+def test_coverage_with_pytest_cov_pytest_pythonpath(testing_context):
     files = copy.deepcopy(test_files)
     files.update(
         {
