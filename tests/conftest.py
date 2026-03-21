@@ -100,6 +100,7 @@ def testing_context():
                     "--strict-markers",
                     "--strict-config",
                     *additional_pytest_args,
+                    *additional_blender_args,
                 ]
                 with subprocess.Popen(
                     cmd,
