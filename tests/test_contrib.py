@@ -1,3 +1,4 @@
+import copy
 import os
 
 import pytest
@@ -27,7 +28,7 @@ def my_foo_function():
 
 
 def test_coverage_with_pytest_cov(testing_context):
-    files = test_files
+    files = copy.deepcopy(test_files)
     files.update(
         {
             "tests/test_one_two_library.py": create_lib_tests_py("one.two"),
@@ -47,7 +48,7 @@ def test_coverage_with_pytest_cov(testing_context):
 
 
 def test_coverage_with_pytest_cov_pythonpath(testing_context):
-    files = test_files
+    files = copy.deepcopy(test_files)
     files.update(
         {
             "tests/test_three_four_library.py": create_lib_tests_py("three.four"),
@@ -78,7 +79,7 @@ def test_coverage_with_pytest_cov_pythonpath(testing_context):
 
 
 def test_coverage_with_pytest_cov_blender_addons_dir(testing_context):
-    files = test_files
+    files = copy.deepcopy(test_files)
     files.update(
         {
             "tests/test_five_six_library.py": create_lib_tests_py("five.six"),
@@ -107,7 +108,7 @@ addopts = --cov five/six
 
 
 def test_coverage_with_pytest_cov_blender_user_scripts_envvar(testing_context):
-    files = test_files
+    files = copy.deepcopy(test_files)
     files.update(
         {
             "tests/test_seven_height_library.py": create_lib_tests_py("seven.height"),
@@ -137,7 +138,7 @@ def test_coverage_with_pytest_cov_blender_user_scripts_envvar(testing_context):
     reason="The pytest option pythonpath has been added in pytest v7",
 )
 def test_coverage_with_pytest_cov_pytest_pythonpath(testing_context, tmp_path):
-    files = test_files
+    files = copy.deepcopy(test_files)
     files.update(
         {
             "tests/test_nine_ten_library.py": create_lib_tests_py("nine.ten"),
