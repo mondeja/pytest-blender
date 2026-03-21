@@ -80,6 +80,18 @@ def get_pytest_blender_debug(config):
     )
 
 
+def get_options_cli_args_and_skip_count(opts=OPTIONS):
+    result = {}
+    for k, v in opts.items():
+        skip_count = 2
+        if "opts" in v and "action" in v["opts"]:
+            action = v["opts"]["action"]
+            if action in ["store_true", "store_false"]:
+                skip_count = 1
+        result[f"--{k}"] = skip_count
+    return result
+
+
 @pytest.hookimpl(tryfirst=True)
 def pytest_addoption(parser):
     for arg, argdef in OPTIONS.items():
@@ -97,13 +109,13 @@ def pytest_configure(config):
     args_groups, args_group_index = ([], [], []), 0
     argv = sys.argv[1:]
     i = 0
-    options_cli_args = [f"--{arg}" for arg in OPTIONS.keys()]
+    options_cli_args_and_skip_count = get_options_cli_args_and_skip_count()
 
     argv_length = len(argv)
     while i < argv_length:
         arg = argv[i]
-        if arg in options_cli_args:
-            i += 2
+        if arg in options_cli_args_and_skip_count:
+            i += options_cli_args_and_skip_count[arg]
             continue
         elif arg in ["-h", "--help"]:
             return  # pytest's help, abort
@@ -169,8 +181,7 @@ def pytest_configure(config):
 
     if pytest_blender_debug:
         sys.stdout.write(
-            "[DEBUG (pytest-blender)] Running blender with:"
-            f" {utils.shlex_join(args)}\n"
+            f"[DEBUG (pytest-blender)] Running blender with: {utils.shlex_join(args)}\n"
         )
 
     with subprocess.Popen(
